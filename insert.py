@@ -28,6 +28,7 @@ try:
     #                 "(pan, clientid, portalpass)"
     #                 "VALUES (%(pan)s, %(client_id)s, %(portal_pass)s)")
 
+    # replace with info read from file
     data_client = {'client_id': int(20003), 'first_name': 'Jane', 'last_name': 'Doe', 'pan': 'AXYD1234ST'}
 
     # Insert new client
