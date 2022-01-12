@@ -8,6 +8,9 @@ dbconfig = {'user': 'root',
             'database': 'taxdata',
             'raise_on_warnings': True}
 
+# display all databases in the current SQL server
+showdb_query = "SHOW DATABASES"
+
 try:
     cnx = mysql.connector.connect(**dbconfig)
     cursor = cnx.cursor()
@@ -17,6 +20,11 @@ try:
     detail = {'client_id': 20002}
     # Search SQL db
     cursor.execute(query, detail)
+
+    # show all db in SQL server
+    # cursor.execute(showdb_query)
+    # for db in cursor:
+    #     print(db)
 
     for (first_name, last_name) in cursor:
         print("{} {} is a client".format(first_name, last_name))
