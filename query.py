@@ -39,4 +39,30 @@ def querydb(dbconfig={}, query='', query_args={}, printflag=False):
     return flag
 
 
+def add2db(dbconfig, add_query, add_data):
+    """add data to tables in existing db"""
+
+    flag = False
+    try:
+        cnx = mysql.connector.connect(**dbconfig)
+        cursor = cnx.cursor()
+        cursor.execute(add_query, add_data)  # execute given query in mysql object
+        cnx.commit()    # commit changes to db
+        cursor.close()
+        cnx.close()
+        flag = True
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+    else:
+        cnx.close()
+
+    return flag
+
+
 
