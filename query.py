@@ -21,8 +21,8 @@ def querydb(dbconfig={}, query='', query_args={}, printflag=False):
                 # print statement only good for taxdb.clients
                 for (first_name, last_name, client_id) in cursor:
                     print("{} {} is a client with ID: {}".format(first_name, last_name, client_id))
-            cursor.close()
-            cnx.close()
+            # cursor.close()
+            # cnx.close()
 
             flag = True
 
@@ -33,8 +33,10 @@ def querydb(dbconfig={}, query='', query_args={}, printflag=False):
                 print("Database does not exist")
             else:
                 print(err)
-        else:
-            cnx.close()
+        finally:
+            if cnx.is_connected():
+                cursor.close()
+                cnx.close()
 
     return flag
 
@@ -48,8 +50,8 @@ def add2db(dbconfig, add_query, add_data):
         cursor = cnx.cursor()
         cursor.execute(add_query, add_data)  # execute given query in mysql object
         cnx.commit()    # commit changes to db
-        cursor.close()
-        cnx.close()
+        # cursor.close()
+        # cnx.close()
         flag = True
 
     except mysql.connector.Error as err:
@@ -59,8 +61,11 @@ def add2db(dbconfig, add_query, add_data):
             print("Database does not exist")
         else:
             print(err)
-    else:
-        cnx.close()
+        cnx.rollback()
+    finally:
+        if cnx.is_connected():
+            cursor.close()
+            cnx.close()
 
     return flag
 
