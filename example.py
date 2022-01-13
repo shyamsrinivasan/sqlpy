@@ -19,17 +19,29 @@ if __name__ == '__main__':
 
     # step 2 - connect to sql db/add values to db
     # insert data into existing db table
-    add_client = ("INSERT INTO taxdata.clients "
+    add_client = ("INSERT INTO {}.clients "
                   "(clientid, firstname, lastname, pan) "
-                  "VALUES (%(client_id)s, %(first_name)s, %(last_name)s, %(pan)s)")
-    client_data = {'client_id': 20005, 'first_name': 'Neji', 'last_name': 'Hyuga', 'pan': 'BXTC5489SD'}
+                  "VALUES (%(client_id)s, %(first_name)s, %(last_name)s, %(pan)s)".format(dbconfig['database']))
+    add_address = ("INSERT INTO {}.address "
+                   "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
+                   "VALUES (%(client_id)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, %(city)s, "
+                   "%(state)s, %(pin)s)".format(dbconfig['database']))
+    add_identity = ("INSERT INTO {}.identity "
+                    "(clientid, pan, portalpass) "
+                    "VALUES (%(client_id)s, %(pan)s, %(portalpass)s)".format(dbconfig['database']))
+
+    client_data = {'client_id': 20006, 'first_name': 'Shikamaru', 'last_name': 'Nara', 'pan': 'SDRF2546RT',
+                   'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '', 'city': 'Everywhere',
+                   'state': 'This', 'pin': 600001, 'portalpass': 'xdst45Ds3rf98S'}
     add2db(dbconfig, add_client, client_data)
+    add2db(dbconfig, add_identity, client_data)
+    add2db(dbconfig, add_address, client_data)
 
     # query to check addition to db
     querydb(dbconfig, query, printflag=True)
 
 
-    # add_identity = "INSERT INTO identity"
+
     # add_address = "INSERT INTO address"
 
     # display all databases in the current SQL server
