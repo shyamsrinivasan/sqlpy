@@ -1,7 +1,35 @@
 from query import querydb, add2db
+from openpyxl import load_workbook
+import pandas as pd
+import os.path
+
+
+def loadclientinfo(client_list=None):
+    """read client info from file and add to db"""
+
+    read_flag = False
+    write_flag = False
+    # read excel file with client data into pandas
+    if client_list is None:
+        client_list = []
+    df = pd.read_excel(os.path.join(os.getcwd(), 'sampleinfo.xlsx'), 'info', engine='openpyxl')
+    read_flag = True
+    # get first and last names from full name
+    firstname = [iname.split()[0] for iname in df['name']]
+    lastname = [iname.split()[1] for iname in df['name']]
+    df = df.assign(firstname=pd.Series(firstname))
+    df = df.assign(lastname=pd.Series(lastname))
+
+    # add info to db one by one
+    print(df.loc[0].index.values[0])
+
+    return read_flag, write_flag
 
 
 if __name__ == '__main__':
+    """script to test reading data fgrom excel file and writing to mysql db"""
+    loadclientinfo()
+
     """script to test mySQL python connector"""
     # step 1 - connect to sql db/query db for values
     dbconfig = {'user': 'root',
