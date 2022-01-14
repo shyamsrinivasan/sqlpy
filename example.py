@@ -42,7 +42,8 @@ if __name__ == '__main__':
     # step 2 - connect to sql db/add values to db
     # insert data into existing db table
     # client_data = {'client_id': 20006, 'first_name': 'Shikamaru', 'last_name': 'Nara', 'pan': 'SDRF2546RT',
-    #                'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '', 'city': 'Everywhere',
+    #                'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '',
+    #                'city': 'Everywhere',
     #                'state': 'This', 'pin': 600001, 'portalpass': 'xdst45Ds3rf98S'}
     # loadsingleclientinfo(dbconfig, client_data)
 
