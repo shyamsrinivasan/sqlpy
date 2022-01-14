@@ -22,6 +22,8 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
                 # print statement only good for taxdb.clients
                 for (first_name, last_name, client_id) in cursor:
                     print("{} {} is a client with ID: {}".format(first_name, last_name, client_id))
+            # else:  # pass cursor output
+
             flag = True
 
         except mysql.connector.Error as err:
@@ -49,7 +51,6 @@ def add2db(dbconfig, add_query, add_data):
         cursor.execute(add_query, add_data)  # execute given query in mysql object
         cnx.commit()    # commit changes to db
         flag = True
-
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password")
@@ -64,6 +65,34 @@ def add2db(dbconfig, add_query, add_data):
             cnx.close()
 
     return flag
+
+
+def check_client(dbconfig: dict, info: dict):
+    """check if client is already present in db"""
+
+    # check if name/pan present in any one of three tables
+    query = ("SELECT firstname, lastname, clientid FROM taxdata.clients "
+             "WHERE firstname=%(firstname)s")
+
+    try:
+        cnx = mysql.connector.connect(**dbconfig)
+        cursor = cnx.cursor()
+        cursor.execute(add_query, add_data)  # execute given query in mysql object
+        cnx.commit()    # commit changes to db
+        flag = True
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+        cnx.rollback()
+    finally:
+        if cnx.is_connected():
+            cursor.close()
+            cnx.close()
+    return
 
 
 def addclient(dbconfig: dict, details: dict):
@@ -146,7 +175,11 @@ def loadclientinfo(data: object, dbconfig=None):
 
     client_list = data.to_dict('records')
     for i_client in client_list:
+        # check if new client in db (same name/pan)
+        # if present, only update existing entry (address) or return error
+        # else add new entry
         loadsingleclientinfo(dbconfig, i_client)
+
     return
 
 
