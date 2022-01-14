@@ -146,9 +146,26 @@ def loadclientinfo(data: object, dbconfig=None):
 
     client_list = data.to_dict('records')
     for i_client in client_list:
-        addclient(dbconfig, i_client)
-        addaddress(dbconfig, i_client)
-        addidentity(dbconfig, i_client)
+        loadsingleclientinfo(dbconfig, i_client)
+    return
+
+
+def loadsingleclientinfo(dbconfig: dict, data: dict, add_type=-1):
+    """add single client with info provided as dictionary
+    add_type == 1 for add client only
+    add_type == 2 for add address only
+    add_type == 3 for add identity only"""
+
+    if add_type == 1:  # add client only
+        addclient(dbconfig, data)
+    elif add_type == 2:  # add address only
+        addaddress(dbconfig, data)
+    elif add_type == 3:  # add identity only
+        addidentity(dbconfig, data)
+    else:   # add all client, address and identity
+        addclient(dbconfig, data)
+        addaddress(dbconfig, data)
+        addidentity(dbconfig, data)
     return
 
 
