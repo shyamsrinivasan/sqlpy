@@ -1,4 +1,4 @@
-from query import querydb, loadsingleclientinfo, loadclientinfo
+from query import querydb, loadclientinfo
 from openpyxl import load_workbook
 import pandas as pd
 import os.path
