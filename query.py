@@ -72,13 +72,20 @@ def check_client(dbconfig: dict, info: dict):
 
     # check if name/pan present in any one of three tables
     query = ("SELECT firstname, lastname, clientid FROM taxdata.clients "
-             "WHERE firstname=%(firstname)s")
+             "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR pan = %(pan)s")
+    # query = ("SELECT firstname, lastname, clientid FROM {}.clients".format(dbconfig["database"]))
 
     try:
         cnx = mysql.connector.connect(**dbconfig)
-        cursor = cnx.cursor()
-        cursor.execute(add_query, add_data)  # execute given query in mysql object
-        cnx.commit()    # commit changes to db
+        cursor = cnx.cursor(dictionary=True)
+        cursor.execute(query, info)  # execute given query in mysql object
+        fname, lname, cid = [], [], []
+        for row in cursor:
+            fname.append(row['firstname'])
+            lname.append(row['lastname'])
+            cid.append(row['clientid'])
+        if fname or lname or cid:
+            print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
         flag = True
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -177,6 +184,7 @@ def loadclientinfo(data: object, dbconfig=None):
     for i_client in client_list:
         # check if new client in db (same name/pan)
         # if present, only update existing entry (address) or return error
+        check_client(dbconfig, i_client)
         # else add new entry
         loadsingleclientinfo(dbconfig, i_client)
 
