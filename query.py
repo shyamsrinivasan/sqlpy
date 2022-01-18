@@ -37,7 +37,6 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
             if cnx.is_connected():
                 cursor.close()
                 cnx.close()
-
     return flag
 
 
@@ -63,7 +62,6 @@ def add2db(dbconfig, add_query, add_data):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
-
     return flag
 
 
@@ -101,6 +99,39 @@ def check_client(dbconfig: dict, info: dict):
             cursor.close()
             cnx.close()
     return present, cid
+
+
+def update_client(dbconfig: dict, info: dict):
+    """update client entries in DB using buffered cursor"""
+
+    query = ("UPDATE tablename SET colname = colvalue")
+
+    try:
+        cnx = mysql.connector.connect(**dbconfig)
+        cursor = cnx.cursor(buffered=True)
+        cursor.execute(query, info)  # execute given query in mysql object
+        fname, lname, cid = [], [], []
+        for row in cursor:
+            fname.append(row['firstname'])
+            lname.append(row['lastname'])
+            cid.append(row['clientid'])
+        if fname or lname or cid:
+            # print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
+            present = True
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+        cnx.rollback()
+    finally:
+        if cnx.is_connected():
+            cursor.close()
+            cnx.close()
+
+    return
 
 
 def addclient(dbconfig: dict, details: dict):
