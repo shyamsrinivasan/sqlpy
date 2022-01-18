@@ -75,6 +75,7 @@ def check_client(dbconfig: dict, info: dict):
              "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR pan = %(pan)s")
     # query = ("SELECT firstname, lastname, clientid FROM {}.clients".format(dbconfig["database"]))
 
+    present = False
     try:
         cnx = mysql.connector.connect(**dbconfig)
         cursor = cnx.cursor(dictionary=True)
@@ -85,8 +86,8 @@ def check_client(dbconfig: dict, info: dict):
             lname.append(row['lastname'])
             cid.append(row['clientid'])
         if fname or lname or cid:
-            print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
-        flag = True
+            # print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
+            present = True
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password")
@@ -99,7 +100,7 @@ def check_client(dbconfig: dict, info: dict):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
-    return
+    return present, cid
 
 
 def addclient(dbconfig: dict, details: dict):
@@ -183,11 +184,12 @@ def loadclientinfo(data: object, dbconfig=None):
     client_list = data.to_dict('records')
     for i_client in client_list:
         # check if new client in db (same name/pan)
-        # if present, only update existing entry (address) or return error
-        check_client(dbconfig, i_client)
-        # else add new entry
-        loadsingleclientinfo(dbconfig, i_client)
-
+        present, cid = check_client(dbconfig, i_client)
+        if present:     # if present, only update existing entry (address) or return error
+            print("Client {} is present in DB with ID {}. "
+                  "Proceeding to update existing entry".format(i_client['name'], cid))
+        else:   # else add new entry
+            loadsingleclientinfo(dbconfig, i_client)
     return
 
 
