@@ -324,7 +324,54 @@ def loadsingleclientinfo(dbconfig: dict, data: dict, add_type=-1):
     return
 
 
+def check_update(dbconfig: dict, info: dict):
+    """check if current entries for existing clients are same as one provided. If not, update entry.
+    Update only entries that are different"""
 
+    # check client info using
+    query = ("SELECT firstname, lastname FROM {}.clients")
+    # check address info
+    # check identity info
+
+    return
+
+
+def update_client(dbconfig: dict, data: dict):
+    update_cl = ("UPDATE tablename SET colname = colvalue")
+    # update_db(dbconfig, update_cl, data)
+    return
+
+
+def update_address(dbconfig: dict, data: dict):
+    update_add = ("UPDATE")
+    # query = ("UPDATE tablename SET colname = colvalue")
+    # update_db(dbconfig, update_add, data)
+    return
+
+
+def update_identity(dbconfig: dict, data: dict):
+    update_id = ("UPDATE")
+    # update_db(dbconfig, update_id, data)
+    return
+
+
+def updatesingleentry(dbconfig: dict, data: dict, entry_type=-1):
+    """update a single/single type of entry in db
+    entry_type == 1 for update client only
+    entry_type == 2 for update address only
+    entry_type == 3 for update identity (password) only"""
+
+    if entry_type == 1:  # add client only
+        update_client(dbconfig, data)
+    elif entry_type == 2:  # add address only
+        update_address(dbconfig, data)
+    elif entry_type == 3:  # add identity only
+        update_identity(dbconfig, data)
+    else:   # add all client, address and identity
+        update_client(dbconfig, data)
+        update_address(dbconfig, data)
+        update_identity(dbconfig, data)
+    return
 
 
 
