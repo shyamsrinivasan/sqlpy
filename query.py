@@ -41,15 +41,45 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
     return flag
 
 
-def add2db(dbconfig, add_query, add_data):
-    """add data to tables in existing db"""
+# def add2db(dbconfig, add_query, add_data):
+#     """add data to tables in existing db"""
+#
+#     flag = False
+#     try:
+#         cnx = mysql.connector.connect(**dbconfig)
+#         cursor = cnx.cursor()
+#         cursor.execute(add_query, add_data)  # execute given query in mysql object
+#         cnx.commit()    # commit changes to db
+#         flag = True
+#     except mysql.connector.Error as err:
+#         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+#             print("Username or password")
+#         elif err.errno == errorcode.ER_BAD_DB_ERROR:
+#             print("Database does not exist")
+#         else:
+#             print(err)
+#         cnx.rollback()
+#     finally:
+#         if cnx.is_connected():
+#             cursor.close()
+#             cnx.close()
+#     return flag
+
+
+def updatedb(dbconfig: dict, query, data):
+    """update client entries in DB"""
+
+    # steps to update client info
+    # 1. check if info (identity) in db is same as provided info
+    # 2. if TRUE - do not update
+    # 3. else (FALSE) - update db entries
 
     flag = False
     try:
         cnx = mysql.connector.connect(**dbconfig)
         cursor = cnx.cursor()
-        cursor.execute(add_query, add_data)  # execute given query in mysql object
-        cnx.commit()    # commit changes to db
+        cursor.execute(query, data)  # execute given query in mysql object
+        cnx.commit()  # commit changes to db
         flag = True
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -104,22 +134,26 @@ def query_client(dbconfig: dict, info: dict):
 def query_address(dbconfig: dict, info: dict):
     """check if client is already present in db and get address, if present"""
 
-
-
-    query = ("UPDATE tablename SET colname = colvalue")
-
+    # check if name/pan present in any one of three tables
+    query = ("SELECT clientid, streetnumber, streetname, housenum, locality, city, state, pin FROM taxdata.address"
+             "WHERE clientid = %(clientid)s")
+    address = None
     try:
         cnx = mysql.connector.connect(**dbconfig)
-        cursor = cnx.cursor(buffered=True)
+        cursor = cnx.cursor(dictionary=True)
         cursor.execute(query, info)  # execute given query in mysql object
-        fname, lname, cid = [], [], []
+        cid, snum, sname, housenum, locale, city, state, pin = [], [], [], [], [], [], [], []
         for row in cursor:
-            fname.append(row['firstname'])
-            lname.append(row['lastname'])
+            sname.append(row['streetname'])
+            snum.append(row['streetnumber'])
             cid.append(row['clientid'])
-        if fname or lname or cid:
-            # print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
-            present = True
+            housenum.append(row['housenum'])
+            locale.append(row['locality'])
+            city.append(row['city'])
+            state.append(row['state'])
+            pin.append(row['pin'])
+        address = {'clientid': cid, 'streetnumber': snum, 'streetname': sname, 'housenum': housenum, 'locality': locale,
+                   'city': city, 'state': state, 'pin': pin}
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password")
@@ -132,6 +166,39 @@ def query_address(dbconfig: dict, info: dict):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
+    return address
+
+
+def query_identity(dbconfig: dict, info: dict):
+    """Query identity table for all field/column information"""
+
+    # check if name/pan present in any one of three tables
+    query = ("SELECT clientid, streetnumber, streetname, housenum, locality, city, state, pin FROM taxdata.address"
+             "WHERE clientid = %(clientid)s")
+    identity = None
+    try:
+        cnx = mysql.connector.connect(**dbconfig)
+        cursor = cnx.cursor(dictionary=True)
+        cursor.execute(query, info)  # execute given query in mysql object
+        cid, pan, portalpass = [], [], []
+        for row in cursor:
+            cid.append(row['clientid'])
+            pan.append(row['pan'])
+            portalpass.append(row['portalpass'])
+        identity = {'clientid': cid, 'pan': pan, 'portalpass': portalpass}
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+        cnx.rollback()
+    finally:
+        if cnx.is_connected():
+            cursor.close()
+            cnx.close()
+    return identity
 
 
 def get_client_id(dbconfig: dict, info: dict):
@@ -226,10 +293,13 @@ def loadclientinfo(data: object, dbconfig=None):
     client_list = data.to_dict('records')
     for i_client in client_list:
         # check if new client in db (same name/pan)
-        present, cid = check_client(dbconfig, i_client)
-        if present:     # if present, only update existing entry (address) or return error
+        client_info = query_client(dbconfig, i_client)
+        if client_info is not None:     # if present, only update existing entry (address) or return error
             print("Client {} is present in DB with ID {}. "
-                  "Proceeding to update existing entry".format(i_client['name'], cid))
+                  "Proceeding to update existing entry".format(i_client['name'], client_info['clientid']))
+            # check if same address in DB
+            client_add = query_address(dbconfig, client_info)
+            # update_db(i_client, dbconfig)
         else:   # else add new entry
             loadsingleclientinfo(dbconfig, i_client)
     return
