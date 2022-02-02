@@ -4,7 +4,8 @@ import pandas as pd
 
 
 def querydb(dbconfig=None, query='', query_args=None, printflag=False):
-    """connect to mysql db using connector"""
+    """connect to mysql db using connector and query, add to or
+    update db using relevant queries passed as input"""
 
     flag = False
     if dbconfig is None:
@@ -18,6 +19,7 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
                 cursor.execute(query)
             else:
                 cursor.execute(query, query_args)  # execute given query in mysql object
+            cnx.commit()
             if printflag:
                 # print statement only good for taxdb.clients
                 for (first_name, last_name, client_id) in cursor:
@@ -33,6 +35,7 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
                 print("Database does not exist")
             else:
                 print(err)
+            cnx.rollback()
         finally:
             if cnx.is_connected():
                 cursor.close()
@@ -140,7 +143,7 @@ def addclient(dbconfig: dict, details: dict):
     add_client = ("INSERT INTO {}.clients "
                   "(clientid, firstname, lastname, pan) "
                   "VALUES (%(client_id)s, %(firstname)s, %(lastname)s, %(pan)s)".format(dbconfig['database']))
-    flag = add2db(dbconfig, add_client, details)
+    flag = querydb(dbconfig, add_client, details)
     return flag
 
 
@@ -151,7 +154,7 @@ def addaddress(dbconfig: dict, details: dict):
                    "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
                    "VALUES (%(client_id)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, %(city)s, "
                    "%(state)s, %(pin)s)".format(dbconfig['database']))
-    flag = add2db(dbconfig, add_address, details)
+    flag = querydb(dbconfig, add_address, details)
     return flag
 
 
@@ -161,7 +164,7 @@ def addidentity(dbconfig: dict, details: dict):
     add_identity = ("INSERT INTO {}.identity "
                     "(clientid, pan, portalpass) "
                     "VALUES (%(client_id)s, %(pan)s, %(portalpass)s)".format(dbconfig['database']))
-    flag = add2db(dbconfig, add_identity, details)
+    flag = querydb(dbconfig, add_identity, details)
     return flag
 
 
