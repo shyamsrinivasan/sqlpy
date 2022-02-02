@@ -20,13 +20,11 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
             else:
                 cursor.execute(query, query_args)  # execute given query in mysql object
             cnx.commit()
+            flag = True
             if printflag:
                 # print statement only good for taxdb.clients
                 for (first_name, last_name, client_id) in cursor:
                     print("{} {} is a client with ID: {}".format(first_name, last_name, client_id))
-            # else:  # pass cursor output
-
-            flag = True
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -65,30 +63,29 @@ def add2db(dbconfig, add_query, add_data):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
-    return flag
+    return
 
 
-def check_client(dbconfig: dict, info: dict):
-    """check if client is already present in db"""
+def query_client(dbconfig: dict, info: dict):
+    """check if client is already present in db and get client ID and name, if present"""
 
     # check if name/pan present in any one of three tables
-    query = ("SELECT firstname, lastname, clientid FROM taxdata.clients "
+    query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
              "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR pan = %(pan)s")
     # query = ("SELECT firstname, lastname, clientid FROM {}.clients".format(dbconfig["database"]))
 
-    present = False
+    client = None
     try:
         cnx = mysql.connector.connect(**dbconfig)
         cursor = cnx.cursor(dictionary=True)
         cursor.execute(query, info)  # execute given query in mysql object
-        fname, lname, cid = [], [], []
+        fname, lname, cid, pan = [], [], [], []
         for row in cursor:
             fname.append(row['firstname'])
             lname.append(row['lastname'])
             cid.append(row['clientid'])
-        if fname or lname or cid:
-            # print("Client {} {} with ID {} is present in DB".format(fname, lname, cid))
-            present = True
+            pan.append(row['pan'])
+        client = {'firstname': fname, 'lastname': lname, 'clientid': cid, 'pan': pan}
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password")
@@ -101,11 +98,13 @@ def check_client(dbconfig: dict, info: dict):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
-    return present, cid
+    return client
 
 
-def update_client(dbconfig: dict, info: dict):
-    """update client entries in DB using buffered cursor"""
+def query_address(dbconfig: dict, info: dict):
+    """check if client is already present in db and get address, if present"""
+
+
 
     query = ("UPDATE tablename SET colname = colvalue")
 
@@ -134,7 +133,16 @@ def update_client(dbconfig: dict, info: dict):
             cursor.close()
             cnx.close()
 
-    return
+
+def get_client_id(dbconfig: dict, info: dict):
+    """Get client ID for all given first names or last names or both"""
+
+    client_id = []
+    for i_client in info:
+        cid = query_client(dbconfig, i_client)
+        client_id.append(cid[0])
+
+    return client_id
 
 
 def addclient(dbconfig: dict, details: dict):
