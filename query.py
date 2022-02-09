@@ -40,7 +40,7 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
     return flag
 
 
-def getinfo(dbconfig: dict, info: dict, query, address=False, identity=False):
+def getinfo(dbconfig: dict, query, id_only=False, query_args=None, address=False, identity=False):
     """get entries from db using given query. Fetch all relevant details from all tables in db"""
 
     # check if name/pan present in any one of three tables
@@ -54,16 +54,20 @@ def getinfo(dbconfig: dict, info: dict, query, address=False, identity=False):
     try:
         cnx = mysql.connector.connect(**dbconfig)
         cursor = cnx.cursor(dictionary=True)
-        cursor.execute(query, info)  # execute given query in mysql object
+        if query_args is None:
+            cursor.execute(query)
+        else:
+            cursor.execute(query, query_args)  # execute given query in mysql object
         fname, lname, cid, pan = [], [], [], []
         snum, sname, housenum, locale, city, state, pin = [], [], [], [], [], [], []
         portalpass = []
         for row in cursor:
             # client info
             cid.append(row['clientid'])
-            fname.append(row['firstname'])
-            lname.append(row['lastname'])
-            pan.append(row['pan'])
+            if not id_only:
+                fname.append(row['firstname'])
+                lname.append(row['lastname'])
+                pan.append(row['pan'])
             # address info
             if address:
                 sname.append(row['streetname'])
@@ -94,23 +98,20 @@ def getinfo(dbconfig: dict, info: dict, query, address=False, identity=False):
     return client
 
 
-def check_db(dbconfig: dict, info: dict, type=-1, get_address=False, get_password=False):
+def check_db(dbconfig: dict, info: dict, qtype=-1, get_address=False, get_password=False):
     """check if given client part of DB based on given info (name/pan/client id)
     and return all details of said client"""
 
-    # ("SELECT * FROM clients LEFT JOIN (address, identity) "
-    #  #          "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND clients.clientid=20001)")
-
     if get_address and get_password:
-        if type == 1:       # get info with clientid
+        if qtype == 1:       # get info with clientid
             query = ("SELECT * FROM clients LEFT JOIN (address, identity)"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "clients.clientid = %(clientid)s)")
-        elif type == 2:     # get info using name
+        elif qtype == 2:     # get info using name
             query = ("SELECT * FROM clients LEFT JOIN (address, identity)"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.firstname = %(firstname)s OR clients.lastname = %(lastname)s)")
-        elif type == 3:     # get info using pan
+        elif qtype == 3:     # get info using pan
             query = ("SELECT * FROM clients LEFT JOIN (address, identity)"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "clients.pan = %(pan)s")
@@ -119,17 +120,17 @@ def check_db(dbconfig: dict, info: dict, type=-1, get_address=False, get_passwor
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
                      "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-        dbinfo = getinfo(dbconfig, info, query, address=True, identity=True)
+        dbinfo = getinfo(dbconfig, query, False, info, address=True, identity=True)
     elif get_address and not get_password:
-        if type == 1:  # get info with clientid
+        if qtype == 1:  # get info with clientid
             query = ("SELECT * FROM clients LEFT JOIN address"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "clients.clientid = %(clientid)s)")
-        elif type == 2:  # get info using name
+        elif qtype == 2:  # get info using name
             query = ("SELECT * FROM clients LEFT JOIN address"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.firstname = %(firstname)s OR clients.lastname = %(lastname)s)")
-        elif type == 3:  # get info using pan
+        elif qtype == 3:  # get info using pan
             query = ("SELECT * FROM clients LEFT JOIN address"
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "clients.pan = %(pan)s")
@@ -138,22 +139,22 @@ def check_db(dbconfig: dict, info: dict, type=-1, get_address=False, get_passwor
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
                      "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-        dbinfo = getinfo(dbconfig, info, query, address=True)
+        dbinfo = getinfo(dbconfig, query, False, info, address=True)
     else:
-        if type == 1:   # check using client ID
+        if qtype == 1:   # check using client ID
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
                      "WHERE clientid = %(clientid)s")
-        elif type == 2:     # get info using name
+        elif qtype == 2:     # get info using name
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
                      "WHERE firstname = %(firstname)s OR lastname = %(lastname)s")
-        elif type == 3:      # get info using pan
+        elif qtype == 3:      # get info using pan
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
                      "WHERE pan = %(pan)s")
         else:   # check using all of the above
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
                      "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR "
                      "pan = %(pan)s OR clientid = %(clientid)s")
-        dbinfo = getinfo(dbconfig, info, query)
+        dbinfo = getinfo(dbconfig, query, False, info)
     return dbinfo
 
 
