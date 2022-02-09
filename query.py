@@ -172,7 +172,8 @@ def updatedb(dbconfig: dict, query, data):
     flag = False
     try:
         cnx = mysql.connector.connect(**dbconfig)
-        cursor = cnx.cursor()
+        cursor = cnx.cursor()      # cursor = cnx.cursor(buffered=True)
+
         cursor.execute(query, data)  # execute given query in mysql object
         cnx.commit()  # commit changes to db
         flag = True

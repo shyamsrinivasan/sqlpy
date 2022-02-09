@@ -99,10 +99,10 @@ def loadclientinfo(data: object, dbconfig=None):
 
             # get existing client info (pan,address) using client info from db
             db_info = check_db(dbconfig, i_client, qtype=1, get_address=True)
-
-        #     # check if same address in DB
-        #     # client_add = query_address(dbconfig, client_info)
-        #     # update_db(i_client, dbconfig)
+            info_list = list2dict(db_info)
+            _, _, _, add_check = compare_info(i_client, info_list[0])   # check if same address in DB
+            # if add_check:
+            #     update_db(i_client, dbconfig)
         else:   # else add new entry
             loadsingleclientinfo(dbconfig, i_client)
     return
