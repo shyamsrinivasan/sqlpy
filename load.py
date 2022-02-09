@@ -1,40 +1,35 @@
 import mysql.connector
 from mysql.connector import errorcode
 import pandas as pd
-from query import querydb, check_db
+from query import querydb, check_db, getinfo
+
+
+def last_client_id(dbconfig: dict):
+    """get last client id (biggest) from DB. Usually used to assign client id to new added clients"""
+
+    # search db for latest clientid
+    query = ("SELECT clientid FROM {}.clients".format(dbconfig['database']))
+    db_info = getinfo(dbconfig, query, id_only=True)
+
+    if db_info is not None:
+        large_id = db_info['clientid'][0]
+        for id in db_info['clientid']:
+            if id > large_id:
+                large_id = id
+    else:
+        large_id = None
+
+    return large_id
 
 
 def assignid(dbconfig: dict, data: object) -> object:
     """assign client ids to new clients from client info file"""
 
     # search db for latest clientid
-    query = ("SELECT clientid FROM {}.clients".format(dbconfig['database']))
-    try:
-        cnx = mysql.connector.connect(**dbconfig)
-        cursor = cnx.cursor()
-        cursor.execute(query)  # execute given query in mysql object
-        flag = True
-        all_clientid = [clientid[0] for clientid in cursor]
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Username or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
-        else:
-            print(err)
-        all_clientid = None
-    finally:
-        if cnx.is_connected():
-            cursor.close()
-            cnx.close()
+    large_id = last_client_id(dbconfig)
 
-    # get last client id - client id increases sequentially
-    if all_clientid is not None:
-        large_id = all_clientid[0]
-        for id in all_clientid:
-            if id > large_id:
-                large_id = id
-        # add client ids to new clients
+    # add client ids to new clients
+    if large_id is not None:
         nrows = data.shape[0]
         large_id += 1
         new_client_ids = [large_id + irow for irow in range(0, nrows)]
