@@ -40,33 +40,44 @@ def compare_info(info: dict, dbinfo: dict, check_name=True, check_id=False, chec
 
     name_check = False
     if check_name:
-        if info['firstname'] == dbinfo['firstname'][0] and info['lastname'] == dbinfo['lastname'][0]:
+        if info['firstname'] == dbinfo['firstname'] and info['lastname'] == dbinfo['lastname']:
             name_check = True
 
     id_check = False
     pan_check = False
     if check_id:
         # client id check
-        if info['clientid'] == dbinfo['clientid'][0]:
+        if info['clientid'] == dbinfo['clientid']:
             id_check = True
         # pan check
-        if info['pan'] == dbinfo['pan'][0]:
+        if info['pan'] == dbinfo['pan']:
             pan_check = True
 
     add_check = True
     if check_address:
-        if info['streetname'] != dbinfo['streetname'][0] or info['streetnumber'] != dbinfo['streetnumber'][0] or \
-                info['housenum'] != dbinfo['housenum'][0] or info['locality'] != dbinfo['locality'][0] or \
-                info['city'] != dbinfo['city'][0] or info['state'] != dbinfo['state'][0] or \
-                info['pin'] != dbinfo['pin'][0]:
+        if info['streetname'] != dbinfo['streetname'] or info['streetnumber'] != dbinfo['streetnumber'] or \
+                info['housenum'] != dbinfo['housenum'] or info['locality'] != dbinfo['locality'] or \
+                info['city'] != dbinfo['city'] or info['state'] != dbinfo['state'] or \
+                info['pin'] != dbinfo['pin']:
             add_check = False
 
     return name_check, id_check, pan_check, add_check
 
 
-def list2dict():
+def list2dict(info_dict: dict) -> list:
     """convert dictionary of list to list of dictionaries for info obtained from db"""
-    return
+
+    new_list, new_dict = [], {}
+    nvals = max([len(info_dict[key]) for key, _ in info_dict.items() if info_dict[key]])     # size of new final list
+
+    for ival in range(0, nvals):
+        for key, _ in info_dict.items():
+            if info_dict[key]:
+                new_dict[key] = info_dict[key][ival]
+            else:
+                new_dict[key] = ''
+        new_list.append(new_dict)
+    return new_list
 
 
 def loadclientinfo(data: object, dbconfig=None):
@@ -75,14 +86,21 @@ def loadclientinfo(data: object, dbconfig=None):
     # assign client id to new clients
     data = assignid(dbconfig, data)
 
-    client_list = data.to_dict('records')
-    for i_client in client_list:
+    client_list: dict = data.to_dict('records')
+    for idx, i_client in enumerate(client_list):
         # check if new client in db (same name/pan)
         db_info = check_db(dbconfig, i_client)
-        name_check, _, _, _ = compare_info(i_client, db_info)
+        info_list = list2dict(db_info)
+        name_check, _, _, _ = compare_info(i_client, info_list[0])
         if name_check:     # if present, only update existing entry (address) or return error
             print("Client {} is present in DB with ID {}. "
-                  "Proceeding to update existing entry".format(i_client['name'], db_info['clientid']))
+                  "Proceeding to update existing entry".format(i_client['name'], info_list[0]['clientid']))
+            # change client id to one obtained from db
+            i_client['clientid'] = info_list[0]['clientid']
+
+            # get existing client info (pan,address) using client info from db
+            db_info = check_db(dbconfig, i_client, qtype=1, get_address=True)
+
         #     # check if same address in DB
         #     # client_add = query_address(dbconfig, client_info)
         #     # update_db(i_client, dbconfig)
