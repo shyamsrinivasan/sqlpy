@@ -1,7 +1,6 @@
-import mysql.connector
-from mysql.connector import errorcode
 import pandas as pd
 from query import querydb, check_db, getinfo
+import collections
 
 
 def last_client_id(dbconfig: dict):
@@ -12,10 +11,7 @@ def last_client_id(dbconfig: dict):
     db_info = getinfo(dbconfig, query, id_only=True)
 
     if db_info is not None:
-        large_id = db_info['clientid'][0]
-        for id in db_info['clientid']:
-            if id > large_id:
-                large_id = id
+        large_id = max(db_info['clientid'])
     else:
         large_id = None
 
