@@ -157,6 +157,8 @@ def check_db(dbconfig: dict, info: dict, type=-1, get_address=False, get_passwor
     return dbinfo
 
 
+def updatedb(dbconfig: dict, query, data):
+    """update client entries in DB"""
 
     # steps to update client info
     # 1. check if info (identity) in db is same as provided info
