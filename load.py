@@ -1,6 +1,5 @@
 import pandas as pd
 from query import querydb, check_db, getinfo
-import collections
 
 
 def last_client_id(dbconfig: dict):
