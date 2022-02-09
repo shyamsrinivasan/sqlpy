@@ -43,13 +43,6 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
 def getinfo(dbconfig: dict, query, id_only=False, query_args=None, address=False, identity=False):
     """get entries from db using given query. Fetch all relevant details from all tables in db"""
 
-    # check if name/pan present in any one of three tables
-    # query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
-    #          "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR pan = %(pan)s")
-    # query = ("SELECT firstname, lastname, clientid FROM {}.clients".format(dbconfig["database"]))
-    # query = ("SELECT * FROM clients LEFT JOIN (address, identity) "
-    #          "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND clients.clientid=20001)")
-
     client = None
     try:
         cnx = mysql.connector.connect(**dbconfig)
@@ -120,26 +113,36 @@ def check_db(dbconfig: dict, info: dict, qtype=-1, get_address=False, get_passwo
                      "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
                      "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-        dbinfo = getinfo(dbconfig, query, False, info, address=True, identity=True)
+        dbinfo = getinfo(dbconfig, query, query_args=info, address=True, identity=True)
     elif get_address and not get_password:
         if qtype == 1:  # get info with clientid
-            query = ("SELECT * FROM clients LEFT JOIN address"
-                     "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-                     "clients.clientid = %(clientid)s)")
+            query = ("SELECT * FROM clients LEFT JOIN address "
+                     "ON (clients.clientid=address.clientid AND clients.clientid = %(clientid)s) "
+                     "WHERE address.streetname is NOT NULL OR address.streetnumber is NOT NULL OR "
+                     "address.housenum is NOT NULL OR address.locality is NOT NULL OR address.city is NOT NULL OR "
+                     "address.state is NOT NULL")
         elif qtype == 2:  # get info using name
-            query = ("SELECT * FROM clients LEFT JOIN address"
-                     "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-                     "(clients.firstname = %(firstname)s OR clients.lastname = %(lastname)s)")
+            query = ("SELECT * FROM clients LEFT JOIN address "
+                     "ON (clients.clientid=address.clientid AND (clients.firstname = %(firstname)s OR "
+                     "clients.lastname = %(lastname)s) WHERE address.streetname is NOT NULL OR "
+                     "address.streetnumber is NOT NULL OR address.housenum is NOT NULL OR address.locality is NOT NULL "
+                     "OR address.city is NOT NULL OR address.state is NOT NULL")
         elif qtype == 3:  # get info using pan
-            query = ("SELECT * FROM clients LEFT JOIN address"
-                     "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-                     "clients.pan = %(pan)s")
+            query = ("SELECT * FROM clients LEFT JOIN address "
+                     "ON (clients.clientid=address.clientid AND clients.pan = %(pan)s WHERE "
+                     "address.streetname is NOT NULL OR address.streetnumber is NOT NULL OR "
+                     "address.housenum is NOT NULL OR address.locality is NOT NULL OR address.city is NOT NULL OR "
+                     "address.state is NOT NULL")
         else:  # get info using clientid, name or pan
-            query = ("SELECT * FROM clients LEFT JOIN address"
-                     "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
+            query = ("SELECT * FROM clients LEFT JOIN address "
+                     "ON (clients.clientid=address.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
-                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-        dbinfo = getinfo(dbconfig, query, False, info, address=True)
+                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s) WHERE address.streetname is NOT NULL "
+                     "OR address.streetnumber is NOT NULL OR address.housenum is NOT NULL OR "
+                     "address.locality is NOT NULL OR address.city is NOT NULL OR address.state is NOT NULL")
+        dbinfo = getinfo(dbconfig, query, query_args=info, address=True)
+        # remove all row entries corresponding to a None entry (SQL output is NULL for respective row)
+        # remove_row()
     else:
         if qtype == 1:   # check using client ID
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
@@ -154,7 +157,7 @@ def check_db(dbconfig: dict, info: dict, qtype=-1, get_address=False, get_passwo
             query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
                      "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR "
                      "pan = %(pan)s OR clientid = %(clientid)s")
-        dbinfo = getinfo(dbconfig, query, False, info)
+        dbinfo = getinfo(dbconfig, query, query_args=info)
     return dbinfo
 
 
@@ -188,135 +191,13 @@ def updatedb(dbconfig: dict, query, data):
     return
 
 
-# def query_address(dbconfig: dict, info: dict):
-#     """check if client is already present in db and get address, if present"""
-#
-#     # check if name/pan present in any one of three tables
-#     query = ("SELECT clientid, streetnumber, streetname, housenum, locality, city, state, pin FROM taxdata.address"
-#              "WHERE clientid = %(clientid)s")
-#     address = None
-#     try:
-#         cnx = mysql.connector.connect(**dbconfig)
-#         cursor = cnx.cursor(dictionary=True)
-#         cursor.execute(query, info)  # execute given query in mysql object
-#         cid, snum, sname, housenum, locale, city, state, pin = [], [], [], [], [], [], [], []
-#         for row in cursor:
-#             sname.append(row['streetname'])
-#             snum.append(row['streetnumber'])
-#             cid.append(row['clientid'])
-#             housenum.append(row['housenum'])
-#             locale.append(row['locality'])
-#             city.append(row['city'])
-#             state.append(row['state'])
-#             pin.append(row['pin'])
-#         address = {'clientid': cid, 'streetnumber': snum, 'streetname': sname, 'housenum': housenum, 'locality': locale,
-#                    'city': city, 'state': state, 'pin': pin}
-#     except mysql.connector.Error as err:
-#         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-#             print("Username or password")
-#         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-#             print("Database does not exist")
-#         else:
-#             print(err)
-#         cnx.rollback()
-#     finally:
-#         if cnx.is_connected():
-#             cursor.close()
-#             cnx.close()
-#     return address
 
 
-# def query_identity(dbconfig: dict, info: dict):
-#     """Query identity table for all field/column information"""
-#
-#     # check if name/pan present in any one of three tables
-#     query = ("SELECT clientid, streetnumber, streetname, housenum, locality, city, state, pin FROM taxdata.address"
-#              "WHERE clientid = %(clientid)s")
-#     identity = None
-#     try:
-#         cnx = mysql.connector.connect(**dbconfig)
-#         cursor = cnx.cursor(dictionary=True)
-#         cursor.execute(query, info)  # execute given query in mysql object
-#         cid, pan, portalpass = [], [], []
-#         for row in cursor:
-#             cid.append(row['clientid'])
-#             pan.append(row['pan'])
-#             portalpass.append(row['portalpass'])
-#         identity = {'clientid': cid, 'pan': pan, 'portalpass': portalpass}
-#     except mysql.connector.Error as err:
-#         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-#             print("Username or password")
-#         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-#             print("Database does not exist")
-#         else:
-#             print(err)
-#         cnx.rollback()
-#     finally:
-#         if cnx.is_connected():
-#             cursor.close()
-#             cnx.close()
-#     return identity
 
 
-# def get_client_id(dbconfig: dict, info: dict):
-#     """Get client ID for all given first names or last names or both"""
-#
-#     client_id = []
-#     for i_client in info:
-#         cid = query_client(dbconfig, i_client)
-#         client_id.append(cid[0])
-#
-#     return client_id
 
 
-def check_update(dbconfig: dict, info: dict):
-    """check if current entries for existing clients are same as one provided. If not, update entry.
-    Update only entries that are different"""
 
-    # check client info using
-    query = ("SELECT firstname, lastname FROM {}.clients")
-    # check address info
-    # check identity info
-
-    return
-
-
-def update_client(dbconfig: dict, data: dict):
-    update_cl = ("UPDATE tablename SET colname = colvalue")
-    # update_db(dbconfig, update_cl, data)
-    return
-
-
-def update_address(dbconfig: dict, data: dict):
-    update_add = ("UPDATE")
-    # query = ("UPDATE tablename SET colname = colvalue")
-    # update_db(dbconfig, update_add, data)
-    return
-
-
-def update_identity(dbconfig: dict, data: dict):
-    update_id = ("UPDATE")
-    # update_db(dbconfig, update_id, data)
-    return
-
-
-def updatesingleentry(dbconfig: dict, data: dict, entry_type=-1):
-    """update a single/single type of entry in db
-    entry_type == 1 for update client only
-    entry_type == 2 for update address only
-    entry_type == 3 for update identity (password) only"""
-
-    if entry_type == 1:  # add client only
-        update_client(dbconfig, data)
-    elif entry_type == 2:  # add address only
-        update_address(dbconfig, data)
-    elif entry_type == 3:  # add identity only
-        update_identity(dbconfig, data)
-    else:   # add all client, address and identity
-        update_client(dbconfig, data)
-        update_address(dbconfig, data)
-        update_identity(dbconfig, data)
-    return
 
 
 
