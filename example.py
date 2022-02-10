@@ -1,6 +1,5 @@
 from query import querydb
 from load import loadclientinfo
-from openpyxl import load_workbook
 import pandas as pd
 import os.path
 
@@ -11,6 +10,10 @@ def readclientinfo() -> object:
     # write_flag = False
     # read excel file with client data into pandas
     df = pd.read_excel(os.path.join(os.getcwd(), 'sampleinfo.xlsx'), 'info', engine='openpyxl')
+
+    # fill nan values (for non NN columns in db) with appropriate replacement
+    df['house_num'].fillna('0A', inplace=True)
+    df['locality'].fillna('none', inplace=True)
 
     # get first and last names from full name
     firstname = [iname.split()[0] for iname in df['name']]
