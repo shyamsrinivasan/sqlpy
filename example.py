@@ -1,5 +1,5 @@
-from query import querydb, loadsingleclientinfo, loadclientinfo
-from openpyxl import load_workbook
+from query import querydb
+from load import loadclientinfo
 import pandas as pd
 import os.path
 
@@ -11,11 +11,19 @@ def readclientinfo() -> object:
     # read excel file with client data into pandas
     df = pd.read_excel(os.path.join(os.getcwd(), 'sampleinfo.xlsx'), 'info', engine='openpyxl')
 
+    # fill nan values (for non NN columns in db) with appropriate replacement
+    df['house_num'].fillna('none', inplace=True)
+    df['locality'].fillna('none', inplace=True)
+
     # get first and last names from full name
     firstname = [iname.split()[0] for iname in df['name']]
     lastname = [iname.split()[1] for iname in df['name']]
     df = df.assign(firstname=pd.Series(firstname))
     df = df.assign(lastname=pd.Series(lastname))
+
+    # convert street_num to string
+    df['street_num'] = df['street_num'].map(str)
+
     return df
 
 
@@ -34,7 +42,7 @@ if __name__ == '__main__':
 
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
     # detail = {'client_id': 20002}
-    query = "SELECT firstname, lastname, clientid FROM clients;"
+    query = "SELECT firstname, lastname, clientid FROM clients"
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
     # detail = {'client_id': 20002}
     querydb(dbconfig, query, printflag=True)
@@ -42,7 +50,8 @@ if __name__ == '__main__':
     # step 2 - connect to sql db/add values to db
     # insert data into existing db table
     # client_data = {'client_id': 20006, 'first_name': 'Shikamaru', 'last_name': 'Nara', 'pan': 'SDRF2546RT',
-    #                'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '', 'city': 'Everywhere',
+    #                'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '',
+    #                'city': 'Everywhere',
     #                'state': 'This', 'pin': 600001, 'portalpass': 'xdst45Ds3rf98S'}
     # loadsingleclientinfo(dbconfig, client_data)
 
