@@ -1,30 +1,6 @@
 from query import querydb
-from load import loadclientinfo
-import pandas as pd
+from load import readclientinfo, loadclientinfo
 import os.path
-
-
-def readclientinfo() -> object:
-    """read client info from file to dataframe"""
-
-    # write_flag = False
-    # read excel file with client data into pandas
-    df = pd.read_excel(os.path.join(os.getcwd(), 'sampleinfo.xlsx'), 'info', engine='openpyxl')
-
-    # fill nan values (for non NN columns in db) with appropriate replacement
-    df['house_num'].fillna('none', inplace=True)
-    df['locality'].fillna('none', inplace=True)
-
-    # get first and last names from full name
-    firstname = [iname.split()[0] for iname in df['name']]
-    lastname = [iname.split()[1] for iname in df['name']]
-    df = df.assign(firstname=pd.Series(firstname))
-    df = df.assign(lastname=pd.Series(lastname))
-
-    # convert street_num to string
-    df['street_num'] = df['street_num'].map(str)
-
-    return df
 
 
 if __name__ == '__main__':
@@ -37,7 +13,8 @@ if __name__ == '__main__':
                 'raise_on_warnings': True}
 
     """script to test reading data fgrom excel file and writing to mysql db"""
-    data = readclientinfo()
+    file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
+    data = readclientinfo(file_name)
     loadclientinfo(data, dbconfig)
 
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"

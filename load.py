@@ -161,3 +161,30 @@ def loadsingleclientinfo(dbconfig: dict, data: dict, add_type=-1):
         addaddress(dbconfig, data)
         addidentity(dbconfig, data)
     return
+
+
+def readclientinfo(file_name=None) -> object:
+    """read client info from file to dataframe"""
+
+    # write_flag = False
+    # read excel file with client data into pandas
+    if file_name is not None:
+        df = pd.read_excel(file_name, 'info', engine='openpyxl')
+    else:
+        df = None
+
+    # fill nan values (for non NN columns in db) with appropriate replacement
+    if df is not None:
+        df['house_num'].fillna('none', inplace=True)
+        df['locality'].fillna('none', inplace=True)
+
+        # get first and last names from full name
+        firstname = [iname.split()[0] for iname in df['name']]
+        lastname = [iname.split()[1] for iname in df['name']]
+        df = df.assign(firstname=pd.Series(firstname))
+        df = df.assign(lastname=pd.Series(lastname))
+
+        # convert street_num to string
+        df['street_num'] = df['street_num'].map(str)
+
+    return df
