@@ -17,6 +17,8 @@ if __name__ == '__main__':
     data = readclientinfo(file_name)
     loadclientinfo(data, dbconfig)
 
+    # add new column to DB and relevant data
+
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
     # detail = {'client_id': 20002}
     query = "SELECT firstname, lastname, clientid FROM clients"

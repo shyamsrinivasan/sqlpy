@@ -212,15 +212,3 @@ def updatedb(dbconfig: dict, up_fields: list, query: dict, query_args: dict):
             cursor.close()
             cnx.close()
     return flag
-
-
-
-
-
-
-
-
-
-
-
-

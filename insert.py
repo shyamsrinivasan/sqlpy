@@ -95,16 +95,8 @@ def update1entry(dbconfig: dict, dbinfo: dict, data: dict, entry_type=1):
     return
 
 
-# def check_update(dbconfig: dict, info: dict):
-#     """check if current entries for existing clients are same as one provided. If not, update entry.
-#     Update only entries that are different"""
-#
-#     # check client info using
-#     query = ("SELECT firstname, lastname FROM {}.clients")
-#     # check address info
-#     # check identity info
-#
-#     return
+def add_column():
+    """add column to existing table in DB"""
 
-
-
+    query = ("ALTER TABLE tablename alter_option")
+    return
