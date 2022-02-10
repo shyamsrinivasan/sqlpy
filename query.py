@@ -18,12 +18,14 @@ def querydb(dbconfig=None, query='', query_args=None, printflag=False):
                 cursor.execute(query)
             else:
                 cursor.execute(query, query_args)  # execute given query in mysql object
-            cnx.commit()
-            flag = True
+
             if printflag:
                 # print statement only good for taxdb.clients
                 for (first_name, last_name, client_id) in cursor:
                     print("{} {} is a client with ID: {}".format(first_name, last_name, client_id))
+
+            cnx.commit()
+            flag = True
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
