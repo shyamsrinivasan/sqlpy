@@ -86,7 +86,7 @@ def loadclientinfo(data: object, dbconfig=None):
     # assign client id to new clients
     data = assignid(dbconfig, data)
 
-    client_list: dict = data.to_dict('records')
+    client_list = data.to_dict('records')
     for idx, i_client in enumerate(client_list):
         # check if new client in db (same name/pan)
         db_info = check_db(dbconfig, i_client)

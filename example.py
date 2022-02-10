@@ -12,7 +12,7 @@ def readclientinfo() -> object:
     df = pd.read_excel(os.path.join(os.getcwd(), 'sampleinfo.xlsx'), 'info', engine='openpyxl')
 
     # fill nan values (for non NN columns in db) with appropriate replacement
-    df['house_num'].fillna('0A', inplace=True)
+    df['house_num'].fillna('none', inplace=True)
     df['locality'].fillna('none', inplace=True)
 
     # get first and last names from full name
@@ -20,6 +20,10 @@ def readclientinfo() -> object:
     lastname = [iname.split()[1] for iname in df['name']]
     df = df.assign(firstname=pd.Series(firstname))
     df = df.assign(lastname=pd.Series(lastname))
+
+    # convert street_num to string
+    df['street_num'] = df['street_num'].map(str)
+
     return df
 
 

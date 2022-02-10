@@ -10,37 +10,51 @@ def update_address(dbconfig: dict, dbinfo: dict, data: dict):
                 'pin': ''}
     if data['street_num'] != dbinfo['streetnumber']:
         up_fields[0] = True
-        up_query['streetnumber'] = ("UPDATE {}.address SET "
-                                    "streetnumber = %(street_num)s".format(dbconfig['database']))
+        up_query['streetnumber'] = ("UPDATE {}.address SET streetnumber = %(street_num)s "
+                                    "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['street_name'] != dbinfo['streetname']:
         up_fields[1] = True
-        up_query['streetname'] = ("UPDATE {}.address SET streetname = %(street_name)s".format(dbconfig['database']))
+        up_query['streetname'] = ("UPDATE {}.address SET streetname = %(street_name)s "
+                                  "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['house_num'] != dbinfo['housenum']:
         up_fields[2] = True
-        up_query['housenum'] = ("UPDATE {}.address SET housenum = %(house_num)s".format(dbconfig['database']))
+        if data['house_num'] == 'none':
+            up_query['housenum'] = ("UPDATE {}.address SET housenum = NULL "
+                                    "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
+        else:
+            up_query['housenum'] = ("UPDATE {}.address SET housenum = %(house_num)s "
+                                    "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['locality'] != dbinfo['locality']:
         up_fields[3] = True
-        up_query['locality'] = ("UPDATE {}.address SET locality = %(locality)s".format(dbconfig['database']))
+        if data['locality'] == 'none':
+            up_query['locality'] = ("UPDATE {}.address SET locality = NULL "
+                                    "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
+        else:
+            up_query['locality'] = ("UPDATE {}.address SET locality = %(locality)s "
+                                    "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['city'] != dbinfo['city']:
         up_fields[4] = True
-        up_query['city'] = ("UPDATE {}.address SET city = %(city)s".format(dbconfig['database']))
+        up_query['city'] = ("UPDATE {}.address SET city = %(city)s "
+                            "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['state'] != dbinfo['state']:
         up_fields[5] = True
-        up_query['state'] = ("UPDATE {}.address SET state = %(state)s".format(dbconfig['database']))
+        up_query['state'] = ("UPDATE {}.address SET state = %(state)s "
+                             "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if data['pin'] != dbinfo['pin']:
         up_fields[6] = True
-        up_query['pin'] = ("UPDATE {}.address SET pin = %(pin)s".format(dbconfig['database']))
+        up_query['pin'] = ("UPDATE {}.address SET pin = %(pin)s "
+                           "WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     if all(up_fields):
         up_query['all'] = ("UPDATE {}.address SET streetnumber = %(street_num)s, streetname = %(street_name)s, "
                            "housenum = %(house_num)s, locality = %(locality)s, city = %(city)s, state = %(state)s, "
-                           "pin = %(pin)s".format(dbconfig['database']))
+                           "pin = %(pin)s WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
     updatedb(dbconfig, up_fields, up_query, data)
     return
