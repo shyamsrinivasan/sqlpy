@@ -78,6 +78,8 @@ def getinfo(dbconfig: dict, query, id_only=False, query_args=None, address=False
         client = {'firstname': fname, 'lastname': lname, 'clientid': cid, 'pan': pan, 'streetnumber': snum,
                   'streetname': sname, 'housenum': housenum, 'locality': locale, 'city': city, 'state': state,
                   'pin': pin, 'portalpass': portalpass}
+        cursor.close()
+        cnx.close()
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Username or password")
@@ -163,21 +165,39 @@ def check_db(dbconfig: dict, info: dict, qtype=-1, get_address=False, get_passwo
     return dbinfo
 
 
-def updatedb(dbconfig: dict, query, data):
-    """update client entries in DB"""
-
-    # steps to update client info
-    # 1. check if info (identity) in db is same as provided info
-    # 2. if TRUE - do not update
-    # 3. else (FALSE) - update db entries
+def updatedb(dbconfig: dict, up_fields: list, query: dict, query_args: dict):
+    """update client entries in DB using buffered cursor"""
 
     flag = False
     try:
         cnx = mysql.connector.connect(**dbconfig)
-        cursor = cnx.cursor()      # cursor = cnx.cursor(buffered=True)
-
-        cursor.execute(query, data)  # execute given query in mysql object
-        cnx.commit()  # commit changes to db
+        cursor = cnx.cursor(buffered=True)
+        if all(up_fields):
+            cursor.execute(query['all'], query_args)    # execute given query in mysql object
+            cnx.commit()    # commit changes to db
+        else:
+            if up_fields[0]:
+                cursor.execute(query['streetnumber'], query_args)
+                cnx.commit()
+            if up_fields[1]:
+                cursor.execute(query['streetname'], query_args)
+                cnx.commit()
+            if up_fields[2]:
+                cursor.execute(query['housenum'], query_args)
+                cnx.commit()
+            if up_fields[3]:
+                cursor.execute(query['locality'], query_args)
+                cnx.commit()
+            if up_fields[4]:
+                cursor.execute(query['city'], query_args)
+                cnx.commit()
+            if up_fields[5]:
+                cursor.execute(query['state'], query_args)
+                cnx.commit()
+            if up_fields[6]:
+                cursor.execute(query['pin'], query_args)
+                cnx.commit()
+        cnx.close()
         flag = True
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -191,7 +211,7 @@ def updatedb(dbconfig: dict, query, data):
         if cnx.is_connected():
             cursor.close()
             cnx.close()
-    return
+    return flag
 
 
 

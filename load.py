@@ -1,5 +1,6 @@
 import pandas as pd
 from query import querydb, check_db, getinfo
+from insert import update1entry
 
 
 def last_client_id(dbconfig: dict):
@@ -54,8 +55,8 @@ def compare_info(info: dict, dbinfo: dict, check_name=True, check_id=False, chec
 
     add_check = True
     if check_address:
-        if info['streetname'] != dbinfo['streetname'] or info['streetnumber'] != dbinfo['streetnumber'] or \
-                info['housenum'] != dbinfo['housenum'] or info['locality'] != dbinfo['locality'] or \
+        if info['street_name'] != dbinfo['streetname'] or info['street_num'] != dbinfo['streetnumber'] or \
+                info['house_num'] != dbinfo['housenum'] or info['locality'] != dbinfo['locality'] or \
                 info['city'] != dbinfo['city'] or info['state'] != dbinfo['state'] or \
                 info['pin'] != dbinfo['pin']:
             add_check = False
@@ -100,9 +101,13 @@ def loadclientinfo(data: object, dbconfig=None):
             # get existing client info (pan,address) using client info from db
             db_info = check_db(dbconfig, i_client, qtype=1, get_address=True)
             info_list = list2dict(db_info)
-            _, _, _, add_check = compare_info(i_client, info_list[0])   # check if same address in DB
-            # if add_check:
-            #     update_db(i_client, dbconfig)
+            # check if same address in DB
+            _, _, _, add_check = compare_info(i_client, info_list[0], check_address=True)
+            if not add_check:
+                update1entry(dbconfig, info_list[0], i_client)  # update DB if address is not same
+            else:
+                print("{} with ID {} has same address in DB. "
+                      "No changes made".format(i_client['name'], i_client['clientid']))
         else:   # else add new entry
             loadsingleclientinfo(dbconfig, i_client)
     return
