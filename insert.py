@@ -100,7 +100,7 @@ def update_identity(dbconfig: dict, dbinfo: dict, data: dict):
 
     if data['portalpass'] != dbinfo['portalpass']:
         up_fields[0] = True
-        up_query['portalpass'] = ("UPDATE {}.clients SET portalpass = %(portalpass)s "
+        up_query['portalpass'] = ("UPDATE {}.identity SET portalpass = %(portalpass)s "
                                   "WHERE clients.clientid = %(clientid)s".format(dbconfig['database']))
         up_query['all'] = up_query['portalpass']
 
