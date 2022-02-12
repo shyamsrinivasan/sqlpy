@@ -165,7 +165,7 @@ def check_db(dbconfig: dict, info: dict, qtype=-1, get_address=False, get_passwo
     return dbinfo
 
 
-def updatedb(dbconfig: dict, up_fields: list, query: dict, query_args: dict):
+def updatedb(dbconfig: dict, up_fields: list, query: dict, query_args: dict, address=False, client=False, identity=False):
     """update client entries in DB using buffered cursor"""
 
     flag = False
@@ -176,27 +176,39 @@ def updatedb(dbconfig: dict, up_fields: list, query: dict, query_args: dict):
             cursor.execute(query['all'], query_args)    # execute given query in mysql object
             cnx.commit()    # commit changes to db
         else:
-            if up_fields[0]:
-                cursor.execute(query['streetnumber'], query_args)
-                cnx.commit()
-            if up_fields[1]:
-                cursor.execute(query['streetname'], query_args)
-                cnx.commit()
-            if up_fields[2]:
-                cursor.execute(query['housenum'], query_args)
-                cnx.commit()
-            if up_fields[3]:
-                cursor.execute(query['locality'], query_args)
-                cnx.commit()
-            if up_fields[4]:
-                cursor.execute(query['city'], query_args)
-                cnx.commit()
-            if up_fields[5]:
-                cursor.execute(query['state'], query_args)
-                cnx.commit()
-            if up_fields[6]:
-                cursor.execute(query['pin'], query_args)
-                cnx.commit()
+            if address:
+                if up_fields[0]:
+                    cursor.execute(query['streetnumber'], query_args)
+                    cnx.commit()
+                if up_fields[1]:
+                    cursor.execute(query['streetname'], query_args)
+                    cnx.commit()
+                if up_fields[2]:
+                    cursor.execute(query['housenum'], query_args)
+                    cnx.commit()
+                if up_fields[3]:
+                    cursor.execute(query['locality'], query_args)
+                    cnx.commit()
+                if up_fields[4]:
+                    cursor.execute(query['city'], query_args)
+                    cnx.commit()
+                if up_fields[5]:
+                    cursor.execute(query['state'], query_args)
+                    cnx.commit()
+                if up_fields[6]:
+                    cursor.execute(query['pin'], query_args)
+                    cnx.commit()
+
+            if client:
+                if up_fields[0]:
+                    cursor.execute(query['clientid'], query_args)
+                    cnx.commit()
+                if up_fields[1]:
+                    cursor.execute(query['firstname'], query_args)
+                    cnx.commit()
+                if up_fields[2]:
+                    cursor.execute(query['firstname'], query_args)
+                    cnx.commit()
         cnx.close()
         flag = True
     except mysql.connector.Error as err:

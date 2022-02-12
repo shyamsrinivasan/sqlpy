@@ -56,23 +56,55 @@ def update_address(dbconfig: dict, dbinfo: dict, data: dict):
                            "housenum = %(house_num)s, locality = %(locality)s, city = %(city)s, state = %(state)s, "
                            "pin = %(pin)s WHERE address.clientid = %(clientid)s".format(dbconfig['database']))
 
-    updatedb(dbconfig, up_fields, up_query, data)
+    flag = updatedb(dbconfig, up_fields, up_query, data, address=True)
     return
 
 
-def update_client(dbconfig: dict, data: dict):
-    update_cl = ("UPDATE tablename SET colname = colvalue")
-    # update_db(dbconfig, update_cl, data)
+def update_client(dbconfig: dict, dbinfo: dict, data: dict):
+    """check if fields in client table are different and change only allowed fields"""
+
+    up_fields = [False, False, False]
+    up_query = {'clientid': '', 'firstname': '', 'lastname': '', 'pan': ''}
+    if data['clientid'] != dbinfo['clientid']:
+        # same name but different client id -> change to same client id
+        up_fields[0] = True
+        up_query['clientid'] = ("UPDATE {}.clients SET clientid = %(clientid)s WHERE clients.firstname = %(firstname)s "
+                                "AND clients.lastname = %(lastname)s".format(dbconfig['database']))
+
+    if data['firstname'] != dbinfo['firstname']:
+        up_fields[1] = True
+        up_query['firstname'] = ("UPDATE {}.clients SET firstname = %(firstname)s "
+                                "WHERE clients.clientid = %(clientid)s".format(dbconfig['database']))
+
+    if data['lastname'] != dbinfo['lastname']:
+        up_fields[2] = True
+        up_query['lastname'] = ("UPDATE {}.clients SET lastname = %(lastname)s "
+                                "WHERE clients.clientid = %(clientid)s".format(dbconfig['database']))
+
+    if data['pan'] != dbinfo['pan']:
+        print('PAN cannot be changed')
+
+    if all(up_fields):
+        up_query['all'] = ("UPDATE {}.clients SET firstname = %(firstname)s, lastname = %(lastname)s "
+                           "WHERE clients.clientid = %(clientid)s".format(dbconfig['database']))
+
+    flag = updatedb(dbconfig, up_fields, up_query, data, client=True)
     return
 
 
-def update_identity(dbconfig: dict, data: dict):
-    # steps to update client info
-    # 1. check if info (identity) in db is same as provided info
-    # 2. if TRUE - do not update
-    # 3. else (FALSE) - update db entries
-    update_id = ("UPDATE")
-    # update_db(dbconfig, update_id, data)
+def update_identity(dbconfig: dict, dbinfo: dict, data: dict):
+    """check if fields in identity are same and change only fields that differ"""
+
+    up_fields = [False]
+    up_query = {'clientid': '', 'portalpass': ''}
+
+    if data['portalpass'] != dbinfo['portalpass']:
+        up_fields[0] = True
+        up_query['portalpass'] = ("UPDATE {}.clients SET portalpass = %(portalpass)s "
+                                  "WHERE clients.clientid = %(clientid)s".format(dbconfig['database']))
+        up_query['all'] = up_query['portalpass']
+
+    flag = updatedb(dbconfig, up_fields, up_query, data)
     return
 
 
@@ -85,13 +117,13 @@ def update1entry(dbconfig: dict, dbinfo: dict, data: dict, entry_type=1):
     if entry_type == 1:  # update address only
         update_address(dbconfig, dbinfo, data)
     elif entry_type == 2:  # add client only
-        update_client(dbconfig, data)
+        update_client(dbconfig, dbinfo, data)
     elif entry_type == 3:  # add identity only
-        update_identity(dbconfig, data)
+        update_identity(dbconfig, dbinfo, data)
     else:   # add all client, address and identity
-        update_client(dbconfig, data)
+        update_client(dbconfig, dbinfo, data)
         update_address(dbconfig, dbinfo, data)
-        update_identity(dbconfig, data)
+        update_identity(dbconfig, dbinfo, data)
     return
 
 
