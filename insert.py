@@ -127,8 +127,10 @@ def update1entry(dbconfig: dict, dbinfo: dict, data: dict, entry_type=1):
     return
 
 
-def add_column():
+def add_column(dbconfig: dict, data: dict):
     """add column to existing table in DB"""
 
-    query = ("ALTER TABLE tablename alter_option")
+    # query = ("ALTER TABLE {} alter_option".format())
+    # ALTER TABLE table_name ADD column_name column_dtype column_is_null column_default/other_value
+    # ALTER TABLE t2 ADD c INT UNSIGNED NOT NULL AUTO_INCREMENT
     return
