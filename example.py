@@ -12,7 +12,7 @@ if __name__ == '__main__':
                 'database': 'taxdata',
                 'raise_on_warnings': True}
 
-    """script to test reading data fgrom excel file and writing to mysql db"""
+    # read data from excel file and write to mysql db
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
     data = readclientinfo(file_name)
     loadclientinfo(data, dbconfig)
