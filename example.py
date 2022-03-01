@@ -1,6 +1,7 @@
 from query import querydb
 from load import readclientinfo, loadclientinfo
 import os.path
+from sqlclass import PySQL
 
 
 if __name__ == '__main__':
@@ -12,10 +13,12 @@ if __name__ == '__main__':
                 'database': 'taxdata',
                 'raise_on_warnings': True}
 
+    db = PySQL(dbconfig)
     # read data from excel file and write to mysql db
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
     data = readclientinfo(file_name)
     loadclientinfo(data, dbconfig)
+    # db = db.enter_data(file_name, table_name)
 
     # add new column to DB and relevant data
 
