@@ -1,5 +1,5 @@
 import pandas as pd
-
+from accessdb import getinfo, query_db
 
 
 class PySQL:
@@ -64,8 +64,8 @@ class PySQL:
         if self.query_flag is not None:
             self.query_flag = None
             print('Query flag reset to None')
-        else:
-            print('Query flag is already None')
+        # else:
+        #     print('Query flag is already None')
 
     def _last_item_id(self, id_col):
         """get last id (biggest) from DB. Usually used to client id to new added entries"""
@@ -96,7 +96,7 @@ class PySQL:
             nrows = data.shape[0]
             large_id += 1
             new_ids = [large_id + irow for irow in range(0, nrows)]
-            data = data.assign(id=pd.Series(new_ids))
+            data = data.assign(clientid=pd.Series(new_ids))
         else:
             print('Could not access database to get existing IDs: Assign IDs manually \n')
         return data
@@ -104,126 +104,67 @@ class PySQL:
     def enter_data(self, file_name=None, table_name=None):
         """enter data in file_name to all tables in table_name"""
 
-        if file_name is not None and table_name is not None:
+        if file_name is not None:
             data = self._read_from_file(file_name)
             # add client ID to new data
             data = self._assign_id(data, id_col='clientid')
-            if isinstance(table_name, list):
-                for i_table in table_name:
-                    # add relevant to each table in db
-                    tab_obj = [j_table for j_table in self.tables if j_table.name == i_table]
-                    if tab_obj:
-                        tab_obj = tab_obj[0]
-                        print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
-                        tab_obj.add_data(data)
-                    else:
-                        tab_obj = None
-                        print('Table {} is not present in current DB {}. Available tables are:'.format(table_name, self.DBname))
-                        for k_table in self.tables:
-                            print(format(k_table.name))
-                        continue
-            elif table_name == 'all':
-                # add data to all tables in db
-                for j_table in self.tables:
-                    print("Adding data to table {} in current DB {}".format(j_table.name, self.DBname))
-                    j_table.add_data(data)
+            if table_name is not None:
+                # add data only to selected tables
+                print('Adding data to given tables only')
             else:
-                # add relevant data to single table in db
-                tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
-                if tab_obj:
-                    tab_obj = tab_obj[0]
-                    print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
-                    tab_obj.add_data(data)
-                else:
-                    tab_obj = None
-                    print('Table {} is not present in current DB {}. Available tables are:'.format(table_name,
-                                                                                                   self.DBname))
-                    for k_table in self.tables:
-                        print(format(k_table.name))
+                # add data to all tables in db one table at a time
+                # add data to parent table (clients) first
+                tab_obj = [j_table for j_table in self.tables if j_table.name == 'clients'][0]
+                print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
+                # check if data present in clients table. Change client id if present
+                data_list = data.to_dict('records')     # convert data df to list of dict
+                for i_data in data_list:
+                    id_check, name_check, pan_check, add_check, info_list = tab_obj.check_client(i_data)
+                    if info_list is not None and info_list:
+                        if (name_check or pan_check) and not id_check:
+                            i_data['clientid'] = info_list['clientid']
+                tab_obj.add_data(data_list)
+                # add data to other (child) tables
+                for j_table in self.tables:
+                    if j_table.name != 'clients':
+                        print("Adding data to table {} in current DB {}".format(j_table.name, self.DBname))
+                        j_table.add_data(data_list)
+                    else:
+                        continue
         else:
-            print('File name/Table name to enter data is empty')
+            print('File name to enter data is empty')
 
-    def check_db(self, query, info: dict, get_client=False, get_address=False, get_identity=False):
-        """check if given client part of DB based on given info (name/pan/client id)
-            and return all details of said client"""
-
-        self._reset_query_flag()
-        self_query = query
-        self.query_args = info
-        dbinfo = getinfo(self, client=get_client, address=get_address, identity=get_identity)
-
-        # if get_address and get_password:
-        #     if qtype == 1:  # get info with clientid
-        #         self.query = ("SELECT * FROM clients LEFT JOIN (address, identity) "
-        #                       "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND \
-        #                       clients.clientid = %(clientid)s)")
-        #     elif qtype == 2:  # get info using name
-        #         self.query = ("SELECT * FROM clients LEFT JOIN (address, identity) "
-        #                       "ON (clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-        #                       "(clients.firstname = %(firstname)s OR clients.lastname = %(lastname)s)")
-        #     elif qtype == 3:  # get info using pan
-        #         self.query = ("SELECT * FROM clients LEFT JOIN (address, identity) ON "
-        #                       "(clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-        #                       "clients.pan = %(pan)s")
-        #     else:  # get info using clientid, name or pan
-        #         self.query = ("SELECT * FROM clients LEFT JOIN (address, identity) ON "
-        #                       "(clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-        #                       "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
-        #                       "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-        #     self._reset_query_flag()
-        #     self.query_args = info
-        #     dbinfo = getinfo(self, address=True, identity=True)
-        # elif get_address and not get_password:
-        #     if qtype == 1:  # get info with clientid
-        #         self.query = ("SELECT * FROM clients LEFT JOIN address "
-        #                       "ON (clients.clientid=address.clientid AND clients.clientid = %(clientid)s) "
-        #                       "WHERE address.streetname is NOT NULL OR address.streetnumber is NOT NULL OR "
-        #                       "address.housenum is NOT NULL OR address.locality is NOT NULL OR "
-        #                       "address.city is NOT NULL OR address.state is NOT NULL")
-        #     elif qtype == 2:  # get info using name
-        #         self.query = ("SELECT * FROM clients LEFT JOIN address "
-        #                       "ON (clients.clientid=address.clientid AND (clients.firstname = %(firstname)s OR "
-        #                       "clients.lastname = %(lastname)s) WHERE address.streetname is NOT NULL OR "
-        #                       "address.streetnumber is NOT NULL OR address.housenum is NOT NULL OR "
-        #                       "address.locality is NOT NULL OR address.city is NOT NULL OR address.state is NOT NULL")
-        #     elif qtype == 3:  # get info using pan
-        #         self.query = ("SELECT * FROM clients LEFT JOIN address "
-        #                       "ON (clients.clientid=address.clientid AND clients.pan = %(pan)s WHERE "
-        #                       "address.streetname is NOT NULL OR address.streetnumber is NOT NULL OR "
-        #                       "address.housenum is NOT NULL OR address.locality is NOT NULL OR "
-        #                       "address.city is NOT NULL OR address.state is NOT NULL")
-        #     else:  # get info using clientid, name or pan
-        #         self.query = ("SELECT * FROM clients LEFT JOIN address "
-        #                       "ON (clients.clientid=address.clientid AND "
-        #                       "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
-        #                       "clients.lastname = %(lastname)s OR clients.pan = %(pan)s) WHERE "
-        #                       "address.streetname is NOT NULL OR address.streetnumber is NOT NULL OR "
-        #                       "address.housenum is NOT NULL OR address.locality is NOT NULL OR "
-        #                       "address.city is NOT NULL OR address.state is NOT NULL")
-        #     self._reset_query_flag()
-        #     self.query_args = info
-        #     dbinfo = getinfo(self, address=True)
-        #     # remove all row entries corresponding to a None entry (SQL output is NULL for respective row)
-        #     # remove_row()
-        # else:
-        #     if qtype == 1:  # check using client ID
-        #         self.query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
-        #                       "WHERE clientid = %(clientid)s")
-        #     elif qtype == 2:  # get info using name
-        #         self.query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
-        #                       "WHERE firstname = %(firstname)s OR lastname = %(lastname)s")
-        #     elif qtype == 3:  # get info using pan
-        #         self.query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
-        #                       "WHERE pan = %(pan)s")
-        #     else:  # check using all of the above
-        #         self.query = ("SELECT firstname, lastname, clientid, pan FROM taxdata.clients "
-        #                       "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR "
-        #                       "pan = %(pan)s OR clientid = %(clientid)s")
-        #     self._reset_query_flag()
-        #     self.query_args = info
-        #     dbinfo = getinfo(self)
-
-        return dbinfo
+    #         if isinstance(table_name, list):
+    #             for i_table in table_name:
+    #                 # add relevant to each table in db
+    #                 tab_obj = [j_table for j_table in self.tables if j_table.name == i_table]
+    #                 if tab_obj:
+    #                     tab_obj = tab_obj[0]
+    #                     print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
+    #                     tab_obj.add_data(data)
+    #                 else:
+    #                     tab_obj = None
+    #                     print('Table {} is not present in current DB {}. Available tables are:'.format(table_name, self.DBname))
+    #                     for k_table in self.tables:
+    #                         print(format(k_table.name))
+    #                     continue
+    #         elif table_name == 'all':
+    #
+    #         else:
+    #             # add relevant data to single table in db
+    #             tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
+    #             if tab_obj:
+    #                 tab_obj = tab_obj[0]
+    #                 print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
+    #                 tab_obj.add_data(data)
+    #             else:
+    #                 tab_obj = None
+    #                 print('Table {} is not present in current DB {}. Available tables are:'.format(table_name,
+    #                                                                                                self.DBname))
+    #                 for k_table in self.tables:
+    #                     print(format(k_table.name))
+    #     else:
+    #
 
     def change_table_entry(self, query, query_args):
         """call query_db to add/update entry in table"""
@@ -233,6 +174,15 @@ class PySQL:
         self._reset_query_flag()
         self.query_flag = query_db(self)
         return self
+
+    def get_table_entry(self, query, query_args, id_only=False, client=False, address=False, identity=False):
+        """call get_info to get entry from db using SELECT"""
+
+        self.query = query
+        self.query_args = query_args
+        self._reset_query_flag()
+        dbinfo = getinfo(self, id_only=id_only, client=client, address=address, identity=identity)
+        return dbinfo
 
 
 class PySQLtable:
@@ -261,7 +211,7 @@ class PySQLtable:
 
         # get column names, column type, column nullablity and column default
         self.DB.query = ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE, COLUMN_KEY "
-                        "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = %(table_name)s")
+                         "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = %(table_name)s")
         self.DB.query_args = {'table_name': self.name}
         column_info = getinfo(self.DB, columns=True)
         self.column_names = column_info['column_names']
@@ -269,6 +219,130 @@ class PySQLtable:
         self.is_null = column_info['is_null']
         self.column_default = column_info['default']
         self.columns = len(self.column_names)
+
+    def add_data(self, data):
+        """load client info from dataframe to db"""
+
+        # data_list = data.to_dict('records')
+        for idx, i_entry in enumerate(data):
+            # check if new entry in db (same name/pan)
+            id_check, name_check, pan_check, add_check, info_list = self.check_client(i_entry)
+            # db_info = self._check_table(i_entry)
+            # info_list = None
+            # id_check, name_check, pan_check, add_check = False, False, False, True
+            # if db_info:
+            #     info_list = self._list2dict(db_info)
+            if info_list is not None and info_list:
+                # name_check, id_check, pan_check, add_check = self._compare_info(i_entry, info_list[0])
+                if name_check and id_check and pan_check:
+                    print("Client {} {} is present in DB with ID:{} and PAN:{}. "
+                          "Proceeding to update existing entry".format(i_entry['firstname'], i_entry['lastname'],
+                                                                       info_list['clientid'],
+                                                                       info_list['pan']))
+                else:
+                    if name_check and not pan_check:
+                        print("Client {} {} is present in DB with different PAN:{}".format(i_entry['firstname'],
+                                                                                           i_entry['lastname'],
+                                                                                           info_list['pan']))
+                        if info_list['pan']:
+                            i_entry['pan'] = info_list['pan']
+                        # may be update PAN?
+                    elif name_check and not id_check:
+                        print("Client {} {} is present in DB with different ID:{}".format(i_entry['firstname'],
+                                                                                          i_entry['lastname'],
+                                                                                          info_list['clientid']))
+                        # change client id to one obtained from db
+                        i_entry['clientid'] = info_list['clientid']
+                    else:
+                        print("Client {} {} is NOT present in DB with ID:{} and PAN:{}. "
+                              "Proceeding to add entry".format(i_entry['firstname'], i_entry['lastname'],
+                                                               i_entry['clientid'], i_entry['pan']))
+                        self._add_single_table_entry(i_entry)
+                if id_check and not add_check:
+                    print("Client {} {} is present in DB with ID:{} and different address. "
+                          "Proceeding to update address".format(i_entry['firstname'], i_entry['lastname'],
+                                                                i_entry['clientid']))
+            else:
+                print("Client {} {} is NOT present in table {}. "
+                      "Proceeding to add entry".format(i_entry['firstname'], i_entry['lastname'], self.name))
+                self._add_single_table_entry(i_entry)
+
+    def _add_single_table_entry(self, entry_info):
+        """add data to one table based on which table object calls method"""
+
+        if self.name == 'clients':
+            # add data to clients table
+            query = ("INSERT INTO {}.{} "
+                     "(clientid, firstname, lastname, pan) "
+                     "VALUES (%(clientid)s, %(firstname)s, %(lastname)s, %(pan)s)".format(self.DBname, self.name))
+            self.DB = self.DB.change_table_entry(query, entry_info)
+            if self.DB.query_flag:
+                print("Entry with id `{}` and name `{} {}` added to {} in {}".format(entry_info['clientid'],
+                                                                                     entry_info['firstname'],
+                                                                                     entry_info['lastname'],
+                                                                                     self.name, self.DBname))
+            else:
+                print("Entry with name {} {} NOT added to {}".format(entry_info['firstname'], entry_info['lastname'],
+                                                                     self.name))
+
+        if self.name == 'address':
+            # add data to address table
+            query = ("INSERT INTO {}.{} "
+                     "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
+                     "VALUES (%(clientid)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, %(city)s, "
+                     "%(state)s, %(pin)s)".format(self.DBname, self.name))
+            self.DB = self.DB.change_table_entry(query, entry_info)
+            if self.DB.query_flag:
+                print("Entry with id `{}` and address `{} {}, {}, {}, {}-{}` "
+                      "added to {} in {}".format(entry_info['clientid'], entry_info['street_num'],
+                                                 entry_info['street_name'], entry_info['locality'], entry_info['city'],
+                                                 entry_info['state'], entry_info['pin'], self.name, self.DBname))
+            else:
+                print("Entry with name {} {} and id {} NOT added to {}".format(entry_info['firstname'],
+                                                                               entry_info['lastname'],
+                                                                               entry_info['clientid'], self.name))
+        if self.name == 'identity':
+            # add data to identity table
+            query = ("INSERT INTO {}.{} (clientid, pan, portalpass) "
+                     "VALUES (%(clientid)s, %(pan)s, %(portalpass)s)".format(self.DBname, self.name))
+            self.DB = self.DB.change_table_entry(query, entry_info)
+            if self.DB.query_flag:
+                print("Entry with id `{}` and PAN `{}` "
+                      "added to {} in {}".format(entry_info['clientid'], entry_info['pan'], self.name, self.DBname))
+            else:
+                print("Entry with name {} {} and id {} NOT added to {}".format(entry_info['firstname'],
+                                                                               entry_info['lastname'],
+                                                                               entry_info['clientid'], self.name))
+
+    def _check_table(self, info: dict):
+        """check table in db for existing entry"""
+
+        db_info = None
+        if self.name == 'clients':
+            query = ("SELECT firstname, lastname, clientid, pan FROM {}.clients "
+                     "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR "
+                     "pan = %(pan)s OR clientid = %(clientid)s".format(self.DBname))
+            db_info = self.DB.get_table_entry(query, info, client=True)
+        elif self.name == 'address':
+            query = ("SELECT address.clientid, clients.firstname, clients.lastname, clients.pan, streetnumber, streetname, "
+                     "housenum, locality, city, state, pin "
+                     "FROM clients LEFT JOIN address ON (clients.clientid=address.clientid AND "
+                     "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
+                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)) WHERE address.streetname is NOT NULL "
+                     "OR address.streetnumber is NOT NULL OR address.housenum is NOT NULL OR "
+                     "address.locality is NOT NULL OR address.city is NOT NULL OR address.state is NOT NULL")
+            db_info = self.DB.get_table_entry(query, info, address=True)
+        elif self.name == 'identity':
+            query = ("SELECT identity.clientid, clients.firstname, clients.lastname, identity.pan, portalpass "
+                     "FROM clients LEFT JOIN identity ON "
+                     "(clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
+                     "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
+                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)) WHERE "
+                     "identity.pan IS NOT NULL OR identity.portalpass IS NOT NULL")
+            db_info = self.DB.get_table_entry(query, info, identity=True)
+        else:
+            print("Table {} is not present in DB {}".format(self.name, self.DBname))
+        return db_info
 
     @staticmethod
     def _list2dict(info_dict: dict) -> list:
@@ -290,37 +364,50 @@ class PySQLtable:
             new_list.append(new_dict)
         return new_list
 
-    def _compare_info(self, info: dict, dbinfo: dict, check_name=False, check_id=False, check_address=False):
+    def _compare_info(self, info: dict, dbinfo: dict):
         """compare given information with information obtained from db and see what the difference is"""
 
         name_check = False
         id_check = False
         pan_check = False
-        if self.name == 'clients':
-            if info['firstname'] == dbinfo['firstname'] and info['lastname'] == dbinfo['lastname']:
-                name_check = True
-            if info['clientid'] == dbinfo['clientid']:
-                id_check = True
-            if info['pan'] == dbinfo['pan']:
-                pan_check = True
-
-        if self.name == 'identity':
-            if info['clientid'] == dbinfo['clientid']:
-                id_check = True
-            if info['pan'] == dbinfo['pan']:
-                pan_check = True
-
         add_check = True
+        # clients table only
+        if info['firstname'] == dbinfo['firstname'] and info['lastname'] == dbinfo['lastname']:
+            name_check = True
+        if info['clientid'] == dbinfo['clientid']:
+            id_check = True
+        if info['pan'] == dbinfo['pan']:
+            pan_check = True
+        # if self.name == 'clients':
+        # identity table only
+        # if self.name == 'identity':
+        #     if info['pan'] == dbinfo['pan']:
+        #         pan_check = True
+        # address table only
         if self.name == 'address':
-            if info['clientid'] == dbinfo['clientid']:
-                id_check = True
             if info['street_name'] != dbinfo['streetname'] or info['street_num'] != dbinfo['streetnumber'] or \
-                    info['house_num'] != dbinfo['housenum'] or info['locality'] != dbinfo['locality'] or \
+                    str(info['house_num']) != dbinfo['housenum'] or info['locality'] != dbinfo['locality'] or \
                     info['city'] != dbinfo['city'] or info['state'] != dbinfo['state'] or \
                     info['pin'] != dbinfo['pin']:
                 add_check = False
 
         return name_check, id_check, pan_check, add_check
+
+    def check_client(self, data):
+        """check if given client in present in clients table to change
+        client ID in info to match ID already present in clients"""
+
+        db_info = self._check_table(data)
+        info_list = None
+        id_check, name_check, pan_check, add_check = False, False, False, True
+        if db_info:
+            info_list = self._list2dict(db_info)
+        if info_list is not None and info_list:
+            name_check, id_check, pan_check, add_check = self._compare_info(data, info_list[0])
+            info_list = info_list[0]
+        else:
+            info_list = None
+        return id_check, name_check, pan_check, add_check, info_list
 
     # def _update_cost(self, db_obj: PySQL, dbinfo: dict, data: dict):
     #     """check address fields that are different and update only these fields"""
@@ -355,123 +442,9 @@ class PySQLtable:
     #         # update entries in other tables
     #     return
     #
-    # def _add_client(self, query_args: dict):
-    #     """call db_obj.add_item to add entry to relevant table"""
-    #
-    #     query = ("INSERT INTO {}.{} "
-    #              "(clientid, firstname, lastname, pan) "
-    #              "VALUES (%(client_id)s, %(firstname)s, %(lastname)s, %(pan)s)".format(self.DBname, self.name))
-    #     self.DB = self.DB.change_table_entry(query, query_args)
-    #     if self.DB.query_flag:
-    #         print("Entry with id `{}` and name `{} {}` added to {} in {}".format(query_args['client_id'],
-    #                                                                              query_args['firstname'],
-    #                                                                              query_args['lastname'],
-    #                                                                              self.name, self.DBname))
-    #     else:
-    #         print("Entry with name {} {} NOT added to {}".format(query_args['firstname'], query_args['lastname'], self.name))
-    #
-    #
-    # def _add_address(self, query_args: dict):
-    #     """add client address details to db"""
-    #
-    #     query = ("INSERT INTO {}.address "
-    #              "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
-    #              "VALUES (%(client_id)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, %(city)s, "
-    #              "%(state)s, %(pin)s)".format(self.DBname))
-    #     flag = querydb(dbconfig, add_address, details)
-    #     return flag
-    #
-    # def addidentity(dbconfig: dict, details: dict):
-    #     """add client identity details to db"""
-    #
-    #     add_identity = ("INSERT INTO {}.identity "
-    #                     "(clientid, pan, portalpass) "
-    #                     "VALUES (%(client_id)s, %(pan)s, %(portalpass)s)".format(dbconfig['database']))
-    #     flag = querydb(dbconfig, add_identity, details)
-    #     return flag
 
-    # def _add_single_entry(self, data: dict, add_type=-1):
-    #     """add single client with info provided as dictionary
-    #     add_type == 1 for add client only
-    #     add_type == 2 for add address only
-    #     add_type == 3 for add identity only"""
-    #
-    #     if add_type == 1:  # add client only
-    #         self._add_client(data)
-    #     elif add_type == 2:  # add address only
-    #         addaddress(dbconfig, data)
-    #     elif add_type == 3:  # add identity only
-    #         addidentity(dbconfig, data)
-    #     else:   # add all client, address and identity
-    #         addclient(dbconfig, data)
-    #         addaddress(dbconfig, data)
-    #         addidentity(dbconfig, data)
 
-    # (self, db_obj: PySQL, data, add_type=-1):
-    #     """add a single new entry to existing table in existing DB
-    #     add_type == 1 for add item only"""
-    #
-    #     if add_type == 1:  # add item only
-    #         self._add_item(data)
-    #     else:
-    #         self._add_item(data)
-    #         # add items to other tables as well
-    #     return
 
-    def _check_table(self, info: dict):
-        """check table in db for existing entry"""
 
-        db_info = None
-        if self.name == 'clients':
-            query = ("SELECT firstname, lastname, clientid, pan FROM {}.clients "
-                     "WHERE firstname = %(firstname)s OR lastname = %(lastname)s OR "
-                     "pan = %(pan)s OR clientid = %(clientid)s".format(self.DBname))
-            db_info = self.DB.check_db(query, info, get_client=True)
-        elif self.name == 'address':
-            query = ("SELECT streetnumber, streetname, housenum, locality, city, state, pin "
-                     "FROM address LEFT JOIN clients ON (clients.clientid=address.clientid AND "
-                     "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
-                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-            db_info = self.DB.check_db(query, info, get_address=True)
-        elif self.name == 'identity':
-            query = ("SELECT pan, clientid, portalpass FROM identity LEFT JOIN clients ON "
-                     "(clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
-                     "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
-                     "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)")
-            db_info = self.DB.check_db(query, info, get_identity=True)
-        else:
-            print("Table {} is not present in DB {}".format(self.name, self.DBname))
-        return db_info
 
-    def add_data(self, data):
-        """load client info from dataframe to db"""
-
-        data_list = data.to_dict('records')
-        for idx, i_entry in enumerate(data_list):
-            # check if new entry in db (same name/pan)
-            db_info = self._check_table(i_entry)
-            info_list = None
-            if db_info:
-                info_list = self._list2dict(db_info)
-            if info_list is not None and info_list:
-                name_check, _, _, _ = self._compare_info(i_entry, info_list[0])
-            else:
-                name_check = False
-    #         if item_check:  # if present, only update existing entry (cost) or return error
-    #             print("Client {} is present in DB with ID {}. "
-    #                   "Proceeding to update existing entry".format(i_client['name'], info_list[0]['clientid']))
-    #             # change client id to one obtained from db
-    #             i_client['clientid'] = info_list[0]['clientid']
-    #             # get existing client info (pan,address) using client info from db
-    #             db_info = check_db(dbconfig, i_entry, qtype=1, get_address=True)
-    #             info_list = self._list2dict(db_info)
-    #             # check if same address in DB
-    #             _, _, _, add_check = compare_info(i_entry, info_list[0], check_address=True)
-    #             if not add_check:
-    #                 # self._update_entry(db_obj, info_list[0], i_entry)  # update DB if cost is not same
-    #             else:
-    #                 print("{} with ID {} has same cost {} in DB. "
-    #                       "No changes made".format(i_entry['description'], i_entry['id'], info_list[0]['cost']))
-    #         else:  # else add new entry
-    #             self._add_single_entry(db_obj, i_entry)
 

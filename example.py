@@ -16,9 +16,7 @@ if __name__ == '__main__':
     db = PySQL(dbconfig)
     # read data from excel file and write to mysql db
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
-    data = readclientinfo(file_name)
-    loadclientinfo(data, dbconfig)
-    # db = db.enter_data(file_name, table_name)
+    db = db.enter_data(file_name)
 
     # add new column to DB and relevant data
 
