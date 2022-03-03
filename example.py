@@ -22,10 +22,11 @@ if __name__ == '__main__':
 
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
     # detail = {'client_id': 20002}
-    query = "SELECT firstname, lastname, clientid FROM clients"
+    query = "SELECT firstname, lastname, clientid, pan FROM clients"
     # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
     # detail = {'client_id': 20002}
-    querydb(dbconfig, query, printflag=True)
+    db.print_query_info(query, client=True)
+    # querydb(dbconfig, query, printflag=True)
 
     # step 2 - connect to sql db/add values to db
     # insert data into existing db table
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     # loadsingleclientinfo(dbconfig, client_data)
 
     # query to check addition to db
-    querydb(dbconfig, query, printflag=True)
+    # querydb(dbconfig, query, printflag=True)
 
     # display all databases in the current SQL server
     # showdb_query = "SHOW DATABASES"

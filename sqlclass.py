@@ -42,7 +42,7 @@ class PySQL:
         else:
             df = None
 
-        # fill nan values (for non NN columns in db) with appropriate replacement
+        # fill nan values (for non NaN columns in db) with appropriate replacement
         if df is not None:
             df['house_num'].fillna('none', inplace=True)
             df['locality'].fillna('none', inplace=True)
@@ -133,40 +133,9 @@ class PySQL:
                         continue
         else:
             print('File name to enter data is empty')
+        return self
 
-    #         if isinstance(table_name, list):
-    #             for i_table in table_name:
-    #                 # add relevant to each table in db
-    #                 tab_obj = [j_table for j_table in self.tables if j_table.name == i_table]
-    #                 if tab_obj:
-    #                     tab_obj = tab_obj[0]
-    #                     print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
-    #                     tab_obj.add_data(data)
-    #                 else:
-    #                     tab_obj = None
-    #                     print('Table {} is not present in current DB {}. Available tables are:'.format(table_name, self.DBname))
-    #                     for k_table in self.tables:
-    #                         print(format(k_table.name))
-    #                     continue
-    #         elif table_name == 'all':
-    #
-    #         else:
-    #             # add relevant data to single table in db
-    #             tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
-    #             if tab_obj:
-    #                 tab_obj = tab_obj[0]
-    #                 print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
-    #                 tab_obj.add_data(data)
-    #             else:
-    #                 tab_obj = None
-    #                 print('Table {} is not present in current DB {}. Available tables are:'.format(table_name,
-    #                                                                                                self.DBname))
-    #                 for k_table in self.tables:
-    #                     print(format(k_table.name))
-    #     else:
-    #
-
-    def change_table_entry(self, query, query_args):
+    def change_table_entry(self, query, query_args=None):
         """call query_db to add/update entry in table"""
 
         self.query = query
@@ -175,14 +144,32 @@ class PySQL:
         self.query_flag = query_db(self)
         return self
 
-    def get_table_entry(self, query, query_args, id_only=False, client=False, address=False, identity=False):
+    def get_table_entry(self, query, query_args=None, id_only=False, client=False, address=False, identity=False,
+                        all_details=False):
         """call get_info to get entry from db using SELECT"""
 
         self.query = query
         self.query_args = query_args
         self._reset_query_flag()
-        dbinfo = getinfo(self, id_only=id_only, client=client, address=address, identity=identity)
+        dbinfo = getinfo(self, id_only=id_only, client=client, address=address, identity=identity,
+                         all_details=all_details)
         return dbinfo
+
+    def print_query_info(self, query, query_args=None, id_only=False, client=False, address=False, identity=False,
+                            all_details=False):
+
+        db_info = self.get_table_entry(query, query_args=query_args, id_only=id_only, client=client, address=address,
+                                       identity=identity, all_details=all_details)
+
+        # print statement only good for taxdb.clients
+        if client:
+            if db_info is not None and db_info:
+                nres = len([val for val in db_info['firstname'] if db_info['firstname']])
+            else:
+                nres = 0
+            for ival in range(0, nres):
+                print("{} {} is a client with ID: {}".format(db_info['firstname'][ival], db_info['lastname'][ival],
+                                                             db_info['clientid'][ival]))
 
 
 class PySQLtable:
@@ -223,7 +210,7 @@ class PySQLtable:
     def add_data(self, data):
         """load client info from dataframe to db"""
 
-        # data_list = data.to_dict('records')
+        update_data = [False] * len(data)
         for idx, i_entry in enumerate(data):
             # check if new entry in db (same name/pan)
             id_check, name_check, pan_check, add_check, info_list = self.check_client(i_entry)
@@ -235,10 +222,12 @@ class PySQLtable:
             if info_list is not None and info_list:
                 # name_check, id_check, pan_check, add_check = self._compare_info(i_entry, info_list[0])
                 if name_check and id_check and pan_check:
+                    # update entry only in other tables
                     print("Client {} {} is present in DB with ID:{} and PAN:{}. "
-                          "Proceeding to update existing entry".format(i_entry['firstname'], i_entry['lastname'],
-                                                                       info_list['clientid'],
-                                                                       info_list['pan']))
+                          "Existing entry can only be updated".format(i_entry['firstname'], i_entry['lastname'],
+                                                                      info_list['clientid'],
+                                                                      info_list['pan']))
+                    update_data[idx] = True
                 else:
                     if name_check and not pan_check:
                         print("Client {} {} is present in DB with different PAN:{}".format(i_entry['firstname'],
@@ -246,7 +235,9 @@ class PySQLtable:
                                                                                            info_list['pan']))
                         if info_list['pan']:
                             i_entry['pan'] = info_list['pan']
-                        # may be update PAN?
+                        # may be update PAN in clients and identity?
+                        # if info_list['pan']:
+                        #     i_entry['pan'] = info_list['pan']
                     elif name_check and not id_check:
                         print("Client {} {} is present in DB with different ID:{}".format(i_entry['firstname'],
                                                                                           i_entry['lastname'],
@@ -262,6 +253,8 @@ class PySQLtable:
                     print("Client {} {} is present in DB with ID:{} and different address. "
                           "Proceeding to update address".format(i_entry['firstname'], i_entry['lastname'],
                                                                 i_entry['clientid']))
+                    # update address
+                    self._update_entry(info_list, i_entry)
             else:
                 print("Client {} {} is NOT present in table {}. "
                       "Proceeding to add entry".format(i_entry['firstname'], i_entry['lastname'], self.name))
@@ -287,10 +280,16 @@ class PySQLtable:
 
         if self.name == 'address':
             # add data to address table
-            query = ("INSERT INTO {}.{} "
-                     "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
-                     "VALUES (%(clientid)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, %(city)s, "
-                     "%(state)s, %(pin)s)".format(self.DBname, self.name))
+            if entry_info['house_num'] == 'none':
+                query = ("INSERT INTO {}.{} "
+                         "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
+                         "VALUES (%(clientid)s, %(street_num)s, %(street_name)s, NULL, %(locality)s, %(city)s, "
+                         "%(state)s, %(pin)s)".format(self.DBname, self.name))
+            else:
+                query = ("INSERT INTO {}.{} "
+                         "(clientid, streetnumber, streetname, housenum, locality, city, state, pin) "
+                         "VALUES (%(clientid)s, %(street_num)s, %(street_name)s, %(house_num)s, %(locality)s, "
+                         "%(city)s, %(state)s, %(pin)s)".format(self.DBname, self.name))
             self.DB = self.DB.change_table_entry(query, entry_info)
             if self.DB.query_flag:
                 print("Entry with id `{}` and address `{} {}, {}, {}, {}-{}` "
@@ -324,8 +323,8 @@ class PySQLtable:
                      "pan = %(pan)s OR clientid = %(clientid)s".format(self.DBname))
             db_info = self.DB.get_table_entry(query, info, client=True)
         elif self.name == 'address':
-            query = ("SELECT address.clientid, clients.firstname, clients.lastname, clients.pan, streetnumber, streetname, "
-                     "housenum, locality, city, state, pin "
+            query = ("SELECT address.clientid, clients.firstname, clients.lastname, clients.pan, streetnumber, "
+                     "streetname, housenum, locality, city, state, pin "
                      "FROM clients LEFT JOIN address ON (clients.clientid=address.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
                      "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)) WHERE address.streetname is NOT NULL "
@@ -335,7 +334,7 @@ class PySQLtable:
         elif self.name == 'identity':
             query = ("SELECT identity.clientid, clients.firstname, clients.lastname, identity.pan, portalpass "
                      "FROM clients LEFT JOIN identity ON "
-                     "(clients.clientid=address.clientid AND clients.clientid=identity.clientid AND "
+                     "(clients.clientid=identity.clientid AND clients.clientid=identity.clientid AND "
                      "(clients.clientid = %(clientid)s OR clients.firstname = %(firstname)s OR "
                      "clients.lastname = %(lastname)s OR clients.pan = %(pan)s)) WHERE "
                      "identity.pan IS NOT NULL OR identity.portalpass IS NOT NULL")
@@ -403,48 +402,173 @@ class PySQLtable:
         if db_info:
             info_list = self._list2dict(db_info)
         if info_list is not None and info_list:
+            if info_list[0]['housenum'] is None:
+                info_list[0]['housenum'] = 'none'
             name_check, id_check, pan_check, add_check = self._compare_info(data, info_list[0])
             info_list = info_list[0]
         else:
             info_list = None
         return id_check, name_check, pan_check, add_check, info_list
 
-    # def _update_cost(self, db_obj: PySQL, dbinfo: dict, data: dict):
-    #     """check address fields that are different and update only these fields"""
-    #
-    #     # check address fields that are different
-    #     up_query = None
-    #     if data['cost'] != dbinfo['cost']:
-    #         # update to_date to reflect current timestamp
-    #         up_query = ("UPDATE {}.{} SET {}.to_date = CURRENT_TIMESTAMP WHERE {}.id = %(id)s".format(self.DBname,
-    #                                                                                                   self.name,
-    #                                                                                                   self.name,
-    #                                                                                                   self.name))
-    #         db_obj = db_obj.change_table_entry(up_query, data)
-    #         # add new cost entry with from_date = CURRENT_TIMESTAMP
-    #         self._add_single_entry(db_obj, data, add_type=1)
-    #     if db_obj.query_flag:
-    #         print("Cost of `{}` changed from {} to {} in {}".format(data['description'], dbinfo['cost'], data['cost'],
-    #                                                                 self.name))
-    #     else:
-    #         print("Cost of `{}` NOT CHANGED from {} in {}".format(data['description'], dbinfo['cost'], self.name))
-    #
-    #     return
-    #
-    # def _update_entry(self, db_obj:PySQL, dbinfo: dict, data: dict, entry_type=-1):
-    #     """update a single/single type of entry in db
-    #     entry_type == 1 for update cost only"""
-    #
-    #     if entry_type == 1:  # update cost only (items)
-    #         self._update_cost(db_obj, dbinfo, data)
-    #     else:
-    #         self._update_cost(db_obj, dbinfo, data)
-    #         # update entries in other tables
-    #     return
-    #
+    def _update_entry(self, dbinfo: dict, data: dict):
+        """update a single/single type of entry in db"""
 
+        if self.name == 'client':
+            # update pan or other details
+            if data['clientid'] != dbinfo['clientid']:
+                # same name but different client id -> change to same client id
+                query = ("UPDATE {}.{} SET clientid = %(clientid)s WHERE clients.firstname = %(firstname)s "
+                         "AND clients.lastname = %(lastname)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Client ID changed ID from {} to {} for `{} {}`  has ".format(dbinfo['clientid'],
+                                                                                        data['clientid'],
+                                                                                        dbinfo['firstname'],
+                                                                                        dbinfo['lastname']))
+                else:
+                    print('NO CHANGE in client ID made for `{} {}`. Old client ID: {}'.format(dbinfo['firstname'],
+                                                                                              dbinfo['lastname'],
+                                                                                              dbinfo['clientid']))
 
+            if data['firstname'] != dbinfo['firstname']:
+                query = ("UPDATE {}.{} SET firstname = %(firstname)s "
+                         "WHERE clients.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("First name changed to `{}` for client:{} `{} {}`".format(data['firstname'],
+                                                                                    dbinfo['clientid'],
+                                                                                    dbinfo['firstname'],
+                                                                                    dbinfo['lastname']))
+                else:
+                    print("First name NOT CHANGED to `{}` for "
+                          "client:{} `{} {}`".format(data['firstname'], dbinfo['clientid'],
+                                                     dbinfo['firstname'], dbinfo['lastname']))
 
+            if data['lastname'] != dbinfo['lastname']:
+                query = ("UPDATE {}.{} SET lastname = %(lastname)s "
+                         "WHERE clients.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Last name changed to `{}` for client: {} `{} {}`".format(data['lastname'],
+                                                                                    dbinfo['clientid'],
+                                                                                    dbinfo['firstname'],
+                                                                                    dbinfo['lastname']))
+                else:
+                    print("Last name NOT CHANGED to `{}` for "
+                          "client: {} `{} {}`".format(data['lastname'], dbinfo['clientid'],
+                                                      dbinfo['firstname'], dbinfo['lastname']))
 
+            if data['pan'] != dbinfo['pan']:
+                print('PAN cannot be changed')
 
+        elif self.name == 'address':
+            # update address details
+            if data['street_num'] != dbinfo['streetnumber']:
+                query = ("UPDATE {}.{} SET streetnumber = %(street_num)s "
+                         "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Street number changed from {} to {} for `{} {}`".format(dbinfo['streetnumber'],
+                                                                                   data['street_num'],
+                                                                                   dbinfo['firstname'],
+                                                                                   dbinfo['lastname']))
+                else:
+                    print("Street number NOT CHANGED from {} to {} for "
+                          "`{} {}`".format(dbinfo['streetnumber'], data['street_num'], dbinfo['firstname'],
+                                           dbinfo['lastname']))
+            if data['street_name'] != dbinfo['streetname']:
+                query = ("UPDATE {}.{} SET streetname = %(street_name)s "
+                         "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Street name changed from {} to {} for `{} {}`".format(dbinfo['streetname'],
+                                                                                 data['street_name'],
+                                                                                 dbinfo['firstname'],
+                                                                                 dbinfo['lastname']))
+                else:
+                    print("Street name NOT CHANGED from {} to {} for "
+                          "`{} {}`".format(dbinfo['streetname'], data['street_name'], dbinfo['firstname'],
+                                           dbinfo['lastname']))
+            # house number can be empty
+            if data['house_num'] != dbinfo['housenum']:
+                if data['house_num'] == 'none':
+                    query = ("UPDATE {}.{} SET housenum = NULL "
+                             "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                else:
+                    query = ("UPDATE {}.{} SET housenum = %(house_num)s "
+                             "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("House number changed from {} to {} for `{} {}`".format(dbinfo['housenum'],
+                                                                                  data['house_num'],
+                                                                                  dbinfo['firstname'],
+                                                                                  dbinfo['lastname']))
+                else:
+                    print("House number NOT CHANGED from {} to {} for `{} {}`".format(dbinfo['housenum'],
+                                                                                      data['house_num'],
+                                                                                      dbinfo['firstname'],
+                                                                                      dbinfo['lastname']))
+            # locality can be empty
+            if data['locality'] != dbinfo['locality']:
+                if data['locality'] == 'none':
+                    query = ("UPDATE {}.{} SET locality = NULL "
+                             "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                else:
+                    query = ("UPDATE {}.{} SET locality = %(locality)s "
+                             "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Locality changed from {} to {} for `{} {}`".format(dbinfo['locality'], data['locality'],
+                                                                              dbinfo['firstname'], dbinfo['lastname']))
+                else:
+                    print("Locality NOT CHANGED from {} to {} for `{} {}`".format(dbinfo['locality'], data['locality'],
+                                                                                  dbinfo['firstname'],
+                                                                                  dbinfo['lastname']))
 
+            if data['city'] != dbinfo['city']:
+                query = ("UPDATE {}.{} SET city = %(city)s "
+                         "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("City changed from {} to {} for `{} {}`".format(dbinfo['city'], data['city'],
+                                                                          dbinfo['firstname'], dbinfo['lastname']))
+                else:
+                    print("City NOT CHANGED from {} to {} for `{} {}`".format(dbinfo['city'], data['city'],
+                                                                              dbinfo['firstname'],
+                                                                              dbinfo['lastname']))
+            if data['state'] != dbinfo['state']:
+                query = ("UPDATE {}.{} SET state = %(state)s "
+                         "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("State changed from {} to {} for `{} {}`".format(dbinfo['state'], data['state'],
+                                                                           dbinfo['firstname'], dbinfo['lastname']))
+                else:
+                    print("State NOT CHANGED from {} to {} for `{} {}`".format(dbinfo['state'], data['state'],
+                                                                               dbinfo['firstname'],
+                                                                               dbinfo['lastname']))
+            if data['pin'] != dbinfo['pin']:
+                query = ("UPDATE {}.{} SET pin = %(pin)s "
+                         "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("PIN changed from {} to {} for `{} {}`".format(dbinfo['pin'], data['pin'],
+                                                                         dbinfo['firstname'], dbinfo['lastname']))
+                else:
+                    print("PIN NOT CHANGED from {} to {} for `{} {}`".format(dbinfo['pin'], data['pin'],
+                                                                             dbinfo['firstname'],
+                                                                             dbinfo['lastname']))
+
+        elif self.name == 'identity':
+            # update pan or other identity details
+            if data['portalpass'] != dbinfo['portalpass']:
+                query = ("UPDATE {}.{} SET portalpass = %(portalpass)s "
+                         "WHERE clients.clientid = %(clientid)s".format(self.DBname, self.name))
+                self.DB = self.DB.change_table_entry(query, data)
+                if self.DB.query_flag:
+                    print("Portal password changed to {} for `{} {}`".format(data['portalpass'], dbinfo['firstname'],
+                                                                             dbinfo['lastname']))
+                else:
+                    print("Portal password NOT CHANGED for `{} {}`".format(dbinfo['firstname'], dbinfo['lastname']))
+        else:
+            print('Update commands not available for {} in {}'.format(self.name, self.DBname))

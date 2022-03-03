@@ -2,10 +2,13 @@ import mysql.connector
 from mysql.connector import errorcode
 
 
-def getinfo(sqlobj, tables=False, columns=False, id_only=False, client=False, address=False, identity=False):
+def getinfo(sqlobj, tables=False, columns=False, id_only=False, client=False, address=False, identity=False,
+            all_details=False):
     """get entries from db using given query. Fetch all relevant details from all tables in db"""
 
     result = None
+    if all_details:
+        id_only, client, address, identity = True, True, True, True
     try:
         cnx = mysql.connector.connect(**sqlobj.dbconfig)
         cursor = cnx.cursor(dictionary=True)
