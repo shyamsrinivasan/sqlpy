@@ -171,6 +171,21 @@ class PySQL:
                 print("{} {} is a client with ID: {}".format(db_info['firstname'][ival], db_info['lastname'][ival],
                                                              db_info['clientid'][ival]))
 
+    def add_column(self, table_name, col_prop):
+        """add column to given table and ensure they have col_property"""
+
+        if table_name is not None:
+            tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
+            if tab_obj:
+                # add data only to selected table
+                tab_obj = tab_obj[0]
+                print("Adding column to table {} in current DB {}".format(tab_obj.name, self.DBname))
+                tab_obj.add_column(col_prop)
+            else:
+                print('Error in given table name {}. No such table in DB {}'.format(table_name, self.DBname))
+        else:
+            print('Table name to add column is empty')
+
 
 class PySQLtable:
     def __init__(self, db_obj, init):
@@ -572,3 +587,68 @@ class PySQLtable:
                     print("Portal password NOT CHANGED for `{} {}`".format(dbinfo['firstname'], dbinfo['lastname']))
         else:
             print('Update commands not available for {} in {}'.format(self.name, self.DBname))
+
+    def add_column(self, col_prop):
+        """add column in table (self.name) using properties provided in col_prop"""
+
+        ncols = len(col_prop)
+        for idx, i_col in enumerate(col_prop):
+            print('Adding column {} of {}'.format(idx, ncols))
+            # create PySQLNewColumn object for each new column to be added
+            col = PySQLNewColumn(i_col)
+            col = col.build_query(self.name)
+            self.DB = self.DB.change_table_entry(col.query, col.query_args)
+            if self.DB.query_flag:
+                print('Column {} added to {}'.format(col.name, self.name))
+            else:
+                print('Column {} NOT added to {}'.format(col.name, self.name))
+
+
+class PySQLNewColumn:
+    def __init__(self, init):
+        if init.get('name') is not None:
+            self.name = init['name']
+        else:
+            self.name = None
+        if init.get('dtype') is not None:
+            self.dtype = init['dtype']
+        else:
+            self.dtype = 'VARCHAR(50)'
+        if init.get('is_null') is not None:
+            self.is_null = init['is_null']
+        else:
+            self.is_null = None
+        if init.get('default') is not None:
+            self.default = init['default']
+        else:
+            self.default = None
+        if init.get('other') is not None:
+            self.other = init['other']
+        else:
+            self.other = None
+
+        self.query = None
+        self.query_args = None
+
+    def build_query(self, table_name):
+        """build query statement required to add column object to any table"""
+
+        # query = ("ALTER TABLE {} alter_option".format())
+        # ALTER TABLE table_name ADD column_name column_dtype column_is_null column_default/other_value
+        # ALTER TABLE t2 ADD c INT UNSIGNED NOT NULL AUTO_INCREMENT
+        start = "ALTER TABLE `{}` ".format(table_name)
+
+        # add column name and column dtype (default is VARCHAR(50) if not given)
+        start += "ADD {} {}".format(self.name, self.dtype)
+
+        # NULL or NOT NULL
+        if self.is_null is not None:
+            start += " {}".format(self.is_null)
+
+        if self.default is not None:
+            start += " DEFAULT {}".format(self.default)
+        elif self.other is not None:
+            start += " {}".format(self.other)
+
+        self.query = start
+        return self
