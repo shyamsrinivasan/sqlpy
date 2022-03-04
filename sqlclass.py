@@ -543,6 +543,7 @@ class PySQLtable:
                 query = ("UPDATE {}.{} SET streetnumber = %(street_num)s "
                          "WHERE address.clientid = %(clientid)s".format(self.DBname, self.name))
                 self.DB = self.DB.change_table_entry(query, data)
+                # update time stamp and instead add new address as new address with current time stamp
                 if self.DB.query_flag:
                     print("Street number changed from {} to {} for `{} {}`".format(dbinfo['streetnumber'],
                                                                                    data['street_num'],
