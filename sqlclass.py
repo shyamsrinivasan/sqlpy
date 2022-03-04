@@ -104,6 +104,7 @@ class PySQL:
     def enter_data(self, file_name=None, table_name=None):
         """enter data in file_name to all tables in table_name"""
 
+        print("=========================================================")
         if file_name is not None:
             data = self._read_from_file(file_name)
             # add client ID to new data
@@ -116,6 +117,7 @@ class PySQL:
                 # add data to parent table (clients) first
                 tab_obj = [j_table for j_table in self.tables if j_table.name == 'clients'][0]
                 print("Adding data to table {} in current DB {}".format(tab_obj.name, self.DBname))
+                print("=========================================================")
                 # check if data present in clients table. Change client id if present
                 data_list = data.to_dict('records')     # convert data df to list of dict
                 for i_data in data_list:
@@ -124,15 +126,20 @@ class PySQL:
                         if (name_check or pan_check) and not id_check:
                             i_data['clientid'] = info_list['clientid']
                 tab_obj.add_data(data_list)
+                print("=========================================================")
                 # add data to other (child) tables
                 for j_table in self.tables:
                     if j_table.name != 'clients':
                         print("Adding data to table {} in current DB {}".format(j_table.name, self.DBname))
+                        print("=========================================================")
                         j_table.add_data(data_list)
+                        print("=========================================================")
                     else:
                         continue
         else:
             print('File name to enter data is empty')
+
+        print("=========================================================")
         return self
 
     def change_table_entry(self, query, query_args=None):
@@ -179,13 +186,17 @@ class PySQL:
             # add data only to selected table
             tab_obj = tab_obj[0]
             print("Adding column to table {} in current DB {}".format(tab_obj.name, self.DBname))
-            tab_obj.add_column(col_prop)
+            tab_obj, flag = tab_obj.add_column(col_prop)
+            # get new table objects for db with updated information
+            if flag:
+                self._get_tables()
         else:
             print('Error in given table name {}. No such table in DB {}'.format(table_name, self.DBname))
 
     def add_column(self, table_name, col_prop):
         """add column to all given tables and ensure they have col_property"""
 
+        print("=========================================================")
         if table_name is not None:
             # add column(s) to multiple tables
             if isinstance(table_name, list):
@@ -193,11 +204,48 @@ class PySQL:
                     for i_table, i_col_prop in zip(table_name, col_prop):
                         self._add_column_one_table(table_name=i_table, col_prop=i_col_prop)
                 else:
-                    print('Number of table names in list does not macth number of column property dictionaries given')
+                    print('Number of table names in list does not match number of column property dictionaries given')
             else:
                 self._add_column_one_table(table_name=table_name, col_prop=col_prop)
         else:
             print('Table name to add column is empty')
+        print("=========================================================")
+        return self
+
+    def _drop_column_one_table(self, table_name, column_name):
+        """drop one column from one table"""
+
+        print("=========================================================")
+        tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
+        if tab_obj:
+            # add data only to selected table
+            tab_obj = tab_obj[0]
+            print("Dropping column from table {} in current DB {}".format(tab_obj.name, self.DBname))
+            tab_obj, flag = tab_obj.drop_column(column_name)
+            # get new table objects for db with updated information
+            if flag:
+                self._get_tables()
+        else:
+            print('Error in given table name {}. No such table in DB {}'.format(table_name, self.DBname))
+
+        return self
+
+    def drop_column(self, table_name=None, column_name=None):
+        """drop given column(s) from given table(s)"""
+
+        if table_name is not None and column_name is not None:
+            # drop column_name from table_name
+            if isinstance(table_name, list):
+                # remove column in all tables in list
+                for i_table in table_name:
+                    self._drop_column_one_table(table_name=i_table, column_name=column_name)
+            else:
+                # remove column in one table
+                self._drop_column_one_table(table_name=table_name, column_name=column_name)
+        else:
+            print('Both table name and column should be given.')
+
+        return self
 
 
 class PySQLtable:
@@ -612,15 +660,38 @@ class PySQLtable:
                       'Provide different column name for {} or remove existing column'.format(i_col['name']))
                 continue
             else:
-                print('Adding column {} of {}'.format(idx, ncols))
+                print('Adding column {} of {}'.format(idx + 1, ncols))
                 # create PySQLNewColumn object for each new column to be added
                 col = PySQLNewColumn(i_col)
                 col = col.build_query(self.name)
                 self.DB = self.DB.change_table_entry(col.query, col.query_args)
                 if self.DB.query_flag:
                     print('Column {} added to {}'.format(col.name, self.name))
+                    # get list of new columns
+                    self._get_columns()
                 else:
                     print('Column {} NOT added to {}'.format(col.name, self.name))
+
+        return self, self.DB.query_flag
+
+    def drop_column(self, column_name):
+        """drop column_name column from table self.name"""
+
+        if isinstance(column_name, list):
+            for i_col in column_name:
+                query = "ALTER TABLE {} DROP COLUMN {}".format(self.name, i_col)
+                self.DB = self.DB.change_table_entry(query)
+                if self.DB.query_flag:
+                    print('Column {} dropped from {}'.format(i_col, self.name))
+                else:
+                    print('Column {} NOT dropped from {}'.format(i_col, self.name))
+        else:
+            query = "ALTER TABLE {} DROP COLUMN {}".format(self.name, column_name)
+            self.DB = self.DB.change_table_entry(query)
+            if self.DB.query_flag:
+                print('Column {} dropped from {}'.format(column_name, self.name))
+            else:
+                print('Column {} NOT dropped from {}'.format(column_name, self.name))
 
 
 class PySQLNewColumn:
@@ -661,12 +732,13 @@ class PySQLNewColumn:
         start += "ADD {} {}".format(self.name, self.dtype)
 
         # NULL or NOT NULL
+        query_args = None
         if self.is_null is not None:
             start += " {}".format(self.is_null)
 
         if self.default is not None:
-            start += " DEFAULT %(default)s"
-            query_args = {'default': self.default}
+            start += " DEFAULT {}".format(self.default)
+            # query_args = {'default': self.default}
         elif self.other is not None:
             start += " {}".format(self.other)
 
