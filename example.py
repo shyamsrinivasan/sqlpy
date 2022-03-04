@@ -1,5 +1,3 @@
-from query import querydb
-from load import readclientinfo, loadclientinfo
 import os.path
 from sqlclass import PySQL
 
@@ -20,25 +18,19 @@ if __name__ == '__main__':
     db = db.enter_data(file_name)
 
     # add new column to DB and relevant data
-    type_column = {'name': 'client_type', 'dtype': 'VARCHAR(15)', 'is_null': 'NOT NULL',
-                   'default': 'personal'}   # 'other': 'AUTO_INCREMENT'
-    column_property = [type_column]
-    db.add_column(table_name='clients', col_prop=column_property)
+    # type_column = {'name': 'client_type', 'dtype': 'VARCHAR(15)', 'is_null': 'NOT NULL',
+    #                'default': 'personal'}   # 'other': 'AUTO_INCREMENT'
+    from_date = {'name': 'from_date', 'dtype': 'TIMESTAMP', 'is_null': 'NOT NULL', 'default': 'CURRENT_TIMESTAMP'}
+    to_date = {'name': 'to_date', 'dtype': 'TIMESTAMP'}
+    column_property = [from_date, to_date]
+    db = db.add_column(table_name='address', col_prop=column_property)
+
+    # drop columns from db tables
+    db = db.drop_column(table_name='address', column_name=['last_update'])
 
     # additional queries to print results for
     query = "SELECT firstname, lastname, clientid, pan FROM clients"
     db.print_query_info(query, client=True)
-
-    # step 2 - connect to sql db/add values to db
-    # insert data into existing db table
-    # client_data = {'client_id': 20006, 'first_name': 'Shikamaru', 'last_name': 'Nara', 'pan': 'SDRF2546RT',
-    #                'street_num': '1', 'street_name': 'nowhere st', 'house_num': '', 'locality': '',
-    #                'city': 'Everywhere',
-    #                'state': 'This', 'pin': 600001, 'portalpass': 'xdst45Ds3rf98S'}
-    # loadsingleclientinfo(dbconfig, client_data)
-
-    # query to check addition to db
-    # querydb(dbconfig, query, printflag=True)
 
     # display all databases in the current SQL server
     # showdb_query = "SHOW DATABASES"
