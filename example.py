@@ -1,6 +1,7 @@
 from query import querydb
 from load import readclientinfo, loadclientinfo
 import os.path
+from sqlclass import PySQL
 
 
 if __name__ == '__main__':
@@ -12,17 +13,21 @@ if __name__ == '__main__':
                 'database': 'taxdata',
                 'raise_on_warnings': True}
 
-    """script to test reading data fgrom excel file and writing to mysql db"""
+    # create PySQL db object
+    db = PySQL(dbconfig)
+    # read data from excel file and write to mysql db
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
-    data = readclientinfo(file_name)
-    loadclientinfo(data, dbconfig)
+    db = db.enter_data(file_name)
 
-    # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
-    # detail = {'client_id': 20002}
-    query = "SELECT firstname, lastname, clientid FROM clients"
-    # query = "SELECT firstname, lastname FROM taxdata.clients WHERE clientid=%(client_id)s;"
-    # detail = {'client_id': 20002}
-    querydb(dbconfig, query, printflag=True)
+    # add new column to DB and relevant data
+    type_column = {'name': 'client_type', 'dtype': 'VARCHAR(15)', 'is_null': 'NOT NULL',
+                   'default': 'personal'}   # 'other': 'AUTO_INCREMENT'
+    column_property = [type_column]
+    db.add_column(table_name='clients', col_prop=column_property)
+
+    # additional queries to print results for
+    query = "SELECT firstname, lastname, clientid, pan FROM clients"
+    db.print_query_info(query, client=True)
 
     # step 2 - connect to sql db/add values to db
     # insert data into existing db table
@@ -33,7 +38,7 @@ if __name__ == '__main__':
     # loadsingleclientinfo(dbconfig, client_data)
 
     # query to check addition to db
-    querydb(dbconfig, query, printflag=True)
+    # querydb(dbconfig, query, printflag=True)
 
     # display all databases in the current SQL server
     # showdb_query = "SHOW DATABASES"
