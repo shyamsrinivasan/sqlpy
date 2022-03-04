@@ -171,18 +171,31 @@ class PySQL:
                 print("{} {} is a client with ID: {}".format(db_info['firstname'][ival], db_info['lastname'][ival],
                                                              db_info['clientid'][ival]))
 
+    def _add_column_one_table(self, table_name, col_prop):
+        """add column to one given table and ensure they have col_property"""
+
+        tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
+        if tab_obj:
+            # add data only to selected table
+            tab_obj = tab_obj[0]
+            print("Adding column to table {} in current DB {}".format(tab_obj.name, self.DBname))
+            tab_obj.add_column(col_prop)
+        else:
+            print('Error in given table name {}. No such table in DB {}'.format(table_name, self.DBname))
+
     def add_column(self, table_name, col_prop):
-        """add column to given table and ensure they have col_property"""
+        """add column to all given tables and ensure they have col_property"""
 
         if table_name is not None:
-            tab_obj = [j_table for j_table in self.tables if j_table.name == table_name]
-            if tab_obj:
-                # add data only to selected table
-                tab_obj = tab_obj[0]
-                print("Adding column to table {} in current DB {}".format(tab_obj.name, self.DBname))
-                tab_obj.add_column(col_prop)
+            # add column(s) to multiple tables
+            if isinstance(table_name, list):
+                if len(table_name) == len(col_prop):
+                    for i_table, i_col_prop in zip(table_name, col_prop):
+                        self._add_column_one_table(table_name=i_table, col_prop=i_col_prop)
+                else:
+                    print('Number of table names in list does not macth number of column property dictionaries given')
             else:
-                print('Error in given table name {}. No such table in DB {}'.format(table_name, self.DBname))
+                self._add_column_one_table(table_name=table_name, col_prop=col_prop)
         else:
             print('Table name to add column is empty')
 
