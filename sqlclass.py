@@ -618,11 +618,11 @@ class PySQLNewColumn:
             self.is_null = init['is_null']
         else:
             self.is_null = None
-        if init.get('default') is not None:
+        if init.get('default') is not None and init['default']:
             self.default = init['default']
         else:
             self.default = None
-        if init.get('other') is not None:
+        if init.get('other') is not None and init['other']:
             self.other = init['other']
         else:
             self.other = None
@@ -636,7 +636,7 @@ class PySQLNewColumn:
         # query = ("ALTER TABLE {} alter_option".format())
         # ALTER TABLE table_name ADD column_name column_dtype column_is_null column_default/other_value
         # ALTER TABLE t2 ADD c INT UNSIGNED NOT NULL AUTO_INCREMENT
-        start = "ALTER TABLE `{}` ".format(table_name)
+        start = "ALTER TABLE {} ".format(table_name)
 
         # add column name and column dtype (default is VARCHAR(50) if not given)
         start += "ADD {} {}".format(self.name, self.dtype)
@@ -646,9 +646,11 @@ class PySQLNewColumn:
             start += " {}".format(self.is_null)
 
         if self.default is not None:
-            start += " DEFAULT {}".format(self.default)
+            start += " DEFAULT %(default)s"
+            query_args = {'default': self.default}
         elif self.other is not None:
             start += " {}".format(self.other)
 
         self.query = start
+        self.query_args = query_args
         return self
