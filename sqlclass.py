@@ -593,15 +593,21 @@ class PySQLtable:
 
         ncols = len(col_prop)
         for idx, i_col in enumerate(col_prop):
-            print('Adding column {} of {}'.format(idx, ncols))
-            # create PySQLNewColumn object for each new column to be added
-            col = PySQLNewColumn(i_col)
-            col = col.build_query(self.name)
-            self.DB = self.DB.change_table_entry(col.query, col.query_args)
-            if self.DB.query_flag:
-                print('Column {} added to {}'.format(col.name, self.name))
+            # check if column is present in table
+            if i_col['name'] in self.column_names:
+                print('Column name matches column already present in table. '
+                      'Provide different column name for {} or remove existing column'.format(i_col['name']))
+                continue
             else:
-                print('Column {} NOT added to {}'.format(col.name, self.name))
+                print('Adding column {} of {}'.format(idx, ncols))
+                # create PySQLNewColumn object for each new column to be added
+                col = PySQLNewColumn(i_col)
+                col = col.build_query(self.name)
+                self.DB = self.DB.change_table_entry(col.query, col.query_args)
+                if self.DB.query_flag:
+                    print('Column {} added to {}'.format(col.name, self.name))
+                else:
+                    print('Column {} NOT added to {}'.format(col.name, self.name))
 
 
 class PySQLNewColumn:
