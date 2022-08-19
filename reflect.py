@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 from sqlalchemy.ext.declarative import DeferredReflection
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_mixin, declared_attr
 
 Base = declarative_base()
 
@@ -8,6 +9,23 @@ Base = declarative_base()
 # mixin class to serve as base class for mapping to reflected tables
 class Reflected(DeferredReflection):
     __abstract__ = True
+
+
+# @declarative_mixin
+# class MyMixin:
+#     @declared_attr
+#     def __tablename__(cls):
+#         return cls.__name__.lower()
+#
+#     __table_args__ = {"mysql_engine": "InnoDB"}
+#     __mapper_args__ = {"always_refresh": True}
+#
+#     id = Column(Integer, primary_key=True)
+
+
+# @declarative_mixin
+# class TimeStampMixin:
+#     created_on = Column(DateTime, default=func.now())
 
 
 class Customer(Reflected, Base):
@@ -20,7 +38,18 @@ class Customer(Reflected, Base):
     phone = Column(Integer)
 
     taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
-    charges = relationship("Transactions", back_populates="customer_info")
+    # charges = relationship("Transactions", back_populates="customer_info")
+
+
+# @declarative_mixin
+# class UserIdMixin:
+#     @declared_attr
+#     def user_id(cls):
+#         return Column(Integer, ForeignKey('customer.id'))
+#
+#     @declared_attr
+#     def user(cls):
+#         return relationship("Customer", back_populates="taxes")
 
 
 class TaxInfo(Reflected, Base):
@@ -36,5 +65,5 @@ class TaxInfo(Reflected, Base):
 
 
 def reflect_table(engine):
-    """reflect table from DB given an create_engine instance"""
+    """reflect table from DB given a create_engine instance"""
     Reflected.prepare(engine)
