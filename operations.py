@@ -1,4 +1,5 @@
 import pandas as pd
+import tables as table
 
 
 class Operations:
@@ -52,6 +53,11 @@ class Operations:
 
         if file_name is not None:
             data = self._read_from_file(file_name)
+            data_list = data.to_dict('records')  # convert data df to list of dict
+            for j_row in data_list:
+                user_obj = table.Customer(firstname=j_row['firstname'], lastname=j_row['lastname'],
+                                          email=j_row['email'], phone=j_row['phone'])
+                # table.add_row
             # add client ID to new data
             # data = self._assign_id(data, id_col='clientid')
             if table_name is not None:

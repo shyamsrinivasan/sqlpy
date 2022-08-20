@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, TIMESTAMP
 from sqlalchemy import Float
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, Session
 
 Base = declarative_base()
 
@@ -58,7 +58,10 @@ class Transactions(Base):
 
 def create_table(engine):
     """create tables from declarative classes in DB defined in engine"""
-
     Base.metadata.create_all(engine)
 
+
+def add_row(engine):
+    """add data to table in db"""
+    with Session(engine) as session:
 

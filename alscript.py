@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from tables import create_table
 from reflect import reflect_table
-# from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
 
 
 def execute_session(engine, create=False, reflect=False):
