@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from tables import create_table
 from reflect import reflect_table
 from sqlalchemy.orm import Session
+from operations import Operations
 
 
 def execute_session(engine, create=False, reflect=False):
@@ -20,3 +21,7 @@ if __name__ == '__main__':
     # with Session(engine) as session:
     #     result = session.execute()
     #     session.commit()
+    engine_config = {'db_type': 'mysql', 'dbapi': 'mysqldb',
+                     'username': 'root', 'password': 'root',
+                     'server': 'localhost', 'db_name': 'sqlalchemy'}
+    ops_obj = Operations(engine_config)

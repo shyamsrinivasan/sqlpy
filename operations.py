@@ -1,5 +1,8 @@
 import pandas as pd
-import tables as table
+import tables as tb
+import reflect as rf
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 
 
 class Operations:
@@ -17,6 +20,20 @@ class Operations:
                             engine_config['server'] + \
                             '/' + \
                             engine_config['db_name']
+        self.engine = create_engine(self._engine_call)
+
+    def execute_session(self, create=False, reflect=False):
+        """execute a sql process with/without session object"""
+        if create:
+            tb.create_table(engine=self.engine)
+
+        if reflect:
+            rf.reflect_table(self.engine)
+
+    # def add_row(engine, row):
+    #     """add data to table in db"""
+    #     with Session(engine) as session:
+    #         session.add(row)
 
     @staticmethod
     def _read_from_file(file_name=None):
@@ -55,9 +72,11 @@ class Operations:
             data = self._read_from_file(file_name)
             data_list = data.to_dict('records')  # convert data df to list of dict
             for j_row in data_list:
-                user_obj = table.Customer(firstname=j_row['firstname'], lastname=j_row['lastname'],
-                                          email=j_row['email'], phone=j_row['phone'])
-                # table.add_row
+                user_obj = tb.Customer(firstname=j_row['firstname'], lastname=j_row['lastname'],
+                                       email=j_row['email'], phone=j_row['phone'])
+                # add row to table
+                with Session(self.engine) as session:
+                    session.add(user_obj)
             # add client ID to new data
             # data = self._assign_id(data, id_col='clientid')
             if table_name is not None:
