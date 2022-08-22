@@ -8,19 +8,22 @@ import os.path
 
 
 if __name__ == '__main__':
-    # create_engine('db_type+dbapi://username:password@localhost/db_name')
-    # engine = create_engine('mysql+mysqldb://root:root@localhost/sqlalchemy')
-    # execute_session(engine, reflect=True)
-    # with Session(engine) as session:
-    #     result = session.execute()
-    #     session.commit()
     engine_config = {'db_type': 'mysql', 'dbapi': 'mysqldb',
                      'username': 'root', 'password': 'root',
                      'server': 'localhost', 'db_name': 'sqlalchemy'}
     ops_obj = Operations(engine_config)
+    # execute_session(engine, reflect=True)
+    # with Session(engine) as session:
+    #     result = session.execute()
+    #     session.commit()
 
     # reflect table from DB given a create_engine instance
-    Reflected.prepare(ops_obj.engine)
+    ops_obj.reflect_table()
+
+    # add data from file/dictionary
+    file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
+    ops_obj.enter_data(file_name=file_name)
+
     # if table_names (db not empty)
     # then proceed with operations
     # with ops_obj.Session.begin() as session:
@@ -33,6 +36,4 @@ if __name__ == '__main__':
     # my_table = meta_obj.tables['my_table_name']
     ops_obj.read_data()
 
-    # add data from file
-    file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
-    ops_obj.enter_data(file_name=file_name)
+
