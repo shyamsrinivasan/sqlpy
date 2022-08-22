@@ -3,6 +3,11 @@ from sqlalchemy.ext.declarative import DeferredReflection
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm import declarative_mixin, declared_attr
 
+
+# def get_data(engine=None, table=None, col=None):
+#     """get pandas df using SQLAlchemy query"""
+
+
 Base = declarative_base()
 
 
@@ -40,6 +45,10 @@ class Customer(Reflected, Base):
     taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
     # charges = relationship("Transactions", back_populates="customer_info")
 
+    def get_column(self, col=None):
+        """retrieve column from this table"""
+        return self.__table__.columns[col]
+
 
 # @declarative_mixin
 # class UserIdMixin:
@@ -62,6 +71,10 @@ class TaxInfo(Reflected, Base):
     # add columns: portal_password, aadhaar
 
     customer_info = relationship("Customer", back_populates="taxes")
+
+    def get_column(self, col=None):
+        """retrieve column from this table"""
+        return self.__table__.columns[col]
 
 
 def reflect_table(engine):

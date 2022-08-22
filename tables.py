@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, TIMESTAMP
 from sqlalchemy import Float
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.ext.declarative import DeferredReflection
 
 Base = declarative_base()
 
@@ -59,6 +60,28 @@ class Transactions(Base):
 def create_table(engine):
     """create tables from declarative classes in DB defined in engine"""
     Base.metadata.create_all(engine)
+
+
+# mixin class to serve as base class for mapping to reflected tables
+# class Reflected(DeferredReflection):
+#     __abstract__ = True
+#
+#
+# class RfCustomer(Reflected, Base):
+#     __tablename__ = 'customer'
+#
+#     id = Column(Integer, primary_key=True)
+#     firstname = Column(String(30))
+#     lastname = Column(String(30))
+#     email = Column(String(30))
+#     phone = Column(Integer)
+#
+#     taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
+#
+#
+# def reflect_table(engine):
+#     """reflect table from DB given a create_engine instance"""
+#     Reflected.prepare(engine)
 
 
 
