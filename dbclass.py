@@ -16,11 +16,6 @@ class Dbcon:
                             engine_config['server'] + \
                             '/' + \
                             engine_config['db_name']
-        # create_engine('db_type+dbapi://username:password@localhost/db_name')
-        # self.engine = ''
-        # self.engine = create_engine(self._engine_call, echo=True)
-        # self.Session = sessionmaker(self.engine)
-        # self.inspect = inspect(self.engine)
 
     def register_engine(self):
         return create_engine(self._engine_call, echo=True)
