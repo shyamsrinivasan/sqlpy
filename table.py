@@ -22,11 +22,16 @@ class Customer(Reflected, Base):
     firstname = Column(String(30))
     lastname = Column(String(30))
     email = Column(String(30))
-    phone = Column(Integer)
+    phone = Column(String(10))
+    # fullname = Column(String(60))
     # customer_type = Column(String(15))
 
     taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
     charges = relationship("Transactions", back_populates="customer_info")
+
+    def get_column(self, column_name=None):
+        """retrieve column object for table"""
+        return self.__table__.columns[column_name]
 
     def __repr__(self):
         return f"User(id={self.id!r}, firstname={self.firstname!r}, lastname={self.lastname!r})"
@@ -42,6 +47,10 @@ class TaxInfo(Reflected, Base):
     # add columns: portal_password, aadhaar
 
     customer_info = relationship("Customer", back_populates="taxes")
+
+    def get_column(self, column_name=None):
+        """retrieve column object for table"""
+        return self.__table__.columns[column_name]
 
     def __repr__(self):
         return f"Identity(id={self.id!r}, user_id={self.user_id!r}, pan={self.pan!r})"
