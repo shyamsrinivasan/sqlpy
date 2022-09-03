@@ -1,5 +1,6 @@
 import pandas as pd
 import table as tb
+from dbclass import Dbcon
 # import reflect as rf
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect
@@ -75,15 +76,23 @@ class Operations:
         # add data to customer table
         old_last_id = self._get_last_id(db_obj, table_name='customer')
         new_last_id = self._enter_data(db_obj, data_list=data_list, table_name='customer')
+
         # get customer_id for added data
+        new_name = {'first': 'Harry', 'last': 'Ried'}
+        user_id = self._get_any_id(db_obj, 'customer', new_name)
         # add data to tax_info table
         return old_last_id, new_last_id
 
     @staticmethod
-    def _get_last_id(db_obj, table_name: str):
+    def _get_last_id(db_obj: Dbcon, table_name: str):
         """return last id in customer table"""
         last_id_fun = _last_id_factory(table_name)
         return last_id_fun(db_obj)
+
+    @staticmethod
+    def _get_any_id(db_obj: Dbcon, category: str, name: dict):
+        id_fun = _get_id_factory(category)
+        return id_fun(db_obj, name)
 
     def _enter_customer_data(self, data_list: list, db_obj):
         user_obj_list = [tb.Customer(firstname=j_row['firstname'],
@@ -91,6 +100,8 @@ class Operations:
                                      email=j_row['email'],
                                      phone=j_row['phone'])
                          for j_row in data_list]
+
+        n_records = len(user_obj_list)
         session_maker_obj = db_obj.register_session()
         with session_maker_obj.begin() as session:
             session.add_all(user_obj_list)
@@ -202,12 +213,25 @@ def _get_last_transaction_id(db_obj):
     return last_id
 
 
-def _get_customer_id(db_obj, name):
+def _get_id_factory(category: str):
+    """return fun for relevant id"""
+    if category == 'customer':
+        return _get_customer_id
+    elif category == 'tax':
+        return None
+    elif category == 'transaction':
+        return None
+    else:
+        raise ValueError(category)
+
+
+def _get_customer_id(db_obj: Dbcon, name: dict):
     """return user id for given customer"""
-    user_id = None
+    user_id = []
     session_maker_obj = db_obj.register_session()
     with session_maker_obj.begin() as session:
-        user_id = session.query(tb.Customer.id).\
+        user_obj_id = session.query(tb.Customer.id).\
             where(and_(tb.Customer.firstname == name['first'],
                        tb.Customer.lastname == name['last']))
-        
+        user_id = [row.id for row in user_obj_id]
+    return user_id
