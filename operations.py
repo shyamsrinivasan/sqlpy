@@ -3,6 +3,7 @@ import table as tb
 # import reflect as rf
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, inspect
+from sqlalchemy import text, desc
 
 
 class Operations:
@@ -77,27 +78,59 @@ class Operations:
         # add data to tax_info table
         return customer_objs
 
+    @staticmethod
+    def _get_last_id(db_obj):
+        """return last id in customer table"""
+        last_id = None
+        session_maker_obj = db_obj.register_session()
+        with session_maker_obj.begin() as session:
+            last_user = session.query(tb.Customer).order_by(desc(tb.Customer.id)).first()
+            last_id = last_user.id
+        return last_id
+
+    def _enter_customer_data(self, data_list, db_obj):
+        user_obj_list = [tb.Customer(firstname=j_row['firstname'],
+                                     lastname=j_row['lastname'])
+                         for j_row in data_list]
+        session_maker_obj = db_obj.register_session()
+        with session_maker_obj.begin() as session:
+            session.add_all(user_obj_list)
+            # for j_row in user_obj_list:
+            #     session.add(j_row)
+
     def _enter_data(self, db_obj, data_list=None, table_name=None):
         """enter data in file_name to customer table"""
         if data_list is not None:
             if table_name == 'customer':
-                user_obj_list = [tb.Customer(firstname=j_row['firstname'],
-                                             lastname=j_row['lastname'])
-                                 for j_row in data_list]
-                session_maker_obj = db_obj.register_session()
-                with session_maker_obj.begin() as session:
-                    session.add_all(user_obj_list)
+                self._enter_customer_data(data_list, db_obj)
+                # user_obj_list = [tb.Customer(firstname=j_row['firstname'],
+                #                              lastname=j_row['lastname'])
+                #                  for j_row in data_list]
+                # session_maker_obj = db_obj.register_session()
+                # with session_maker_obj.begin() as session:
+                #     session.add_all(user_obj_list)
                     # for j_row in user_obj_list:
                     #     session.add(j_row)
 
                 # get user_id from customer table for
-                firstname = []
-                with session_maker_obj.begin() as session:
-                    results = session.query(tb.Customer).all()
-                    for row in results:
-                        firstname.append(row.firstname)
+                last_id = self._get_last_id(db_obj)
+                # firstname = []
+                # last_id = []
+                # with session_maker_obj.begin() as session:
+                #     cust_obj = tb.Customer()
+                #     column = cust_obj.get_column(column_name='firstname')
+                #     query = session.query(tb.Customer).filter(column == 'Harry')
+                #     engine_obj = db_obj.register_engine()
+                #     data = pd.read_sql_query(query.statement, engine_obj)
+                #     # results = session.query(tb.Customer).all()
+                #     # results = session.query(tb.Customer).from_statement(text("SELECT LAST (id) FROM customer"))
+                #     last_user = session.query(tb.Customer).order_by(desc(tb.Customer.id)).first()
+                #     last_id = last_user.id
+                #     # for row in results:
+                #     #     last_id.append(row.id)
+                #     #     firstname.append(row.firstname)
 
-                return user_obj_list
+                return last_id
 
         #     if table_name == 'tax_info':
         #         pass
