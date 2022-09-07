@@ -30,6 +30,14 @@ class Operations:
         tb.Reflected.prepare(engine)
 
     @staticmethod
+    def drop_table(engine):
+        tb.drop_table(engine)
+
+    @staticmethod
+    def create_table(engine):
+        tb.create_table(engine)
+
+    @staticmethod
     def _read_from_file(file_name=None):
         """read client info from file to dataframe"""
 
@@ -59,7 +67,8 @@ class Operations:
 
         return df
 
-    def add_data(self, session, data_list=None, file_name=None):
+    def add_data(self, session: sqlalchemy.orm.sessionmaker,
+                 data_list=None, file_name=None):
         """enter data in file_name to all tables in table_name"""
 
         # get info from file
@@ -80,7 +89,7 @@ class Operations:
         new_user = self._enter_data(session, data_list=data_list, table_name='customer')
 
         # match names and add customer_id to data_list
-        data_list = self._add_user_id_to_list(pd.DataFrame(data_list), new_user)
+        data_list = self._add_user_id_to_list(data, new_user)
 
         # new_name = {'first': 'Harry', 'last': 'Ried'}
         # user_id = self._get_any_id(session, 'customer', new_name)
@@ -88,6 +97,14 @@ class Operations:
         new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
 
         return old_last_id, new_user
+
+    def delete_data(self, session_obj: sqlalchemy.orm.sessionmaker,
+                    table_name, column, condition_type, condition):
+        """remove rows from a given table"""
+        table_class = _get_class_name(table_name)
+        table_class_attr = _get_class_attribute(table_class, attribute_name=column)
+        delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
+        return delete_value
 
     @staticmethod
     def _get_last_id(session: sqlalchemy.orm.sessionmaker, table_name: str):
@@ -108,7 +125,8 @@ class Operations:
         n_rows = df_of_names.shape[0]
         df_of_names = df_of_names.assign(user_id=pd.Series([0] * n_rows))   #, index=df_of_names.index)
         for j_user in db_user_id:
-            df_of_names.loc[df_of_names['firstname'] == j_user['firstname'], 'user_id'] = j_user['user_id'][0]
+            df_of_names.loc[df_of_names['firstname'] == j_user['firstname'], 'user_id'] = \
+                j_user['user_id'][0]
         data_list = df_of_names.to_dict('records')
         return data_list
 
@@ -116,21 +134,26 @@ class Operations:
         """create Customer object and add object to mapped table as row"""
         old_last_id = self._get_last_id(session_obj, table_name='customer')
         # session_maker_obj = db_obj.register_session()
+        session_obj.close_all()
         with session_obj.begin() as session:
-            user_obj_list = [tb.Customer(firstname=j_row['firstname'],
+            user_obj_list = [tb.Customer(fullname=j_row['name'],
+                                         firstname=j_row['firstname'],
                                          lastname=j_row['lastname'],
                                          email=j_row['email'],
-                                         phone=j_row['phone'])
+                                         phone=j_row['phone'],
+                                         customer_type=j_row['type']
+                                         )
                              for j_row in data_list]
-            session.add_all(user_obj_list)
 
+            # for j_obj in user_obj_list:
+            #     session.add(j_obj)
+            session.add_all(user_obj_list)
             n_records = len(user_obj_list)
-            # name, firstname, lastname = [], [], []
             added_user = [{'firstname': j_row.firstname,
-                           'lastname': j_row.lastname}
+                           'lastname': j_row.lastname,
+                           'name': j_row.name}
                           for j_row in user_obj_list]
-            # name.append([])
-            pass
+            session.commit()
 
         # get ids for inserted names and return all added customer names and ids
         for _, i_name in enumerate(added_user):
@@ -208,7 +231,39 @@ class Operations:
             print('File name to enter data is empty')
             return None
 
-    # def drop_table(self, table_nam):
+    def _remove_row(self, table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
+        delete_fun = self._delete_row_factory(table_class_attr)
+        return delete_fun(table_class_attr, condition_type, condition, session_obj)
+
+    def _delete_row_factory(self, table_class_attr):
+        """factory to delete rows in different tables"""
+        if table_class_attr.class_.__tablename__ == 'customer':
+            return self._remove_customer
+        elif table_class_attr.class_.__tablename__ == 'tax_info':
+            return self._remove_tax_info
+        elif table_class_attr.class_.__tablename__ == 'transactions':
+            return self._remove_transactions
+
+    @staticmethod
+    def _remove_customer(column, condition_type, condition, session_obj):
+        """remove row from customer table"""
+        # delete_query = tb.Customer.__table__.delete().where(column == condition)
+        delete_query_fun = _condition_type_factory(condition_type)
+        delete_query = delete_query_fun(column, condition)
+        with session_obj.begin() as session:
+            session.execute(delete_query)
+            session.commit()
+        return True
+
+    @staticmethod
+    def _remove_tax_info(column, condition, session_obj):
+        """remove row from tax_info table"""
+        return None
+
+    @staticmethod
+    def _remove_transactions(column, condition, session_obj):
+        """remove row from transactions table"""
+        return None
 
     def read_data(self):
         """read rows from table after reflecting table using ORM"""
@@ -237,7 +292,10 @@ def _get_last_customer_id(session_obj: sqlalchemy.orm.sessionmaker):
     # session_maker_obj = db_obj.register_session()
     with session_obj.begin() as session:
         last_user = session.query(tb.Customer).order_by(desc(tb.Customer.id)).first()
-        last_id = last_user.id
+        if last_user is not None:
+            last_id = last_user.id
+        else:
+            last_id = None
     return last_id
 
 
@@ -284,3 +342,46 @@ def _get_customer_id(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
                        tb.Customer.lastname == name['last']))
         user_id = [row.id for row in user_obj_id]
     return user_id
+
+
+def _condition_type_factory(condition_type):
+    """decide function based on condition type"""
+    if condition_type is '>':
+        return _remove_greater_than
+    elif condition_type is '<':
+        return _remove_less_than
+    elif condition_type is '=':
+        return _remove_equal_to
+    else:
+        return None
+
+
+def _remove_greater_than(column, condition):
+    return tb.Customer.__table__.delete().where(column > condition)
+
+
+def _remove_less_than(column, condition):
+    return tb.Customer.__table__.delete().where(column < condition)
+
+
+def _remove_equal_to(column, condition):
+    return tb.Customer.__table__.delete().where(column == condition)
+
+
+def _get_class_name(table_name):
+    if table_name == 'customer':
+        return tb.Customer
+    elif table_name == 'tax_info':
+        return tb.TaxInfo
+    elif table_name == 'transactions':
+        return tb.Transactions
+    else:
+        return None
+
+
+def _get_class_attribute(table_class, attribute_name):
+    """get class attribute (class.attr) from attribute name"""
+    if hasattr(table_class, attribute_name):
+        return getattr(table_class, attribute_name)
+    else:
+        return None

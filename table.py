@@ -19,12 +19,12 @@ class Customer(Reflected, Base):
     __tablename__ = 'customer'
 
     id = Column(Integer, primary_key=True)
-    firstname = Column(String(30))
-    lastname = Column(String(30))
+    firstname = Column(String(15))
+    lastname = Column(String(15))
     email = Column(String(30))
     phone = Column(String(10))
-    # fullname = Column(String(60))
-    # customer_type = Column(String(15))
+    fullname = Column(String(30), index=True)
+    customer_type = Column(String(15))
 
     taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
     charges = relationship("Transactions", back_populates="customer_info")
@@ -42,9 +42,11 @@ class TaxInfo(Reflected, Base):
     __tablename__ = 'tax_info'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('customer.id'))
+    user_id = Column(Integer, ForeignKey('customer.id', onupdate='cascade'))
+    user_name = Column(String(30), index=True)
     pan = Column(String(12), index=True, nullable=False)
-    # add columns: portal_password, aadhaar
+    aadhaar = Column(String(12), index=True, nullable=False)
+    # add columns: portal_password
 
     customer_info = relationship("Customer", back_populates="taxes")
 
@@ -73,3 +75,13 @@ class Transactions(Reflected, Base):
     def __repr__(self):
         return f"Identity(id={self.id!r}, date = {self.date!r}, user_id={self.user_id!r}, " \
                f"transaction_type = {self.transaction_type!r}, cost={self.cost!r})"
+
+
+def create_table(engine):
+    """create tables from declarative classes in DB defined in engine"""
+    Base.metadata.create_all(engine)
+
+
+def drop_table(engine):
+    """drop all tables in DB through engine"""
+    Base.metadata.drop_all(engine)
