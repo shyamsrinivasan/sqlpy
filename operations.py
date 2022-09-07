@@ -89,12 +89,12 @@ class Operations:
         new_user = self._enter_data(session, data_list=data_list, table_name='customer')
 
         # match names and add customer_id to data_list
-        data_list = self._add_user_id_to_list(data, new_user)
+        # data_list = self._add_user_id_to_list(data, new_user)
 
         # new_name = {'first': 'Harry', 'last': 'Ried'}
         # user_id = self._get_any_id(session, 'customer', new_name)
         # add data to tax_info table
-        new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
+        # new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
 
         return old_last_id, new_user
 
@@ -103,7 +103,8 @@ class Operations:
         """remove rows from a given table"""
         table_class = _get_class_name(table_name)
         table_class_attr = _get_class_attribute(table_class, attribute_name=column)
-        delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
+        # delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
+        delete_value = _remove_row(table_class_attr, condition_type, condition, session_obj)
         return delete_value
 
     @staticmethod
@@ -151,7 +152,7 @@ class Operations:
             n_records = len(user_obj_list)
             added_user = [{'firstname': j_row.firstname,
                            'lastname': j_row.lastname,
-                           'name': j_row.name}
+                           'name': j_row.fullname}
                           for j_row in user_obj_list]
             session.commit()
 
@@ -231,39 +232,31 @@ class Operations:
             print('File name to enter data is empty')
             return None
 
-    def _remove_row(self, table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
-        delete_fun = self._delete_row_factory(table_class_attr)
-        return delete_fun(table_class_attr, condition_type, condition, session_obj)
+    # @staticmethod
+    # def _remove_row(table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
+    #     # delete_fun = self._delete_row_factory(table_class_attr)
+    #     return _remove_customer(table_class_attr, condition_type, condition, session_obj)
 
-    def _delete_row_factory(self, table_class_attr):
-        """factory to delete rows in different tables"""
-        if table_class_attr.class_.__tablename__ == 'customer':
-            return self._remove_customer
-        elif table_class_attr.class_.__tablename__ == 'tax_info':
-            return self._remove_tax_info
-        elif table_class_attr.class_.__tablename__ == 'transactions':
-            return self._remove_transactions
+    # @staticmethod
+    # def _delete_row_factory(table_class_attr):
+    #     """factory to delete rows in different tables"""
+    #     return _remove_customer
+    #     # if table_class_attr.class_.__tablename__ == 'customer':
+    #     #     return self._remove_customer
+    #     # elif table_class_attr.class_.__tablename__ == 'tax_info':
+    #     #     return self._remove_tax_info
+    #     # elif table_class_attr.class_.__tablename__ == 'transactions':
+    #     #     return self._remove_transactions
 
-    @staticmethod
-    def _remove_customer(column, condition_type, condition, session_obj):
-        """remove row from customer table"""
-        # delete_query = tb.Customer.__table__.delete().where(column == condition)
-        delete_query_fun = _condition_type_factory(condition_type)
-        delete_query = delete_query_fun(column, condition)
-        with session_obj.begin() as session:
-            session.execute(delete_query)
-            session.commit()
-        return True
-
-    @staticmethod
-    def _remove_tax_info(column, condition, session_obj):
-        """remove row from tax_info table"""
-        return None
-
-    @staticmethod
-    def _remove_transactions(column, condition, session_obj):
-        """remove row from transactions table"""
-        return None
+    # @staticmethod
+    # def _remove_tax_info(column, condition_type, condition, session_obj):
+    #     """remove row from tax_info table"""
+    #     return None
+    #
+    # @staticmethod
+    # def _remove_transactions(column, condition_type, condition, session_obj):
+    #     """remove row from transactions table"""
+    #     return None
 
     def read_data(self):
         """read rows from table after reflecting table using ORM"""
@@ -366,6 +359,16 @@ def _remove_less_than(column, condition):
 
 def _remove_equal_to(column, condition):
     return tb.Customer.__table__.delete().where(column == condition)
+
+
+def _remove_row(column, condition_type, condition, session_obj):
+    """remove row from customer table"""
+    delete_query_fun = _condition_type_factory(condition_type)
+    delete_query = delete_query_fun(column, condition)
+    with session_obj.begin() as session:
+        session.execute(delete_query)
+        session.commit()
+    return True
 
 
 def _get_class_name(table_name):
