@@ -86,7 +86,12 @@ class Operations:
 
         # add data to customer table
         old_last_id = self._get_last_id(session, table_name='customer')
-        new_user = self._enter_data(session, data_list=data_list, table_name='customer')
+        added_user = self._enter_data(session, data_list=data_list, table_name='customer')
+
+        data = pd.DataFrame(data_list)
+        to_add = data[['name', 'firstname', 'lastname', 'pan']]
+        full = to_add.merge(pd.DataFrame(added_user), on=['name', 'firstname', 'lastname'])
+        data_list = full.to_dict('records')
 
         # match names and add customer_id to data_list
         # data_list = self._add_user_id_to_list(data, new_user)
@@ -94,7 +99,8 @@ class Operations:
         # new_name = {'first': 'Harry', 'last': 'Ried'}
         # user_id = self._get_any_id(session, 'customer', new_name)
         # add data to tax_info table
-        # new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
+        new_user = None
+        new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
 
         return old_last_id, new_user
 
@@ -181,8 +187,13 @@ class Operations:
         # create tax info object and insert into tax info table
         with session_obj.begin() as session:
             tax_obj = [tb.TaxInfo(user_id=j_user['user_id'],
-                                  pan=j_user['pan'])
+                                  user_name=j_user['name'],
+                                  pan=j_user['pan'],
+                                  aadhaar='456125874123')
+                                  # aadhaar=j_user['aadhaar'])
                        for j_user in data_list]
+            session.add_all(tax_obj)
+            session.commit()
 
         # INSERT INTO tax_info(user_id, pan) SELECT user_id, 'pan' FROM customer
         # WHERE firstname='first' AND lastname='last' LIMIT 1
@@ -334,6 +345,8 @@ def _get_customer_id(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
             where(and_(tb.Customer.firstname == name['first'],
                        tb.Customer.lastname == name['last']))
         user_id = [row.id for row in user_obj_id]
+    if user_id is not None and len(user_id) <= 1:
+        user_id = user_id[0]
     return user_id
 
 
