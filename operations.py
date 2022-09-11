@@ -110,7 +110,7 @@ class Operations:
         table_class = _get_class_name(table_name)
         table_class_attr = _get_class_attribute(table_class, attribute_name=column)
         # delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
-        delete_value = _remove_row(table_class_attr, condition_type, condition, session_obj)
+        delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
         return delete_value
 
     @staticmethod
@@ -151,7 +151,6 @@ class Operations:
                                          customer_type=j_row['type']
                                          )
                              for j_row in data_list]
-
             # for j_obj in user_obj_list:
             #     session.add(j_obj)
             session.add_all(user_obj_list)
@@ -181,6 +180,7 @@ class Operations:
         # last_id = self._get_last_id(session_obj, table_name='customer')
         return added_user
 
+    @staticmethod
     def _enter_tax_data(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
         """create TaxInfo object and add object as row to mapped table"""
 
@@ -243,26 +243,11 @@ class Operations:
             print('File name to enter data is empty')
             return None
 
-    # @staticmethod
-    # def _remove_row(table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
-    #     # delete_fun = self._delete_row_factory(table_class_attr)
-    #     return _remove_customer(table_class_attr, condition_type, condition, session_obj)
+    @staticmethod
+    def _remove_row(table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
+        delete_fun = _delete_row_factory(table_class_attr)
+        return delete_fun(table_class_attr, condition_type, condition, session_obj)
 
-    # @staticmethod
-    # def _delete_row_factory(table_class_attr):
-    #     """factory to delete rows in different tables"""
-    #     return _remove_customer
-    #     # if table_class_attr.class_.__tablename__ == 'customer':
-    #     #     return self._remove_customer
-    #     # elif table_class_attr.class_.__tablename__ == 'tax_info':
-    #     #     return self._remove_tax_info
-    #     # elif table_class_attr.class_.__tablename__ == 'transactions':
-    #     #     return self._remove_transactions
-
-    # @staticmethod
-    # def _remove_tax_info(column, condition_type, condition, session_obj):
-    #     """remove row from tax_info table"""
-    #     return None
     #
     # @staticmethod
     # def _remove_transactions(column, condition_type, condition, session_obj):
@@ -324,22 +309,34 @@ def _get_last_transaction_id(session_obj: sqlalchemy.orm.sessionmaker):
     return last_id
 
 
-def _get_id_factory(category: str):
+def _get_id_factory(category: str, basis: str):
     """return fun for relevant id"""
     if category == 'customer':
-        return _get_customer_id
+        return _get_customer_id_from_name
+        # return _get_id_factory_type(basis)
     elif category == 'tax':
-        return None
+        return _get_tax_id_from_name
     elif category == 'transaction':
         return None
     else:
         raise ValueError(category)
 
 
-def _get_customer_id(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
+def _get_id_factory_type(basis: str):
+    """return fun on whose basis id is to be determined"""
+    if basis == 'name':
+        # return func that gets ids based on name
+        return None
+    elif basis == 'user_id':
+        # return func that gets ids based on user_id
+        return None
+    else:
+        raise ValueError(basis)
+
+
+def _get_customer_id_from_name(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
     """return user id for given customer"""
     user_id = []
-    # session_maker_obj = db_obj.register_session()
     with session_obj.begin() as session:
         user_obj_id = session.query(tb.Customer.id).\
             where(and_(tb.Customer.firstname == name['first'],
@@ -348,6 +345,23 @@ def _get_customer_id(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
     if user_id is not None and len(user_id) <= 1:
         user_id = user_id[0]
     return user_id
+
+
+def _get_tax_id_from_user_id(column, condition):
+    """return id from tax_info, given user_id from customer"""
+    return None
+
+
+def _get_tax_id_from_name(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
+    """return id from tax_info, given user_name from customer"""
+    tax_info_id = []
+    with session_obj.begin() as session:
+        tax_obj_id = session.query(tb.TaxInfo.id).\
+            where(tb.TaxInfo.user_name == name['name'])
+        tax_info_id = [row.id for row in tax_obj_id]
+    if tax_info_id is not None and len(tax_info_id) <= 1:
+        tax_info_id = tax_info_id[0]
+    return tax_info_id
 
 
 def _condition_type_factory(condition_type):
@@ -374,7 +388,20 @@ def _remove_equal_to(column, condition):
     return tb.Customer.__table__.delete().where(column == condition)
 
 
-def _remove_row(column, condition_type, condition, session_obj):
+def _delete_row_factory(table_class_attr):
+    """factory to delete rows in different tables"""
+    # return _remove_customer
+    if table_class_attr.class_.__tablename__ == 'customer':
+        return _remove_customer
+    elif table_class_attr.class_.__tablename__ == 'tax_info':
+        return _remove_tax_info
+    # elif table_class_attr.class_.__tablename__ == 'transactions':
+    #     return self._remove_transactions
+    else:
+        return None
+
+
+def _remove_customer(column, condition_type, condition, session_obj):
     """remove row from customer table"""
     delete_query_fun = _condition_type_factory(condition_type)
     delete_query = delete_query_fun(column, condition)
@@ -382,6 +409,18 @@ def _remove_row(column, condition_type, condition, session_obj):
         session.execute(delete_query)
         session.commit()
     return True
+
+
+def _remove_tax_info(column, condition_type, condition, session_obj):
+    """remove row from tax_info table"""
+    # find tax_info id corresponding to given condition
+
+    delete_query_fun = _condition_type_factory(condition_type)
+    delete_query = delete_query_fun(column, condition)
+    with session_obj.begin() as session:
+        session.execute(delete_query)
+        session.commit()
+    return None
 
 
 def _get_class_name(table_name):
