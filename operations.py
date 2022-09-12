@@ -107,7 +107,8 @@ class Operations:
         table_class = _get_class_name(table_name)
         table_class_attr = _get_class_attribute(table_class, attribute_name=column)
         # delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
-        delete_value = self._remove_row(table_class_attr, condition_type, condition, session_obj)
+        delete_value = self._remove_row(table_class, table_class_attr, condition_type,
+                                        condition, session_obj)
         return delete_value
 
     @staticmethod
@@ -239,9 +240,11 @@ class Operations:
             return None
 
     @staticmethod
-    def _remove_row(table_class_attr, condition_type, condition, session_obj: sqlalchemy.orm.sessionmaker):
+    def _remove_row(table_class, table_class_attr, condition_type, condition,
+                    session_obj: sqlalchemy.orm.sessionmaker):
         delete_fun = _delete_row_factory(table_class_attr)
-        return delete_fun(table_class_attr, condition_type, condition, session_obj)
+        return delete_fun(table_class, table_class_attr, condition_type,
+                          condition, session_obj)
 
     #
     # @staticmethod
@@ -389,8 +392,8 @@ def _condition_type_factory(condition_type):
         return None
 
 
-def _remove_greater_than(column, condition):
-    return tb.Customer.__table__.delete().where(column > condition)
+def _remove_greater_than(table, column, condition):
+    return table.__table__.delete().where(column > condition)
 
 
 def _remove_less_than(column, condition):
@@ -424,12 +427,12 @@ def _remove_customer(column, condition_type, condition, session_obj):
     return True
 
 
-def _remove_tax_info(column, condition_type, condition, session_obj):
+def _remove_tax_info(table, column, condition_type, condition, session_obj):
     """remove row from tax_info table"""
     # find tax_info id corresponding to given condition
 
     delete_query_fun = _condition_type_factory(condition_type)
-    delete_query = delete_query_fun(column, condition)
+    delete_query = delete_query_fun(table, column, condition)
     with session_obj.begin() as session:
         session.execute(delete_query)
         session.commit()
