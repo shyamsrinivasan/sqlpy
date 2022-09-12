@@ -96,13 +96,10 @@ class Operations:
         # match names and add customer_id to data_list
         # data_list = self._add_user_id_to_list(data, new_user)
 
-        # new_name = {'first': 'Harry', 'last': 'Ried'}
-        # user_id = self._get_any_id(session, 'customer', new_name)
         # add data to tax_info table
-        new_user = None
-        new_user = self._enter_data(session, data_list=data_list, table_name='tax_info')
-
-        return old_last_id, new_user
+        added_tax_user = self._enter_data(session, data_list=data_list,
+                                          table_name='tax_info')
+        return added_user, added_tax_user
 
     def delete_data(self, session_obj: sqlalchemy.orm.sessionmaker,
                     table_name, column, condition_type, condition):
@@ -120,9 +117,9 @@ class Operations:
         return last_id_fun(session)
 
     @staticmethod
-    def _get_any_id(session_obj: sqlalchemy.orm.sessionmaker, category: str, name: dict):
-        id_fun = _get_id_factory(category)
-        return id_fun(session_obj, name)
+    def _get_any_id(basis: str, category: str, condition: dict, session_obj: sqlalchemy.orm.sessionmaker):
+        id_fun = _get_id_factory_type(basis, category)
+        return id_fun(condition, session_obj)
 
     @staticmethod
     def _add_user_id_to_list(df_of_names: pd.DataFrame, db_user_id: list):
@@ -163,24 +160,13 @@ class Operations:
 
         # get ids for inserted names and return all added customer names and ids
         for _, i_name in enumerate(added_user):
-            new_name = {'first': i_name['firstname'],
-                        'last': i_name['lastname']}
-            user_id = self._get_any_id(session_obj, 'customer', new_name)
+            user_id = self._get_any_id(basis='name', category='customer',
+                                       condition=i_name, session_obj=session_obj)
             i_name['user_id'] = user_id
-
-        # get all added ids
-            # for j_row in user_obj_list:
-            #     # add row object to session
-            #     # session.add(j_row)
-            #     # collect names of added records
-            #     name.append(j_row['name'])
-            #     firstname.append(j_row['firstname'])
-            #     lastname.append(j_row['lastname'])
 
         # last_id = self._get_last_id(session_obj, table_name='customer')
         return added_user
 
-    @staticmethod
     def _enter_tax_data(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
         """create TaxInfo object and add object as row to mapped table"""
 
@@ -193,11 +179,20 @@ class Operations:
                                   # aadhaar=j_user['aadhaar'])
                        for j_user in data_list]
             session.add_all(tax_obj)
+            added_user = [{'name': j_row.user_name,
+                           'pan': j_row.pan,
+                           'aadhaar': j_row.aadhaar,
+                           'user_id': j_row.user_id}
+                          for j_row in tax_obj]
             session.commit()
 
-        # INSERT INTO tax_info(user_id, pan) SELECT user_id, 'pan' FROM customer
-        # WHERE firstname='first' AND lastname='last' LIMIT 1
-        return None
+        # get ids for inserted names and return all added tax_info names and ids
+        for _, i_name in enumerate(added_user):
+            user_id = self._get_any_id(basis='user_id', category='tax_info',
+                                       condition=i_name, session_obj=session_obj)
+            i_name['tax_id'] = user_id
+
+        return added_user
 
     def _enter_transactions(self, data_list, db_obj):
         return None
@@ -309,12 +304,27 @@ def _get_last_transaction_id(session_obj: sqlalchemy.orm.sessionmaker):
     return last_id
 
 
-def _get_id_factory(category: str, basis: str):
-    """return fun for relevant id"""
+def _get_id_factory_type(basis: str, category: str):
+    """return fun on whose basis id is to be determined"""
+    if basis == 'name':
+        # return func that gets ids based on name
+        return _get_name_id_factory(category)
+    elif basis == 'user_id':
+        # return func that gets ids based on user_id
+        return _get_user_id_factory(category)
+    elif basis == 'transaction_id':
+        # return func that gets ids based on user_id
+        return None
+    else:
+        raise ValueError(basis)
+
+
+def _get_name_id_factory(category: str):
+    """return fun for relevant id from name"""
     if category == 'customer':
         return _get_customer_id_from_name
         # return _get_id_factory_type(basis)
-    elif category == 'tax':
+    elif category == 'tax_info':
         return _get_tax_id_from_name
     elif category == 'transaction':
         return None
@@ -322,42 +332,45 @@ def _get_id_factory(category: str, basis: str):
         raise ValueError(category)
 
 
-def _get_id_factory_type(basis: str):
-    """return fun on whose basis id is to be determined"""
-    if basis == 'name':
-        # return func that gets ids based on name
-        return None
-    elif basis == 'user_id':
-        # return func that gets ids based on user_id
-        return None
+def _get_user_id_factory(category: str):
+    """return fun for relevant id from user_id"""
+    if category == 'tax_info':
+        return _get_tax_id_from_user_id
     else:
-        raise ValueError(basis)
+        raise ValueError(category)
 
 
-def _get_customer_id_from_name(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
+def _get_customer_id_from_name(condition: dict, session_obj: sqlalchemy.orm.sessionmaker):
     """return user id for given customer"""
     user_id = []
     with session_obj.begin() as session:
         user_obj_id = session.query(tb.Customer.id).\
-            where(and_(tb.Customer.firstname == name['first'],
-                       tb.Customer.lastname == name['last']))
+            where(and_(tb.Customer.firstname == condition['firstname'],
+                       tb.Customer.lastname == condition['lastname']))
         user_id = [row.id for row in user_obj_id]
     if user_id is not None and len(user_id) <= 1:
         user_id = user_id[0]
     return user_id
 
 
-def _get_tax_id_from_user_id(column, condition):
+def _get_tax_id_from_user_id(condition: dict, session_obj: sqlalchemy.orm.sessionmaker):
     """return id from tax_info, given user_id from customer"""
-    return None
+    tax_info_id = []
+    with session_obj.begin() as session:
+        tax_obj_id = session.query(tb.TaxInfo.id). \
+            where(tb.TaxInfo.user_id == condition['user_id'])
+        tax_info_id = [row.id for row in tax_obj_id]
+    if tax_info_id is not None and len(tax_info_id) <= 1:
+        tax_info_id = tax_info_id[0]
+    return tax_info_id
 
 
-def _get_tax_id_from_name(session_obj: sqlalchemy.orm.sessionmaker, name: dict):
+def _get_tax_id_from_name(condition: dict, session_obj: sqlalchemy.orm.sessionmaker):
     """return id from tax_info, given user_name from customer"""
     tax_info_id = []
     with session_obj.begin() as session:
         tax_obj_id = session.query(tb.TaxInfo.id).\
-            where(tb.TaxInfo.user_name == name['name'])
+            where(tb.TaxInfo.user_name == condition['name'])
         tax_info_id = [row.id for row in tax_obj_id]
     if tax_info_id is not None and len(tax_info_id) <= 1:
         tax_info_id = tax_info_id[0]
