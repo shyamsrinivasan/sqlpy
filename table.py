@@ -26,7 +26,8 @@ class Customer(Reflected, Base):
     fullname = Column(String(30), index=True)
     customer_type = Column(String(15))
 
-    taxes = relationship("TaxInfo", back_populates="customer_info", cascade="all, delete")
+    taxes = relationship("TaxInfo", back_populates="customer_info",
+                         cascade="all, delete", uselist=False)
     charges = relationship("Transactions", back_populates="customer_info")
 
     def get_column(self, column_name=None):
@@ -42,13 +43,13 @@ class TaxInfo(Reflected, Base):
     __tablename__ = 'tax_info'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('customer.id', onupdate='cascade'))
+    user_id = Column(Integer, ForeignKey('customer.id', onupdate='CASCADE', ondelete='CASCADE'))
     user_name = Column(String(30), index=True)
     pan = Column(String(12), index=True, nullable=False)
     aadhaar = Column(String(12), index=True, nullable=False)
     # add columns: portal_password
 
-    customer_info = relationship("Customer", back_populates="taxes")
+    customer_info = relationship("Customer", back_populates="taxes") #, cascade="all, delete")
 
     def get_column(self, column_name=None):
         """retrieve column object for table"""
