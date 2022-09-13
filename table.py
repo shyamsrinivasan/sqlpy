@@ -44,13 +44,15 @@ class TaxInfo(Reflected, Base):
     __tablename__ = 'tax_info'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('customer.id', onupdate='CASCADE', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey('customer.id', onupdate='CASCADE',
+                                         ondelete='CASCADE'))
     user_name = Column(String(30), index=True)
-    pan = Column(String(12), index=True, nullable=False)
-    aadhaar = Column(String(12), index=True, nullable=False)
+    pan = Column(String(12), index=True, nullable=False, unique=True)
+    aadhaar = Column(String(12), index=True, nullable=False, unique=False)
     # add columns: portal_password
 
-    customer_info = relationship("Customer", back_populates="taxes", cascade="all, delete")
+    customer_info = relationship("Customer", back_populates="taxes",
+                                 cascade="all, delete")
 
     def get_column(self, column_name=None):
         """retrieve column object for table"""
@@ -67,7 +69,8 @@ class Transactions(Reflected, Base):
 
     id = Column(Integer, primary_key=True)
     date = Column(TIMESTAMP)
-    user_id = Column(Integer, ForeignKey('customer.id'))
+    user_id = Column(Integer, ForeignKey('customer.id', onupdate='CASCADE',
+                                         ondelete='CASCADE'))
     transaction_type = Column(String(50), nullable=False)
     cost = Column(Float)
     # add columns: performed_by
