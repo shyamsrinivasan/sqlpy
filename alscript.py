@@ -1,21 +1,9 @@
 from operations import Operations
-from dbclass import Dbcon
 import os.path
-
-
-def get_object(engine_config):
-    """return engine and session objects"""
-    obj = Dbcon(engine_config)
-    engine_obj = obj.register_engine()
-    session_obj = obj.register_session()
-    return session_obj, engine_obj
+from db_config import engine, session
 
 
 if __name__ == '__main__':
-    engine_config = {'db_type': 'mysql', 'dbapi': 'mysqldb',
-                     'username': 'root', 'password': 'root',
-                     'server': 'localhost', 'db_name': 'sqlalchemy'}
-    session, engine = get_object(engine_config)
     ops_obj = Operations()
 
     # drop all tables
