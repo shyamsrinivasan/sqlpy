@@ -31,18 +31,15 @@ if __name__ == '__main__':
     # reflect table from DB given a Dbcon instance
     ops_obj.reflect_table(engine)
 
-    # execute_session(engine, reflect=True)
-    # with Session(engine) as session:
-    #     result = session.execute()
-    #     session.commit()
-
     # add data from file/dictionary
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
-    customer_obj = ops_obj.add_data(session, file_name=file_name)
+    users, tax_info = ops_obj.add_data(session, file_name=file_name)
 
     # delete data from db
     flag_2 = ops_obj.delete_data(session, table_name='tax_info', column='user_id',
-                                 condition_type='>', condition=2)
+                                 condition_type='=', condition=2)
+    # flag = ops_obj.delete_data(session, table_name='customer', column='id',
+    #                            condition_type='=', condition=3)
     # flag = ops_obj.delete_data(session, table_name='customer', column='id',
     #                            condition_type='>', condition=2)
 
@@ -52,10 +49,6 @@ if __name__ == '__main__':
     #     print("In session")
         # session.inspect.has_table
 
-    # reflect and select data
-    # meta_obj = MetaData(engine)
-    # meta_obj.reflect()
-    # my_table = meta_obj.tables['my_table_name']
     ops_obj.read_data()
 
 
