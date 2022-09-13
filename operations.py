@@ -95,7 +95,7 @@ class Operations:
         added_tax_user = self._enter_data(session, data_list=data_list,
                                           table_name='tax_info')
         # add transactions to transactions table
-        
+
         return added_user, added_tax_user
 
     def delete_data(self, session_obj: sqlalchemy.orm.sessionmaker,
