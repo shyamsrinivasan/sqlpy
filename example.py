@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # create PySQL db object
     db = PySQL(dbconfig)
-    # read data from excel file and write to mysql db
+    # read data from Excel file and write to mysql db
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
     db = db.enter_data(file_name)
 
