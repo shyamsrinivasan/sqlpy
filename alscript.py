@@ -1,10 +1,5 @@
-# from sqlalchemy import inspect
-# from tables import create_table
-# from reflect import reflect_table
-# from sqlalchemy.orm import sessionmaker
 from operations import Operations
 from dbclass import Dbcon
-from table import Reflected
 import os.path
 
 
