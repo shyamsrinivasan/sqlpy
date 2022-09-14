@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # add data from file/dictionary
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
-    users, tax_info = ops_obj.add_data(session, file_name=file_name)
+    customers, tax_info, address = ops_obj.add_data(session, file_name=file_name)
 
     # delete data from db
     flag_2 = ops_obj.delete_data(session, table_name='tax_info', column='user_id',
