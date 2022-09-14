@@ -1,6 +1,9 @@
 # Python-SQL Package 
 This package is to be used for locally storing client information on a MySQL database using python front end.
 
+## Python and environment setup:
+* Setup conda enviroment using given requirements.txt file
+
 ## List of Tasks:
 
 - [x] Develop an example connecting to an existing MySQL database (DB) using SQL-python connector
