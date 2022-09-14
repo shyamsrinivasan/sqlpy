@@ -94,9 +94,15 @@ class Operations:
         # add data to tax_info table
         added_tax_user = self._enter_data(session, data_list=data_list,
                                           table_name='tax_info')
-        # add transactions to transactions table
+        # add address to address table
+        added_address = self._enter_data(session, data_list=data_list, table_name='address')
 
         return added_user, added_tax_user
+
+    def add_transactions(self, session, data_list):
+        """separate method to add transactions to table, since they are added separately"""
+        added_trans = self._enter_data(session, data_list=data_list, table_name='transactions')
+        return added_trans
 
     def delete_data(self, session_obj: sqlalchemy.orm.sessionmaker,
                     table_name, column, condition_type, condition):
@@ -184,6 +190,10 @@ class Operations:
             i_name['tax_id'] = user_id
         return added_user
 
+    def _enter_address(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
+        """create address objects and add as rows to address table"""
+        return None
+
     def _enter_transactions(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
         """create Transactions object and add object as row to mapped table"""
         return None
@@ -195,9 +205,10 @@ class Operations:
             return self._enter_customer_data(data_list, session_obj)
         elif table_name == 'tax_info':
             return self._enter_tax_data(data_list, session_obj)
+        # elif table_name == 'address':
+        #     return None
         elif table_name == 'transactions':
-            return None
-            # return self._enter_transactions(data_list, session_obj)
+            return self._enter_transactions(data_list, session_obj)
         else:
             raise ValueError(table_name)
 
