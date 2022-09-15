@@ -86,29 +86,64 @@ class Operations:
         added_user = self._enter_data(session, data_list=data_list,
                                       table_name='customer')
 
-        data = pd.DataFrame(data_list)
-        to_add = data[['name', 'firstname', 'lastname', 'pan',
-                       'street_num', 'street_name', 'house_num',
-                       'locality', 'city', 'state', 'pin']]
-        full = to_add.merge(pd.DataFrame(added_user), on=['name', 'firstname', 'lastname'])
-        data_list = full.to_dict('records')
+        if added_user is not None:
+            data = pd.DataFrame(data_list)
+            to_add = data[['name', 'firstname', 'lastname', 'pan',
+                           'street_num', 'street_name', 'house_num',
+                           'locality', 'city', 'state', 'pin']]
+            full = to_add.merge(pd.DataFrame(added_user), on=['name', 'firstname', 'lastname'])
+            data_list = full.to_dict('records')
 
         # match names and add customer_id to data_list
         # data_list = self._add_customer_id_to_list(data, new_user)
 
         # add data to tax_info table
+        data_list = self._check_existing_records(data_list, session,
+                                                 table_name='tax_info')
         added_tax_user = self._enter_data(session, data_list=data_list,
                                           table_name='tax_info')
         # add address to address table
+        data_list = self._check_existing_records(data_list, session,
+                                                 table_name='address')
         added_address = self._enter_data(session, data_list=data_list,
                                          table_name='address')
+
         # return all added data as single dataframe
-        user = pd.DataFrame(added_user)
-        user_tax = user.merge(pd.DataFrame(added_tax_user),
-                              on=['name', 'customer_id'])
-        added_data = user_tax.merge(pd.DataFrame(added_address),
-                                    on=['name', 'customer_id'])
-        return added_data
+        # check if new customer added
+        # if added_user is not None:
+        #
+        # else:
+        #     user = None
+        #
+        # # check if new tax_info added
+        # if added_tax_user is not None:
+        #     tax = pd.DataFrame(added_tax_user)
+        # else:
+        #     tax = None
+
+        # merge user and tax if added and get one or both outside as df
+        if added_user is not None and added_tax_user is not None:
+            user = pd.DataFrame(added_user)
+            user_tax = user.merge(pd.DataFrame(added_tax_user),
+                                  on=['name', 'customer_id'])
+        else:
+            if added_user is not None:
+                user_tax = pd.DataFrame(added_user)
+            elif added_tax_user is not None:
+                user_tax = pd.DataFrame(added_tax_user)
+            else:
+                user_tax = None
+
+        if added_address is not None and user_tax is not None:
+            added_data = user_tax.merge(pd.DataFrame(added_address),
+                                        on=['name', 'customer_id'])
+            return added_data
+        elif added_address is not None and user_tax is None:
+            return pd.DataFrame(added_address)
+        elif added_address is None and user_tax is not None:
+            return user_tax
+        else:
+            return None
 
     def add_transaction(self, session, data_list):
         """separate method to add transactions to table, since they are added separately"""
@@ -168,12 +203,15 @@ class Operations:
             session.commit()
 
         # get ids for inserted names and return all added customer names and ids
-        for _, i_name in enumerate(added_user):
-            customer_id = _get_any_id(basis='name', category='customer',
-                                      condition=i_name, session_obj=session_obj)
-            i_name['customer_id'] = customer_id
-        # last_id = self._get_last_id(session_obj, table_name='customer')
-        return added_user
+        if added_user:
+            for _, i_name in enumerate(added_user):
+                customer_id = _get_any_id(basis='name', category='customer',
+                                          condition=i_name, session_obj=session_obj)
+                i_name['customer_id'] = customer_id
+            # last_id = self._get_last_id(session_obj, table_name='customer')
+            return added_user
+        else:
+            return None
 
     def _enter_tax_data(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
         """create TaxInfo object and add object as row to mapped table"""
@@ -185,7 +223,7 @@ class Operations:
                                   pan=j_user['pan'],
                                   aadhaar='456125874123')
                        # aadhaar=j_user['aadhaar'])
-                       for j_user in data_list]
+                       for j_user in data_list if 'tax_id' not in j_user]
             session.add_all(tax_obj)
             added_user = [{'name': j_row.customer_name,
                            'pan': j_row.pan,
@@ -199,7 +237,11 @@ class Operations:
             tax_id = _get_any_id(basis='customer_id', category='tax_info',
                                  condition=i_name, session_obj=session_obj)
             i_name['tax_id'] = tax_id
-        return added_user
+
+        if added_user:
+            return added_user
+        else:
+            return None
 
     def _enter_address_data(self, data_list: list,
                             session_obj: sqlalchemy.orm.sessionmaker):
@@ -215,7 +257,7 @@ class Operations:
                                       city=j_user['city'],
                                       state=j_user['state'],
                                       pin=j_user['pin'])
-                           for j_user in data_list]
+                           for j_user in data_list if 'address_id' not in j_user]
             session.add_all(address_obj)
             added_address = [{'name': j_row.customer_name,
                               'customer_id': j_row.customer_id,
@@ -235,7 +277,11 @@ class Operations:
             address_id = _get_any_id(basis='customer_id', category='address',
                                      condition=i_name, session_obj=session_obj)
             i_name['address_id'] = address_id
-        return added_address
+
+        if added_address:
+            return added_address
+        else:
+            return None
 
     def _enter_transactions(self, data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
         """create Transactions object and add object as row to mapped table"""
@@ -289,11 +335,15 @@ class Operations:
                                 table_name: str):
         """check table for existing records that match new records
         before adding them to the table"""
-        existing_user_fun = _check_records_factory(table_name)
+        # existing_user_fun = _check_records_factory(table_name)
         for i_customer in addition_list:
-            existing_user_id = existing_user_fun(i_customer, session_obj)
-            if existing_user_id:
-                i_customer['customer_id'] = existing_user_id
+            i_customer = _check_existing_records_factory(i_customer,
+                                                         session_obj,
+                                                         table_name)
+            # existing_id =
+            # existing_user_id = existing_user_fun(i_customer, session_obj)
+            # if existing_user_id:
+            #     i_customer['customer_id'] = existing_user_id
         return addition_list
 
     @staticmethod
@@ -398,8 +448,8 @@ def _get_name_id_factory(category: str):
         return _get_customer_id_from_name
     elif category == 'tax_info':
         return _get_tax_id_from_name
-    # elif category == 'address':
-    #     return _get_address_id_from_name
+    elif category == 'address':
+        return _get_address_id_from_name
     elif category == 'transaction':
         return None
     else:
@@ -444,7 +494,7 @@ def _get_customer_id_from_name(condition: dict,
         customer_id = session.query(tb.Customer.id).\
             filter(and_(tb.Customer.firstname == condition['firstname'],
                         tb.Customer.lastname == condition['lastname'])).first()
-    if customer_id is not None and len(customer_id) <= 1:
+    if customer_id and customer_id is not None and len(customer_id) <= 1:
         customer_id = customer_id[0]
         return customer_id
     else:
@@ -473,9 +523,22 @@ def _get_tax_id_from_name(condition: dict, session_obj: sqlalchemy.orm.sessionma
         # tax_obj_id = session.query(tb.TaxInfo.id).\
         #     filter_by(customer_name=condition['name']).first()
         tax_info_id = [row.id for row in tax_obj_id]
-    if tax_info_id is not None and len(tax_info_id) <= 1:
+    if tax_info_id and tax_info_id is not None and len(tax_info_id) <= 1:
         tax_info_id = tax_info_id[0]
         return tax_info_id
+    else:
+        return []
+
+
+def _get_address_id_from_name(condition: dict, session_obj: sqlalchemy.orm.sessionmaker):
+    """return id from address, given name"""
+    with session_obj.begin() as session:
+        address_obj_id = session.query(tb.Address.id).\
+            where(tb.Address.customer_name == condition['name'])
+        address_id = [row.id for row in address_obj_id]
+    if address_id and address_id is not None and len(address_id) <= 1:
+        address_id = address_id[0]
+        return address_id
     else:
         return []
 
@@ -565,14 +628,42 @@ def _remove_address():
     return None
 
 
+def _check_existing_records_factory(customer_info: dict,
+                                    session_obj: sqlalchemy.orm.sessionmaker,
+                                    table_name: str):
+    """factory for deciding which id is being returned
+    by the check records functions"""
+    existing_user_fun = _check_records_factory(table_name)
+    if table_name == 'customer':
+        existing_id = existing_user_fun(customer_info, session_obj)
+        if existing_id:
+            customer_info['customer_id'] = existing_id
+        return customer_info
+
+    elif table_name == 'tax_info':
+        existing_id = existing_user_fun(customer_info, session_obj)
+        if existing_id:
+            customer_info['tax_id'] = existing_id
+        return customer_info
+
+    elif table_name == 'address':
+        existing_id = existing_user_fun(customer_info, session_obj)
+        if existing_id:
+            customer_info['address_id'] = existing_id
+        return customer_info
+
+    else:
+        raise ValueError(table_name)
+
+
 def _check_records_factory(table_name: str):
     """return fun that checks for existing records in different tables"""
     if table_name == 'customer':
         return _check_customer_records
-    # elif table_name == 'tax_info':
-    #     return None
-    # elif table_name == 'address':
-    #     return None
+    elif table_name == 'tax_info':
+        return _check_tax_info_records
+    elif table_name == 'address':
+        return _check_address_records
     else:
         raise ValueError(table_name)
 
@@ -581,16 +672,21 @@ def _check_customer_records(condition, session_obj):
     """check customer table if given record/records are already present"""
     customer_id = _get_any_id(basis='name', category='customer',
                               condition=condition, session_obj=session_obj)
-    # with session_obj.begin() as session:
-    #     customer_id = session.query(tb.Customer.id).\
-    #             filter(and_(tb.Customer.firstname == condition['firstname'],
-    #                         tb.Customer.lastname == condition['lastname'])).first()
-    # if customer_id is not None and len(customer_id) <= 1:
-    #     customer_id = customer_id[0]
-    #     return customer_id
-    #     query =
-    # else:
     return customer_id
+
+
+def _check_tax_info_records(condition, session_obj):
+    """check tax_info table if given record/records are already present"""
+    tax_id = _get_any_id(basis='name', category='tax_info',
+                         condition=condition, session_obj=session_obj)
+    return tax_id
+
+
+def _check_address_records(condition, session_obj):
+    """check address table if given record/records are already present"""
+    address_id = _get_any_id(basis='name', category='address',
+                             condition=condition, session_obj=session_obj)
+    return address_id
 
 
 def _get_class_name(table_name: str):
