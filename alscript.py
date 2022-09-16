@@ -19,12 +19,14 @@ if __name__ == '__main__':
     customers = ops_obj.add_data(session, file_name=file_name)
 
     # delete data from db
-    flag_2 = ops_obj.delete_data(session, table_name='tax_info', column='user_id',
-                                 condition_type='=', condition=2)
-    # flag = ops_obj.delete_data(session, table_name='customer', column='id',
-    #                            condition_type='=', condition=3)
-    # flag = ops_obj.delete_data(session, table_name='customer', column='id',
-    #                            condition_type='>', condition=2)
+    flag = ops_obj.delete_data(session, table_name='tax_info', column='customer_id',
+                               condition_type='=', condition=2)
+    flag = ops_obj.delete_data(session, table_name='address', column='customer_id',
+                               condition_type='=', condition=2)
+    flag = ops_obj.delete_data(session, table_name='customer', column='id',
+                               condition_type='=', condition=2)
+    flag = ops_obj.delete_data(session, table_name='customer', column='id',
+                               condition_type='>', condition=3)
 
     # if table_names (db not empty)
     # then proceed with operations
