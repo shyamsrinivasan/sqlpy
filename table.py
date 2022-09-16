@@ -21,7 +21,7 @@ class User(Reflected, Base):
     lastname = Column(String(15))
     fullname = Column(String(30), index=True)
     email = Column(String(30))
-    username = Column(String(15), index=True, nullable=False, unique=True)
+    # username = Column(String(15), index=True, nullable=False, unique=True)
     # password = Column()
 
     def __repr__(self):
