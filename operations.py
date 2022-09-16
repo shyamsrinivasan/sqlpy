@@ -109,18 +109,6 @@ class Operations:
                                          table_name='address')
 
         # return all added data as single dataframe
-        # check if new customer added
-        # if added_user is not None:
-        #
-        # else:
-        #     user = None
-        #
-        # # check if new tax_info added
-        # if added_tax_user is not None:
-        #     tax = pd.DataFrame(added_tax_user)
-        # else:
-        #     tax = None
-
         # merge user and tax if added and get one or both outside as df
         if added_user is not None and added_tax_user is not None:
             user = pd.DataFrame(added_user)
