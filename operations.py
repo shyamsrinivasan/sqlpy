@@ -62,7 +62,7 @@ class Operations:
         return df
 
     def add_data(self, session: sqlalchemy.orm.sessionmaker,
-                 data_list=None, file_name=None):
+                 data_list=None, file_name=None, user=False):
         """enter data in file_name to all tables in table_name"""
 
         # get info from file
@@ -71,67 +71,78 @@ class Operations:
                              "dictionary (data_list) or as file (file_name). "
                              "Both should not be Empty")
 
-        if data_list is not None:
-            pass
+        # if data_list is not None:
+        #     pass
 
         if file_name is not None:
             data = self._read_from_file(file_name)
             data_list = data.to_dict('records')  # convert data df to list of dict
 
-        # add data to customer table
-        old_last_id = self._get_last_id(session, table_name='customer')
-        # check if given customer is already present in customer table
-        data_list = self._check_existing_records(data_list, session,
-                                                 table_name='customer')
-        added_user = self._enter_data(session, data_list=data_list,
-                                      table_name='customer')
+        if user:    # add only users to db
+            # check existing user records
+            # data_list = self._check_existing_records(data_list, session,
+            #                                          table_name='user')
+            # add user to user table
+            added_user = self._enter_data(session, data_list=data_list,
+                                          table_name='user')
+            return pd.DataFrame(added_user)
 
-        if added_user is not None:
-            data = pd.DataFrame(data_list)
-            to_add = data[['name', 'firstname', 'lastname', 'pan',
-                           'street_num', 'street_name', 'house_num',
-                           'locality', 'city', 'state', 'pin']]
-            full = to_add.merge(pd.DataFrame(added_user), on=['name', 'firstname', 'lastname'])
-            data_list = full.to_dict('records')
+        else:       # add customers to db
+            # add data to customer table
+            old_last_id = self._get_last_id(session, table_name='customer')
+            # check if given customer is already present in customer table
+            data_list = self._check_existing_records(data_list, session,
+                                                     table_name='customer')
+            added_customer = self._enter_data(session, data_list=data_list,
+                                              table_name='customer')
 
-        # match names and add customer_id to data_list
-        # data_list = self._add_customer_id_to_list(data, new_user)
+            if added_customer is not None:
+                data = pd.DataFrame(data_list)
+                to_add = data[['name', 'firstname', 'lastname', 'pan',
+                               'street_num', 'street_name', 'house_num',
+                               'locality', 'city', 'state', 'pin']]
+                full = to_add.merge(pd.DataFrame(added_customer),
+                                    on=['name', 'firstname', 'lastname'])
+                data_list = full.to_dict('records')
 
-        # add data to tax_info table
-        data_list = self._check_existing_records(data_list, session,
-                                                 table_name='tax_info')
-        added_tax_user = self._enter_data(session, data_list=data_list,
-                                          table_name='tax_info')
-        # add address to address table
-        data_list = self._check_existing_records(data_list, session,
-                                                 table_name='address')
-        added_address = self._enter_data(session, data_list=data_list,
-                                         table_name='address')
+            # match names and add customer_id to data_list
+            # data_list = self._add_customer_id_to_list(data, new_user)
 
-        # return all added data as single dataframe
-        # merge user and tax if added and get one or both outside as df
-        if added_user is not None and added_tax_user is not None:
-            user = pd.DataFrame(added_user)
-            user_tax = user.merge(pd.DataFrame(added_tax_user),
-                                  on=['name', 'customer_id'])
-        else:
-            if added_user is not None:
-                user_tax = pd.DataFrame(added_user)
-            elif added_tax_user is not None:
-                user_tax = pd.DataFrame(added_tax_user)
+            # add data to tax_info table
+            data_list = self._check_existing_records(data_list, session,
+                                                     table_name='tax_info')
+            added_tax_customer = self._enter_data(session, data_list=data_list,
+                                                  table_name='tax_info')
+            # add address to address table
+            data_list = self._check_existing_records(data_list, session,
+                                                     table_name='address')
+            added_address = self._enter_data(session, data_list=data_list,
+                                             table_name='address')
+
+            # return all added data as single dataframe
+            # merge user and tax if added and get one or both outside as df
+            if added_customer is not None and added_tax_customer is not None:
+                customer = pd.DataFrame(added_customer)
+                customer_tax = customer.merge(pd.DataFrame(added_tax_customer),
+                                              on=['name', 'customer_id'])
             else:
-                user_tax = None
+                if added_customer is not None:
+                    customer_tax = pd.DataFrame(added_customer)
+                elif added_tax_customer is not None:
+                    customer_tax = pd.DataFrame(added_tax_customer)
+                else:
+                    customer_tax = None
 
-        if added_address is not None and user_tax is not None:
-            added_data = user_tax.merge(pd.DataFrame(added_address),
-                                        on=['name', 'customer_id'])
-            return added_data
-        elif added_address is not None and user_tax is None:
-            return pd.DataFrame(added_address)
-        elif added_address is None and user_tax is not None:
-            return user_tax
-        else:
-            return None
+            if added_address is not None and customer_tax is not None:
+                added_data = customer_tax.merge(pd.DataFrame(added_address),
+                                                on=['name', 'customer_id'])
+                return added_data
+            elif added_address is not None and customer_tax is None:
+                return pd.DataFrame(added_address)
+            elif added_address is None and customer_tax is not None:
+                return customer_tax
+            else:
+                return None
 
     def add_transaction(self, session, data_list):
         """separate method to add transactions to table, since they are added separately"""
@@ -147,6 +158,11 @@ class Operations:
         delete_value = self._remove_row(table_class, table_class_attr, condition_type,
                                         condition, session_obj)
         return delete_value
+
+    def change_data(self):
+        """update existing rows in tables"""
+        updated_rows = self._update_row
+        return None
 
     @staticmethod
     def _get_last_id(session: sqlalchemy.orm.sessionmaker, table_name: str):
@@ -184,20 +200,20 @@ class Operations:
             #     session.add(j_obj)
             session.add_all(user_obj_list)
             n_records = len(user_obj_list)
-            added_user = [{'firstname': j_row.firstname,
-                           'lastname': j_row.lastname,
-                           'name': j_row.fullname}
-                          for j_row in user_obj_list]
+            added_customer = [{'firstname': j_row.firstname,
+                               'lastname': j_row.lastname,
+                               'name': j_row.fullname}
+                              for j_row in user_obj_list]
             session.commit()
 
         # get ids for inserted names and return all added customer names and ids
-        if added_user:
-            for _, i_name in enumerate(added_user):
+        if added_customer:
+            for _, i_name in enumerate(added_customer):
                 customer_id = _get_any_id(basis='name', category='customer',
                                           condition=i_name, session_obj=session_obj)
                 i_name['customer_id'] = customer_id
             # last_id = self._get_last_id(session_obj, table_name='customer')
-            return added_user
+            return added_customer
         else:
             return None
 
@@ -213,21 +229,21 @@ class Operations:
                        # aadhaar=j_user['aadhaar'])
                        for j_user in data_list if 'tax_id' not in j_user]
             session.add_all(tax_obj)
-            added_user = [{'name': j_row.customer_name,
-                           'pan': j_row.pan,
-                           'aadhaar': j_row.aadhaar,
-                           'customer_id': j_row.customer_id}
-                          for j_row in tax_obj]
+            added_customer = [{'name': j_row.customer_name,
+                               'pan': j_row.pan,
+                               'aadhaar': j_row.aadhaar,
+                               'customer_id': j_row.customer_id}
+                              for j_row in tax_obj]
             session.commit()
 
         # get ids for inserted names and return all added tax_info names and ids
-        for _, i_name in enumerate(added_user):
+        for _, i_name in enumerate(added_customer):
             tax_id = _get_any_id(basis='customer_id', category='tax_info',
                                  condition=i_name, session_obj=session_obj)
             i_name['tax_id'] = tax_id
 
-        if added_user:
-            return added_user
+        if added_customer:
+            return added_customer
         else:
             return None
 
@@ -275,11 +291,48 @@ class Operations:
         """create Transactions object and add object as row to mapped table"""
         return None
 
+    def _enter_user_data(self, data_list: list,
+                         session_obj: sqlalchemy.orm.sessionmaker):
+        """create User object and add object as row to mapped user table"""
+        old_last_id = self._get_last_id(session_obj, table_name='user')
+        session_obj.close_all()
+        with session_obj.begin() as session:
+            user_obj_list = [tb.Customer(fullname=j_row['name'],
+                                         firstname=j_row['firstname'],
+                                         lastname=j_row['lastname'],
+                                         email=j_row['email'],
+                                         username=j_row['username']
+                                         )
+                             for j_row in data_list if 'user_id' not in j_row]
+
+            session.add_all(user_obj_list)
+            n_records = len(user_obj_list)
+            added_user = [{'firstname': j_row.firstname,
+                           'lastname': j_row.lastname,
+                           'name': j_row.fullname,
+                           'email': j_row.email,
+                           'username': j_row.username}
+                          for j_row in user_obj_list]
+            session.commit()
+
+        # get ids for inserted names and return all added usernames and ids
+        if added_user:
+            for _, i_name in enumerate(added_user):
+                user_id = _get_any_id(basis='name', category='user',
+                                      condition=i_name, session_obj=session_obj)
+                i_name['user_id'] = user_id
+            # last_id = self._get_last_id(session_obj, table_name='customer')
+            return added_user
+        else:
+            return None
+
     def _data_entry_factory(self, table_name: str, data_list: list,
                             session_obj: sqlalchemy.orm.sessionmaker):
         """factory function to enter data to different tables in db"""
         if table_name == 'customer':
             return self._enter_customer_data(data_list, session_obj)
+        elif table_name == 'user':
+            return self._enter_user_data(data_list, session_obj)
         elif table_name == 'tax_info':
             return self._enter_tax_data(data_list, session_obj)
         elif table_name == 'address':
@@ -291,7 +344,7 @@ class Operations:
 
     def _enter_data(self, session_obj: sqlalchemy.orm.sessionmaker,
                     data_list=None, table_name=None):
-        """enter data in file_name to customer table"""
+        """enter data in file_name or data_list to any/all tables in db"""
         # old_last_id = self._get_last_id(db_obj, table_name)
         if data_list is not None:
             # entry_func = self._data_entry_factory(table_name, data_list, db_obj)
@@ -321,6 +374,11 @@ class Operations:
         delete_fun = _delete_row_factory(table_class_attr)
         return delete_fun(table_class, table_class_attr, condition_type,
                           condition, session_obj)
+
+    @staticmethod
+    def _update_row():
+        """update any row in any table"""
+        return None
 
     @staticmethod
     def read_data():
@@ -419,8 +477,8 @@ def _get_name_id_factory(category: str):
         return _get_tax_id_from_name
     elif category == 'address':
         return _get_address_id_from_name
-    elif category == 'transaction':
-        return None
+    # elif category == 'transaction':
+    #     return None
     else:
         raise ValueError(category)
 
@@ -529,8 +587,12 @@ def _condition_type_factory(condition_type):
     """decide function based on condition type"""
     if condition_type is '>':
         return _remove_greater_than
+    elif condition_type is '>=':
+        return _remove_greater_than_equal
     elif condition_type is '<':
         return _remove_less_than
+    elif condition_type is '<=':
+        return _remove_less_than_equal
     elif condition_type is '=':
         return _remove_equal_to
     else:
@@ -541,8 +603,16 @@ def _remove_greater_than(table, column, condition):
     return table.__table__.delete().where(column > condition)
 
 
+def _remove_greater_than_equal(table, column, condition):
+    return table.__table__.delete().where(column >= condition)
+
+
 def _remove_less_than(table, column, condition):
     return table.__table__.delete().where(column < condition)
+
+
+def _remove_less_than_equal(table, column, condition):
+    return table.__table__.delete().where(column <= condition)
 
 
 def _remove_equal_to(table, column, condition):
@@ -555,11 +625,11 @@ def _delete_row_factory(table_class_attr):
             table_class_attr.class_.__tablename__ == 'tax_info' or \
             table_class_attr.class_.__tablename__ == 'address':
         return _remove_any_customer_info
-    elif table_class_attr.class_.__tablename__ == 'transactions':
+    # elif table_class_attr.class_.__tablename__ == 'transactions':
         # return _remove_transactions
-        return None
+        # return None
     else:
-        return None
+        raise ValueError(table_class_attr)
 
 
 def _remove_any_customer_info(table, column, condition_type, condition, session_obj):
