@@ -313,10 +313,6 @@ class Operations:
             i_customer = _check_existing_records_factory(i_customer,
                                                          session_obj,
                                                          table_name)
-            # existing_id =
-            # existing_user_id = existing_user_fun(i_customer, session_obj)
-            # if existing_user_id:
-            #     i_customer['customer_id'] = existing_user_id
         return addition_list
 
     @staticmethod
