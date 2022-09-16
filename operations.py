@@ -309,21 +309,6 @@ class Operations:
             # entry_func = self._data_entry_factory(table_name, data_list, db_obj)
             # new_last_id = entry_func(data_list, db_obj)
             return self._data_entry_factory(table_name, data_list, session_obj)
-
-            # firstname = []
-            # last_id = []
-            # with session_maker_obj.begin() as session:
-            #     cust_obj = tb.Customer()
-            #     column = cust_obj.get_column(column_name='firstname')
-            #     query = session.query(tb.Customer).filter(column == 'Harry')
-            #     engine_obj = db_obj.register_engine()
-            #     data = pd.read_sql_query(query.statement, engine_obj)
-            #     # results = session.query(tb.Customer).all()
-            #     # results = session.query(tb.Customer).from_statement(text("SELECT LAST (id) FROM customer"))
-            #     # for row in results:
-            #     #     last_id.append(row.id)
-            #     #     firstname.append(row.firstname)
-
             # return old_last_id, new_last_id
         else:
             print('File name to enter data is empty')
