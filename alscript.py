@@ -14,6 +14,12 @@ if __name__ == '__main__':
     # reflect table from DB given a Dbcon instance
     ops_obj.reflect_table(engine)
 
+    # add users to users table
+    user_dict = [{'name': 'Jeremy Irons', 'firstname': 'Jeremy',
+                  'lastname': 'Irons', 'email': 'jeremy@yahoo.com',
+                  'username': 'jrn876'}]
+    users = ops_obj.add_data(session, user_dict, user=True)
+
     # add data from file/dictionary
     file_name = os.path.join(os.getcwd(), 'sampleinfo.xlsx')
     customers = ops_obj.add_data(session, file_name=file_name)
@@ -26,13 +32,9 @@ if __name__ == '__main__':
     flag = ops_obj.delete_data(session, table_name='customer', column='id',
                                condition_type='=', condition=2)
     flag = ops_obj.delete_data(session, table_name='customer', column='id',
-                               condition_type='>', condition=3)
+                               condition_type='=', condition=3)
 
-    # if table_names (db not empty)
-    # then proceed with operations
-    # with ops_obj.Session.begin() as session:
-    #     print("In session")
-        # session.inspect.has_table
+    # update table row entries in db
 
     ops_obj.read_data()
 

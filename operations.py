@@ -80,8 +80,8 @@ class Operations:
 
         if user:    # add only users to db
             # check existing user records
-            # data_list = self._check_existing_records(data_list, session,
-            #                                          table_name='user')
+            data_list = self._check_existing_records(data_list, session,
+                                                     table_name='user')
             # add user to user table
             added_user = self._enter_data(session, data_list=data_list,
                                           table_name='user')
@@ -297,12 +297,12 @@ class Operations:
         old_last_id = self._get_last_id(session_obj, table_name='user')
         session_obj.close_all()
         with session_obj.begin() as session:
-            user_obj_list = [tb.Customer(fullname=j_row['name'],
-                                         firstname=j_row['firstname'],
-                                         lastname=j_row['lastname'],
-                                         email=j_row['email'],
-                                         username=j_row['username']
-                                         )
+            user_obj_list = [tb.User(fullname=j_row['name'],
+                                     firstname=j_row['firstname'],
+                                     lastname=j_row['lastname'],
+                                     email=j_row['email'],
+                                     # username=j_row['username']
+                                     )
                              for j_row in data_list if 'user_id' not in j_row]
 
             session.add_all(user_obj_list)
@@ -311,7 +311,8 @@ class Operations:
                            'lastname': j_row.lastname,
                            'name': j_row.fullname,
                            'email': j_row.email,
-                           'username': j_row.username}
+                           # 'username': j_row.username
+                           }
                           for j_row in user_obj_list]
             session.commit()
 
@@ -352,7 +353,7 @@ class Operations:
             return self._data_entry_factory(table_name, data_list, session_obj)
             # return old_last_id, new_last_id
         else:
-            print('File name to enter data is empty')
+            print('Dictionary containing data to be entered is not given')
             return None
 
     @staticmethod
@@ -401,6 +402,8 @@ def _last_id_factory(table_name: str):
         return _get_last_address_id
     elif table_name == 'transactions':
         return _get_last_transaction_id
+    elif table_name == 'user':
+        return _get_last_user_id
     else:
         raise ValueError(table_name)
 
@@ -409,9 +412,10 @@ def _get_last_customer_id(session_obj: sqlalchemy.orm.sessionmaker):
     """return last id in customer table"""
     # session_maker_obj = db_obj.register_session()
     with session_obj.begin() as session:
-        last_user = session.query(tb.Customer).order_by(desc(tb.Customer.id)).first()
-        if last_user is not None:
-            last_id = last_user.id
+        last_customer = \
+            session.query(tb.Customer).order_by(desc(tb.Customer.id)).first()
+        if last_customer is not None:
+            last_id = last_customer.id
         else:
             last_id = None
     return last_id
@@ -444,7 +448,22 @@ def _get_last_transaction_id(session_obj: sqlalchemy.orm.sessionmaker):
     with session_obj.begin() as session:
         last_transaction = \
             session.query(tb.Transactions).order_by(desc(tb.Transactions.id)).first()
-        last_id = last_transaction.id
+        if last_transaction is not None:
+            last_id = last_transaction.id
+        else:
+            last_id = None
+    return last_id
+
+
+def _get_last_user_id(session_obj: sqlalchemy.orm.sessionmaker):
+    """return last id in transactions table"""
+    with session_obj.begin() as session:
+        last_user = \
+            session.query(tb.User).order_by(desc(tb.User.id)).first()
+        if last_user is not None:
+            last_id = last_user.id
+        else:
+            last_id = None
     return last_id
 
 
@@ -465,6 +484,8 @@ def _get_id_factory_type(basis: str, category: str):
     # elif basis == 'transaction_id':
     #     # return func that gets ids based on transaction_id
     #     return _get_transaction_id_factory(category)
+    # elif basis == 'user_id':
+    #     return _get_user_id_factory(category)
     else:
         raise ValueError(basis)
 
@@ -479,6 +500,10 @@ def _get_name_id_factory(category: str):
         return _get_address_id_from_name
     # elif category == 'transaction':
     #     return None
+    elif category == 'user':
+        return _get_user_id_from_name
+    # elif category == 'username':
+    #     return _get_username_from_name
     else:
         raise ValueError(category)
 
@@ -512,7 +537,7 @@ def _get_transaction_id_factory(category: str):
 
 def _get_customer_id_from_name(condition: dict,
                                session_obj: sqlalchemy.orm.sessionmaker):
-    """return user id for given customer"""
+    """return customer id for given customer name"""
     with session_obj.begin() as session:
         # user_obj_id = session.query(tb.Customer.id).\
         #     where(and_(tb.Customer.firstname == condition['firstname'],
@@ -579,6 +604,20 @@ def _get_address_id_from_customer_id(condition: dict, session_obj: sqlalchemy.or
     if address_id is not None and len(address_id) <= 1:
         address_id = address_id[0]
         return address_id
+    else:
+        return []
+
+
+def _get_user_id_from_name(condition: dict,
+                           session_obj: sqlalchemy.orm.sessionmaker):
+    """return user id for given name"""
+    with session_obj.begin() as session:
+        user_id = session.query(tb.Customer.id).\
+            filter(and_(tb.User.firstname == condition['firstname'],
+                        tb.User.lastname == condition['lastname'])).first()
+    if user_id and user_id is not None and len(user_id) <= 1:
+        user_id = user_id[0]
+        return user_id
     else:
         return []
 
@@ -671,6 +710,12 @@ def _check_existing_records_factory(customer_info: dict,
             customer_info['address_id'] = existing_id
         return customer_info
 
+    elif table_name == 'user':
+        existing_id = existing_user_fun(customer_info, session_obj)
+        if existing_id:
+            customer_info['user_id'] = existing_id
+        return customer_info
+
     else:
         raise ValueError(table_name)
 
@@ -683,6 +728,8 @@ def _check_records_factory(table_name: str):
         return _check_tax_info_records
     elif table_name == 'address':
         return _check_address_records
+    elif table_name == 'user':
+        return _check_user_records
     else:
         raise ValueError(table_name)
 
@@ -708,6 +755,13 @@ def _check_address_records(condition, session_obj):
     return address_id
 
 
+def _check_user_records(condition, session_obj):
+    """check user table if given record is alreay present"""
+    user_id = _get_any_id(basis='name', category='user',
+                          condition=condition, session_obj=session_obj)
+    return user_id
+
+
 def _get_class_name(table_name: str):
     if table_name == 'customer':
         return tb.Customer
@@ -717,6 +771,8 @@ def _get_class_name(table_name: str):
         return tb.Transactions
     elif table_name == 'address':
         return tb.Address
+    elif table_name == 'user':
+        return tb.User
     else:
         raise ValueError(table_name)
 
