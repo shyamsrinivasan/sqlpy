@@ -404,9 +404,9 @@ def _get_id_factory_type(basis: str, category: str):
     elif basis == 'customer_id':
         # return func that gets ids based on customer_id
         return _get_customer_id_factory(category)
-    elif basis == 'transaction_id':
-        # return func that gets ids based on transaction_id
-        return _get_transaction_id_factory(category)
+    # elif basis == 'transaction_id':
+    #     # return func that gets ids based on transaction_id
+    #     return _get_transaction_id_factory(category)
     else:
         raise ValueError(basis)
 
@@ -551,11 +551,10 @@ def _remove_equal_to(table, column, condition):
 
 def _delete_row_factory(table_class_attr):
     """factory to delete rows in different tables"""
-    # return _remove_customer
-    if table_class_attr.class_.__tablename__ == 'customer':
-        return _remove_customer
-    elif table_class_attr.class_.__tablename__ == 'tax_info':
-        return _remove_tax_info
+    if table_class_attr.class_.__tablename__ == 'customer' or \
+            table_class_attr.class_.__tablename__ == 'tax_info' or \
+            table_class_attr.class_.__tablename__ == 'address':
+        return _remove_any_customer_info
     elif table_class_attr.class_.__tablename__ == 'transactions':
         # return _remove_transactions
         return None
@@ -563,7 +562,7 @@ def _delete_row_factory(table_class_attr):
         return None
 
 
-def _remove_customer(table, column, condition_type, condition, session_obj):
+def _remove_any_customer_info(table, column, condition_type, condition, session_obj):
     """remove row from customer table"""
     delete_query_fun = _condition_type_factory(condition_type)
     delete_query = delete_query_fun(table, column, condition)
@@ -573,27 +572,8 @@ def _remove_customer(table, column, condition_type, condition, session_obj):
     return True
 
 
-def _remove_tax_info(table, column, condition_type, condition, session_obj):
-    """remove row from tax_info table"""
-    # find tax_info id corresponding to given condition
-    # customer_id = {'customer_id': condition}
-    # tax_id = _get_any_id(basis='customer_id', category='tax_info',
-    #                      condition=customer_id, session_obj=session_obj)
-    delete_query_fun = _condition_type_factory(condition_type)
-    delete_query = delete_query_fun(table, column, condition)
-    with session_obj.begin() as session:
-        session.execute(delete_query)
-        session.commit()
-    return None
-
-
 def _remove_transactions(table, column, condition_type, condition, session_obj):
     """remove row from transactions table"""
-    return None
-
-
-def _remove_address():
-    """remove row from address table"""
     return None
 
 
