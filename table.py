@@ -56,7 +56,7 @@ class Customer(Reflected, Base):
 
     def __repr__(self):
         return f"Customer(id={self.id!r}, name={self.fullname!r}, email={self.email!r}, " \
-               f"phone={self.phone!r}, type={self.customer_type!r}, added_on={self.date_added!r})"
+               f"phone={self.phone!r}, type={self.type!r}, added_on={self.date_added!r})"
 
 
 class TaxInfo(Reflected, Base):
