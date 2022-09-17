@@ -6,7 +6,7 @@ import table as tb
 # import reflect as rf
 # from sqlalchemy.orm import sessionmaker
 # from sqlalchemy import create_engine, inspect
-from sqlalchemy import text, desc, and_
+from sqlalchemy import text, desc, and_, or_
 
 
 class Operations:
@@ -23,6 +23,15 @@ class Operations:
         and map to given ORM classes"""
         # engine = ops_obj.register_engine()
         tb.Reflected.prepare(engine)
+
+    @staticmethod
+    def _get_column_names(engine):
+        tb.Reflected.prepare(engine)
+        meta_obj = tb.Base.metadata
+        # table_names = [obj.name for obj in meta_obj.sorted_tables]
+        column_names = [{obj.name: [column_name for column_name in obj.columns.keys()]}
+                        for obj in meta_obj.sorted_tables]
+        return column_names
 
     @staticmethod
     def drop_table(engine):
@@ -159,9 +168,20 @@ class Operations:
                                         condition, session_obj)
         return delete_value
 
-    def change_data(self):
+    def change_data(self, session_obj: sqlalchemy.orm.sessionmaker, data_list: list):
         """update existing rows in tables"""
-        updated_rows = self._update_row
+
+        if data_list is None:
+            raise ValueError("Data should be provided as "
+                             "dictionary (data_list).")
+
+        # check which rows in which tables need changes
+        # tables_needing_update
+        table_column_names = self._get_column_names(session_obj.kw['bind'])
+        # update relevant rows in relevant tables
+        # old_rows, updated_rows = self._update_row(data_list, session_obj)
+        self._update_row(data_list, table_column_names, session_obj)
+        # return old_rows, updated_rows
         return None
 
     @staticmethod
@@ -377,8 +397,50 @@ class Operations:
                           condition, session_obj)
 
     @staticmethod
-    def _update_row():
+    def _check_row_values(data_list: list, session_obj: sqlalchemy.orm.sessionmaker):
+        """check which values in given list are different in db table"""
+
+        # table_class = _get_class_name(table_name)
+        # table_class_attr = _get_class_attribute(table_class, attribute_name=column)
+        return None
+
+    @staticmethod
+    def _update_row(data_list: list, table_column_names: list,
+                    session_obj: sqlalchemy.orm.sessionmaker):
         """update any row in any table"""
+        # with session_obj.begin() as session:
+        for i_data in data_list:
+            # update row in customer table
+            update_func = _update_row_factory(table_name='customer')
+            column_names = _get_columns_for_table(table_column_names,
+                                                  table_name='customer')
+            old_customer, new_customer = update_func(i_data, column_names, session_obj)
+
+            # update row in tax_info table
+            update_func = _update_row_factory(table_name='tax_info')
+            column_names = _get_columns_for_table(table_column_names,
+                                                  table_name='tax_info')
+            old_tax_info, new_tax_info = update_func(i_data, column_names, session_obj)
+
+            # update row in address table
+            update_func = _update_row_factory(table_name='address')
+            column_names = _get_columns_for_table(table_column_names,
+                                                  table_name='address')
+            old_address, new_address = update_func(i_data, column_names, session_obj)
+
+            # update row in transaction table
+            # update_func = _update_row_factory(table_name='transaction')
+            # get customer_id, tax_id and address_id for given name
+            # _get_any_id(basis='name', category='customer',
+            #             condition=i_data, session_obj=session_obj)
+            # _get_any_id(basis='name', category='tax_info',
+            #             condition=i_data, session_obj=session_obj)
+            # _get_any_id(basis='name', category='address',
+            #             condition=i_data, session_obj=session_obj)
+            pass
+        # compare existing row with new row details
+
+            # pass
         return None
 
     @staticmethod
@@ -686,6 +748,114 @@ def _remove_transactions(table, column, condition_type, condition, session_obj):
     return None
 
 
+def _update_row_factory(table_name):
+    """factory to return func corresponding to update different table rows"""
+    if table_name == 'customer':
+        return _update_customer_row
+    elif table_name == 'tax_info':
+        return _update_tax_info_row
+    elif table_name == 'address':
+        return _update_address_row
+    # elif table_name == 'transactions':
+    #     return _update_transaction_row
+    # elif table_name == 'user':
+    #     return _update_user_row
+    else:
+        raise ValueError("No table with name % is present", table_name)
+
+
+def _update_customer_row(new_row_info: dict, column_names: list,
+                         session_obj: sqlalchemy.orm.sessionmaker):
+    """update any row in customer table using reflected table objects"""
+
+    with session_obj.begin() as session:
+        # obtain customer object matching given name
+        if 'firstname' in new_row_info and 'lastname' in new_row_info:
+            customer_obj = session.query(tb.Customer).filter(
+                or_(tb.Customer.fullname == new_row_info['name'],
+                    and_(tb.Customer.firstname == new_row_info['firstname'],
+                         tb.Customer.lastname == new_row_info['lastname'])))
+        else:
+            customer_obj = session.query(tb.Customer).filter(
+                tb.Customer.fullname == new_row_info['name']).first()
+            old_value = {'name': customer_obj.fullname, 'customer_id': customer_obj.id}
+            new_value = {'name': customer_obj.fullname, 'customer_id': customer_obj.id}
+            for i_column in column_names:
+                if i_column in new_row_info:
+                    old_value[i_column] = _get_class_attribute(customer_obj, i_column)
+                    if _get_class_attribute(customer_obj, i_column) != new_row_info[i_column]:
+                        setattr(customer_obj, i_column, new_row_info[i_column])
+                        new_value[i_column] = _get_class_attribute(customer_obj, i_column)
+                    else:
+                        new_value[i_column] = None
+                else:
+                    old_value[i_column] = None
+                    new_value[i_column] = None
+        session.commit()
+        session.close()
+    return old_value, new_value
+
+
+def _update_tax_info_row(new_row_info: dict, column_names: list,
+                         session_obj: sqlalchemy.orm.sessionmaker):
+    """update any row in tax_info table using reflected table objects"""
+    with session_obj.begin() as session:
+        tax_info_obj = session.query(tb.TaxInfo).filter(
+            tb.TaxInfo.customer_name == new_row_info['name']).first()
+        old_value = {'name': tax_info_obj.customer_name,
+                     'customer_id': tax_info_obj.customer_id,
+                     'tax_id': tax_info_obj.id
+                     }
+        new_value = {'name': tax_info_obj.customer_name,
+                     'customer_id': tax_info_obj.customer_id,
+                     'tax_id': tax_info_obj.id
+                     }
+        for i_column in column_names:
+            if i_column in new_row_info:
+                old_value[i_column] = _get_class_attribute(tax_info_obj, i_column)
+                if _get_class_attribute(tax_info_obj, i_column) != new_row_info[i_column]:
+                    setattr(tax_info_obj, i_column, new_row_info[i_column])
+                    new_value[i_column] = _get_class_attribute(tax_info_obj, i_column)
+                else:
+                    new_value[i_column] = None
+            else:
+                old_value[i_column] = None
+                new_value[i_column] = None
+        session.commit()
+        session.close()
+    return old_value, new_value
+
+
+def _update_address_row(new_row_info: dict, column_names: list,
+                        session_obj: sqlalchemy.orm.sessionmaker):
+    """update any row in address table using reflected table objects"""
+    with session_obj.begin() as session:
+        address_obj = session.query(tb.Address).filter(
+            tb.Address.customer_name == new_row_info['name']).first()
+        old_value = {'name': address_obj.customer_name,
+                     'customer_id': address_obj.customer_id,
+                     'address_id': address_obj.id
+                     }
+        new_value = {'name': address_obj.customer_name,
+                     'customer_id': address_obj.customer_id,
+                     'address_id': address_obj.id
+                     }
+        for i_column in column_names:
+            if i_column in new_row_info:
+                old_value[i_column] = _get_class_attribute(address_obj, i_column)
+                if _get_class_attribute(address_obj, i_column) != new_row_info[i_column]:
+                    setattr(address_obj, i_column, new_row_info[i_column])
+                    new_value[i_column] = _get_class_attribute(address_obj, i_column)
+                else:
+                    new_value[i_column] = None
+            else:
+                old_value[i_column] = None
+                new_value[i_column] = None
+        session.commit()
+        session.close()
+    return old_value, new_value
+
+
 def _check_existing_records_factory(customer_info: dict,
                                     session_obj: sqlalchemy.orm.sessionmaker,
                                     table_name: str):
@@ -783,3 +953,16 @@ def _get_class_attribute(table_class, attribute_name):
         return getattr(table_class, attribute_name)
     else:
         return None
+
+
+def _get_columns_for_table(table_column_list: list, table_name: str):
+    """return all column names in table_column_list
+    corresponding to given table name"""
+    column_names = [v if k == table_name else None for i_table in table_column_list for k, v in i_table.items() ]
+    for i_column in column_names:
+        if i_column is not None:
+            table_columns = i_column
+            return table_columns
+        # else:
+        #     return column_names
+
