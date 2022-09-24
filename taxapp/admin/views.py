@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from . import admin_bp
-from .forms import LoginForm, ContactForm
+from .forms import LoginForm, ContactForm, SignupForm
 from .models import User
 
 
@@ -14,10 +14,42 @@ def index():
     return render_template('/index.html')
 
 
+@admin_bp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """take user details in form to create User object and
+        add as row to user table"""
+    form = SignupForm()
+    if form.validate_on_submit():
+        # process sign-up information using func into db add info to db here
+        # generate user object
+        new_user_obj = User(firstname=request.form['first_name'],
+                            lastname=request.form['last_name'],
+                            email=request.form['email'],
+                            phone=request.form['phone'],
+                            username=request.form['username'])
+        # add hashed password to db
+        new_user_obj.set_password(request.form['password'])
+
+        # check if user with username exists and redirect to enter data again
+        if new_user_obj.is_username_exist():
+            return redirect(url_for('admin.signup'))
+
+        # check if user with firstname/lastname exists and redirect to enter data again
+        if new_user_obj.is_user_exist():
+            return redirect(url_for('admin.signup'))
+
+        # add user object to session and commit to db
+        db.session.add(new_user_obj)
+        db.session.commit()
+        return redirect(url_for('admin.success', from_page='signup'))
+    #     flash('Addition of new user {} under progress'.format(form.username))
+    return render_template('/signup.html', form=form)
+
+
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login_home():
     """login page"""
-    # deal with a currently signed in user pressing login
+    # deal with a currently logged user pressing login
     if current_user.is_authenticated:
         return redirect(url_for('admin.index'))
 
@@ -80,3 +112,13 @@ def contact():
     return render_template('/contact.html', form=form)
 
 
+@admin_bp.route('/<from_page>/success')
+def success(from_page):
+    """success page views/routes for different sections of app"""
+    # return render_template('/success.html', page=from_page)
+    if from_page == 'contact':
+        return render_template('/contact_success.html')
+    elif from_page == 'signup':
+        # return render_template('/signup_success.html')
+        # return render_template('/success.html')
+        return redirect(url_for('admin.index'))

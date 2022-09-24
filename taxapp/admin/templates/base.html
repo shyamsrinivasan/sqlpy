@@ -32,7 +32,7 @@
 	      <li class="nav-item">        
 	        <a href="{{ url_for('admin.login_home') }}" class="nav-link text-white px-2">Login</a></li>
 	      <li class="nav-item">
-	        <a href="#" type="button" class="btn btn-primary">Sign-up</a></li> 
+	        <a href="{{ url_for('admin.signup') }}" type="button" class="btn btn-primary">Sign-up</a></li> 
 	    {% else %}     
 	      <li class="nav-item"><a href="{{ url_for('admin.logout_home' )}}" class="nav-link text-white px-2">Logout</a>
 	      </li>

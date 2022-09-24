@@ -26,6 +26,24 @@ class User(UserMixin, db.Model):
                                                      rounds=12)
         self.password_hash = hashed
 
+    def is_username_exist(self):
+        """check if user object row already exists in db with given username"""
+        user_obj = db.session.query(User).filter(User.username == self.username).first()
+        if user_obj is not None:
+            return True
+        else:
+            return False
+
+    def is_user_exist(self):
+        """check if user trying to sign up already exists"""
+        user_obj = db.session.query(User).filter(User.firstname == self.firstname,
+                                                 User.lastname == self.lastname).first()
+        if user_obj is not None:
+            return True
+        else:
+            return False
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
