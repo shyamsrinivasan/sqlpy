@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Contact us
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block main %}
+<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-lg-5 py-5">
+      <div class="col-lg-7 text-center text-lg-start">
+        <h1 class="display-4 fw-bold lh-1 mb-3">Contact people at Demeter Farms</h1>
+        <p class="col-lg-10 fs-4">If your questions are not answered in the <a href="#">FAQs</a> section, please feel free to contact us anytime using the form on your right.</p>
+        <p>{{ form.csrf_token }}</p>
+      </div>
+      <div class="col-md-10 mx-auto col-lg-5">
+        <form action="{{ url_for('home.contact') }}" method="POST" class="p-4 p-md-5 border rounded-3 bg-light">
+          {{ form.hidden_tag() }}
+          <div class="form-floating mb-3">            
+          	{{ form.name(class="form-control", id="floatingInput", placeholder="Name") }}
+          	{{ form.name.label }}            
+          </div>
+          
+          <div class="form-floating mb-3">
+          	{{ form.email(class="form-control", id="floatingInput", placeholder="name@example.com") }}    
+            {{ form.email.label }}                 	
+          </div>                 
+            
+          <div class="form-floating mb-3">
+          	{{ form.message(class="form-control", id="floatingInput", placeholder="Your message") }}
+          	{{ form.message.label }}  
+            {% if form.message.errors %}
+            <ul class="errors">
+              {% for error in form.message.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}        	
+          </div>    
+
+          {{ form.submit(class="w-100 btn btn-lg btn-primary") }}          
+          <hr class="my-4">
+          <small class="text-muted">By clicking Send Message, you agree to be contacted by us through any medium that we have on file.</small>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

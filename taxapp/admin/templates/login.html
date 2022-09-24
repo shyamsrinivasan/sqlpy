@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}
+User Login 
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/signin.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block main %}
+<main>
+	<div class="container-md form-signin">
+		<form id="signin_form" action="{{ url_for('admin.login_home') }}" method="post" novalidate>
+	    <!-- <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+	    {{ form.csrf_token() }}
+	    <h1 class="h3 mb-3 fw-normal text-center">User Login</h1>
+	    <div class="form-floating">
+	      {{ form.username(class="form-control", id="floatingInput") }}
+	      {{ form.username.label }}
+        {% for error in form.username.errors %}
+        <small class="form-text text-muted">{{ error }}</small>
+        {% endfor %}
+	    </div>
+	    
+	    <br>
+	    
+	    <div class="form-floating">
+	      {{ form.password(class="form-control", id="floatingInput") }}
+	      {{ form.password.label }}
+        {% for error in form.password.errors %}
+        <small class="form-text text-muted">{{ error }}</small>
+        {% endfor %}
+	    </div>	 
+
+	    <br>   
+	    
+	    {{ form.submit(class="w-100 btn btn-lg btn-primary") }} 
+	    
+	    <p class="mt-5 mb-3 text-muted text-center">&copy; Shyam 2022</p>
+	  </form>	
+	</div>  
+</main>
+{% endblock %}
