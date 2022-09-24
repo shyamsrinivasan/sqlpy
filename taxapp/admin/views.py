@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from . import admin_bp
-from .forms import LoginForm
+from .forms import LoginForm, ContactForm
 from .models import User
 
 
@@ -19,7 +19,7 @@ def login_home():
     """login page"""
     # deal with a currently signed in user pressing login
     if current_user.is_authenticated:
-        return redirect(url_for('home.index'))
+        return redirect(url_for('admin.index'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -29,7 +29,7 @@ def login_home():
                                                     password=password)
         if check_user:
             login_user(user=user_obj)
-            next_page = request.args.get('next')
+            next_page = request.form['next']
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('admin.index')
             return redirect(next_page)
@@ -74,9 +74,9 @@ def about():
 @login_required
 def contact():
     """contact us page"""
-    # form = ContactForm()
+    form = ContactForm()
     # if form.validate_on_submit():
     #     return redirect(url_for('home.success', from_page='contact'))
-    return render_template('/contact.html')
+    return render_template('/contact.html', form=form)
 
 
