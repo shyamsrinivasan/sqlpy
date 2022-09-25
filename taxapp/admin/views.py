@@ -1,5 +1,5 @@
 from taxapp import db, flask_bcrypt
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from . import admin_bp
@@ -41,8 +41,8 @@ def signup():
         # add user object to session and commit to db
         db.session.add(new_user_obj)
         db.session.commit()
+        flash('Addition of new user {} successful'.format(form.username))
         return redirect(url_for('admin.success', from_page='signup'))
-    #     flash('Addition of new user {} under progress'.format(form.username))
     return render_template('/signup.html', form=form)
 
 
@@ -64,9 +64,11 @@ def login_home():
             next_page = request.form['next']
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('admin.index')
+            flash('You are successfully logged in', 'info')
             return redirect(next_page)
         else:
-            return 'Wrong username or password', 404
+            flash('Wrong username or password', 'error')
+            return render_template('/login.html', form=form)
     else:
         return render_template('/login.html', form=form)
 
@@ -86,7 +88,10 @@ def _check_user_password(username, password):
 @admin_bp.route('/logout')
 def logout_home():
     """logout user"""
+    if current_user.is_username_exist():
+        username = current_user.username
     logout_user()
+    flash('User {} logged out succesfully'.format(username))
     return redirect(url_for('admin.index'))
 
 
@@ -117,7 +122,7 @@ def success(from_page):
     """success page views/routes for different sections of app"""
     # return render_template('/success.html', page=from_page)
     if from_page == 'contact':
-        return render_template('/contact_success.html')
+        return render_template('/success.html', page=from_page)
     elif from_page == 'signup':
         # return render_template('/signup_success.html')
         # return render_template('/success.html')
