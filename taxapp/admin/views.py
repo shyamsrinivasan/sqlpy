@@ -63,7 +63,7 @@ def login_home():
             login_user(user=user_obj)
             next_page = request.form['next']
             if not next_page or url_parse(next_page).netloc != '':
-                next_page = url_for('admin.index')
+                next_page = url_for('admin.dashboard', username=username)
             flash('You are successfully logged in', 'info')
             return redirect(next_page)
         else:
@@ -93,6 +93,24 @@ def logout_home():
     logout_user()
     flash('User {} logged out succesfully'.format(username))
     return redirect(url_for('admin.index'))
+
+
+@admin_bp.route('/dashboard/<username>')
+@login_required
+def dashboard(username):
+    """route to user dashboard"""
+    user_obj = User.query.filter(User.username == username).first()
+    if user_obj is None:
+        flash('No user with username {} exist'.format(username), 'error')
+        return redirect(url_for('admin.login_home'))
+    return render_template('/dashboard.html', user=user_obj)
+
+
+@admin_bp.route('/customers')
+@login_required
+def customers():
+    """route to access various customer related pages"""
+    return render_template('/customers.html')
 
 
 @admin_bp.route('/faq')
