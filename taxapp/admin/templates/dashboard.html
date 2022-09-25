@@ -7,6 +7,22 @@ User Dashboard
 {% block styles %}
 <link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
 <link href="{{ url_for('static', filename='css/cover.css') }}" type="text/css" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/dashboard.css') }}" type="text/css" rel="stylesheet">
+<style>
+  .bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  @media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+      font-size: 3.5rem;
+    }
+  }
+</style>
 {% endblock %}
 
 {% block main %}
@@ -14,6 +30,14 @@ User Dashboard
   <main class="px-3">         
       <p class="lead">Welcome {{ user.firstname }} {{ user.lastname }}. Your are logged in as {{ user.username }}</p>        
   </main>
+  <nav class="py-2 bg-dark text-white border-bottom">
+    <ul class="nav me-auto">    
+      <li class="nav-item"><a href="{{ url_for('admin.customers') }}" class="nav-link text-white px-2">Customers</a></li>
+      <li class="nav-item"><a href="#" class="nav-link text-white px-2 active" title="Calculate taxes">Add customer</a></li>
+      <li class="nav-item"><a href="#" class="nav-link text-white px-2 active" title="Calculate taxes">Analyze</a></li>
+      <li class="nav-item"><a href="https://eportal.incometax.gov.in/iec/foservices/#/login" class="nav-link text-white px-2 active" title="File income tax return" target="_blank">e-File Returns</a></li>    
+    </ul>
+  </nav>
 </div>
 {% endblock %}
 
