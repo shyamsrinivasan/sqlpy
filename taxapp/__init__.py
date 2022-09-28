@@ -40,7 +40,7 @@ def create_app():
     app.register_blueprint(admin_bp)
 
     db.init_app(app)
-    migrate.init_app(app)
+    migrate.init_app(app, db)
     with app.app_context():
         db.create_all()
 
