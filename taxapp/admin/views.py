@@ -96,7 +96,7 @@ def logout_home():
 
 
 @admin_bp.route('/dashboard/<username>')
-@login_required
+# @login_required - removed until debugging is complete
 def dashboard(username):
     """route to user dashboard"""
     user_obj = User.query.filter(User.username == username).first()
