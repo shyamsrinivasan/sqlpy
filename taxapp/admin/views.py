@@ -1,10 +1,10 @@
-from taxapp import db, flask_bcrypt
 from flask import render_template, request, redirect, url_for, flash
-from flask_login import current_user, login_user, logout_user, login_required
-from werkzeug.urls import url_parse
 from . import admin_bp
 from .forms import LoginForm, ContactForm, SignupForm
 from .models import User
+from taxapp import db, flask_bcrypt
+from flask_login import current_user, login_user, logout_user, login_required
+from werkzeug.urls import url_parse
 
 
 @admin_bp.route('/')
