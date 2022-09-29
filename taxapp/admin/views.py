@@ -103,7 +103,7 @@ def dashboard(username):
     if user_obj is None:
         flash('No user with username {} exist'.format(username), 'error')
         return redirect(url_for('admin.login_home'))
-    return render_template('/dashboard.html', user=user_obj)
+    return render_template('/dashboard_2.html', user=user_obj)
 
 
 @admin_bp.route('/customers')
