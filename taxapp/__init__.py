@@ -35,9 +35,11 @@ def create_app():
         pass
 
     from .admin import admin_bp
+    from.customer import customer_bp
 
     # register blueprints
     app.register_blueprint(admin_bp)
+    app.register_blueprint(customer_bp)
 
     db.init_app(app)
     migrate.init_app(app, db)

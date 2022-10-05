@@ -114,13 +114,6 @@ def dashboard(username):
     return render_template('/dashboard.html', user=user_obj)
 
 
-@admin_bp.route('/customers')
-@login_required
-def customers():
-    """route to access various customer related pages"""
-    return render_template('/customers.html')
-
-
 @admin_bp.route('/faq')
 def faq():
     """FAQs page"""
