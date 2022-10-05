@@ -25,8 +25,13 @@
 	  <div class="container d-flex flex-wrap">	  	
 	    <ul class="nav me-auto">	    	
 	      <li class="nav-item"><a href="{{ url_for('admin.index') }}" class="nav-link text-white px-2 active" aria-current="page">Home</a></li>     
+	      {% if current_user.is_anonymous %}
+	      	<li class="nav-item"><a href="{{ url_for('admin.dashboard_no_login') }}" class="nav-link text-white px-2">Dashboard</a></li>
+	      {% else %}
+	      	<li class="nav-item"><a href="{{ url_for('admin.dashboard', username=current_user.username) }}" class="nav-link text-white px-2">Dashboard</a></li>
+	      {% endif %}
 	      <li class="nav-item"><a href="{{ url_for('admin.faq') }}" class="nav-link text-white px-2">FAQs</a></li>
-	      <li class="nav-item"><a href="{{ url_for('admin.about') }}" class="nav-link text-white px-2">About</a></li>
+	      <li class="nav-item"><a href="{{ url_for('admin.about') }}" class="nav-link text-white px-2">About</a></li>	      
 	    </ul>
 	    <ul class="nav">
 	    {% if current_user.is_anonymous %}   	    	    
@@ -34,8 +39,7 @@
 	        <a href="{{ url_for('admin.login_home') }}" class="nav-link text-white px-2">Login</a></li>
 	      <li class="nav-item">
 	        <a href="{{ url_for('admin.signup') }}" type="button" class="btn btn-primary">Sign-up</a></li> 
-	    {% else %}
-	    	<li class="nav-item"><a href="{{ url_for('admin.dashboard', username=current_user.username) }}" class="nav-link text-white px-2">Dashboard</a></li>
+	    {% else %}	    	
 	      	<li class="nav-item"><a href="{{ url_for('admin.logout_home' )}}" type="button" class="btn btn-primary">Logout</a></li>
 	    {% endif %}            
 	    </ul>
