@@ -15,6 +15,7 @@ def index():
 
 
 @admin_bp.route('/signup', methods=['GET', 'POST'])
+@login_required
 def signup():
     """take user details in form to create User object and
         add as row to user table"""
@@ -95,8 +96,15 @@ def logout_home():
     return redirect(url_for('admin.index'))
 
 
+@admin_bp.route('/dashboard')
+def dashboard_no_login():
+    """dashboard without username input - redirect to login page"""
+    flash('Need to login to access user dashboard', 'error')
+    return redirect(url_for('admin.login_home'))
+
+
 @admin_bp.route('/dashboard/<username>')
-# @login_required - removed until debugging is complete
+@login_required     # removed until debugging is complete
 def dashboard(username):
     """route to user dashboard"""
     user_obj = User.query.filter(User.username == username).first()
