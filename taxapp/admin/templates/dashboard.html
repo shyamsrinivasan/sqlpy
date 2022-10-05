@@ -73,9 +73,9 @@ User Dashboard
         <div class="collapse" id="dashboard-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li><a href="#" class="link-light rounded">Overview</a></li>
-            <li><a href="#" class="link-light rounded">Add</a></li>
-            <li><a href="#" class="link-light rounded">Remove</a></li>
-            <li><a href="#" class="link-light rounded">Modify</a></li>
+            <li><a href="{{ url_for('customer.add_customer') }}" class="link-light rounded">Add</a></li>
+            <li><a href="{{ url_for('customer.remove_customer') }}" class="link-light rounded">Remove</a></li>
+            <li><a href="{{ url_for('customer.modify_customer') }}" class="link-light rounded">Modify</a></li>
             <li><a href="#" class="link-light rounded">Taxes</a></li>
           </ul>
         </div>
