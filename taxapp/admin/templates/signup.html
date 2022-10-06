@@ -13,54 +13,57 @@ User Sign-up
   <div class="row g-lg-5 py-5">
     <div class="col-lg-5 text-center text-lg-start">
       <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
-      <p class="col-lg-10 fs-4">Please enter the requested details to signup as an user for the application.</p>
-    </div>
-    <div class="col-md-10 mx-auto col-lg-7">
-      <form action="{{ url_for('admin.signup') }}" method="POST" novalidate class="p-4 p-md-5 border rounded-3 bg-light">
+      <p class="col-lg-10 fs-4">Please enter the requested details to sign up as an user</p>
+
+      <hr class="my-4">
+    </div>   
+
+    <div class="col-md-12 mx-auto col-lg-8">
+      <form action="{{ url_for('admin.signup') }}" method="POST" novalidate class="row g-3 border rounded-3 bg-light">
         {{ form.csrf_token() }}   
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-3 col-6 col-md-4">
           {{ form.first_name(class="form-control", id="floatingInput") }}
           {{ form.first_name.label }}
           {% for error in form.first_name.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}
         </div>
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-3 col-6 col-md-4">
           {{ form.last_name(class="form-control", id="floatingInput") }}
           {{ form.last_name.label }}    
           {% for error in form.last_name.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}      
-        </div>   
-        <div class="form-floating mb-3">
+        </div>  
+        <div class="form-floating mb-3 col-6 col-md-4">
+          {{ form.username(class="form-control", id="floatingInput") }}
+          {{ form.username.label }}   
+          {% for error in form.username.errors %}
+          <small class="form-text text-muted">{{ error }}</small>    
+          {% endfor %}
+        </div> 
+        <div class="form-floating mb-3 col-md-6">
           {{ form.email(class="form-control", id="floatingInput") }}
           {{ form.email.label }}  
           {% for error in form.email.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}        
         </div>      
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-3 col-md-6">
           {{ form.phone(class="form-control", id="floatingInput") }}
           {{ form.phone.label }}   
           {% for error in form.phone.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}        
-        </div>
-        <div class="form-floating mb-3">
-          {{ form.username(class="form-control", id="floatingInput") }}
-          {{ form.username.label }}   
-          {% for error in form.username.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}
-        </div>
-        <div class="form-floating mb-3">
+        </div>        
+        <div class="form-floating mb-3 col-md-6">
           {{ form.password(class="form-control floatingPassword", id="floatingInput") }}
           {{ form.password.label }}      
           {% for error in form.password.errors %}
           <small class="form-text text-muted">{{ error }}</small>       
           {% endfor %}
         </div>
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-3 col-md-6">
           {{ form.confirm_pass(class="form-control floatingPassword", id="floatingInput") }}
           {{ form.confirm_pass.label }}
           {% for error in form.confirm_pass.errors %}
@@ -68,10 +71,9 @@ User Sign-up
           {% endfor %}          
         </div>
 
+        <small class="text-muted text-center">By clicking Create User, you agree to the terms of use.</small> 
         {{ form.submit(class="w-100 btn btn-lg btn-primary") }} 
-        
-        <hr class="my-4">
-        <small class="text-muted">By clicking Sign up, you agree to the terms of use.</small>
+              
       </form>
     </div>
   </div>
