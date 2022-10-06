@@ -20,10 +20,13 @@ class CustomerSignup(FlaskForm):
 
     first_name = StringField('First Name', [DataRequired(message='Please provide a first name')])
     last_name = StringField('Last Name', [DataRequired(message='Please provide a last name')])
-    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
-    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
     dob = DateField('Date of Birth', [DataRequired()])
-    customer_type = SelectField('Employee Type', [DataRequired()], choices=[('Personal', 'personal'),
-                                                                            ('Commercial', 'business')])
+    customer_type = SelectField('Customer Type', [DataRequired()], choices=[('personal', 'individual'),
+                                                                            ('commercial', 'business')])
+    country_code = SelectField('Code', [Optional()], choices=[('india', '+91'),
+                                                              ('usa', '+1')])
+    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+
     # recaptcha = RecaptchaField()
     submit = SubmitField('Add Customer')
