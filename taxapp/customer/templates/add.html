@@ -9,68 +9,6 @@ Add customer
 {% endblock %}
 
 {% block main %}
-<div class="d-flex flex-column flex-shrink-0 p-3 bg-dark" style="width: 280px;">    
-    
-  <!--<a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">-->   
-  <span class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
-  <!--</a>-->
-
-  <li class="border-top my-3"></li>
-
-  <ul class="list-unstyled ps-0">
-    <li class="mb-1">
-      <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
-        User
-      </button>
-      <div class="collapse" id="home-collapse">
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-          <li><a href="#" class="link-light rounded">Overview</a></li>
-          <li><a href="{{ url_for('admin.signup') }}" class="link-light rounded">Add user</a></li>
-          <li><a href="#" class="link-light rounded">Remove user</a></li>            
-        </ul>
-      </div>
-    </li>
-    <li class="mb-1">
-      <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
-        Customer
-      </button>
-      <div class="collapse" id="dashboard-collapse">
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-          <li><a href="#" class="link-light rounded">Overview</a></li>
-          <li><a href="{{ url_for('customer.add') }}" class="link-light rounded">Add</a></li>
-          <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded">Remove</a></li>
-          <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded">Modify</a></li>
-          <li><a href="#" class="link-light rounded">Taxes</a></li>
-        </ul>
-      </div>
-    </li>
-    <li class="mb-1">
-      <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
-        Billing
-      </button>
-      <div class="collapse" id="orders-collapse">
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-          <li><a href="#" class="link-light rounded">Overview</a></li>
-          <li><a href="#" class="link-light rounded">New</a></li>            
-        </ul>
-      </div>
-    </li>
-    <li class="border-top my-3"></li>
-    <li class="mb-1">
-      <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
-        Account
-      </button>
-      <div class="collapse" id="account-collapse">
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">            
-          <li><a href="#" class="link-light rounded">Profile</a></li>            
-          <li><a href="#" class="link-light rounded">Sign out</a></li>
-        </ul>
-      </div>
-    </li>
-  </ul>
-</div>
-
-
 <div class="container col-xl-12 col-xxl-12 px-4 py-5">
   <div class="row g-lg-5 py-5">
     <div class="col-lg-5 text-center text-lg-start">
