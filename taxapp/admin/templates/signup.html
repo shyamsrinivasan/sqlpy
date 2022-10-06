@@ -14,7 +14,6 @@ User Sign-up
     <div class="col-lg-5 text-center text-lg-start">
       <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
       <p class="col-lg-10 fs-4">Please enter the requested details to sign up as an user</p>
-
       <hr class="my-4">
     </div>   
 
@@ -67,7 +66,7 @@ User Sign-up
           {{ form.confirm_pass(class="form-control floatingPassword", id="floatingInput") }}
           {{ form.confirm_pass.label }}
           {% for error in form.confirm_pass.errors %}
-          <small class="form-text text-muted">{{ error }}</small>       
+          <small class="form-text text-muted invalid-feedback">{{ error }}</small>       
           {% endfor %}          
         </div>
 
