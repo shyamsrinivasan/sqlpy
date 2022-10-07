@@ -5,14 +5,101 @@ Homepage
 {% endblock %}
 
 {% block styles %}
-<link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/home.css') }}" type="text/css" rel="stylesheet" /> 
 {% endblock %}
 
-{% block main %}
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center text-white bg-dark">
-  <main class="px-3">
-    <h1>Demeter Farms Client Management System</h1>    
-  </main>
+{% block content %}
+<div class="row align-self-start gx-1">
+
+{% if current_user.is_anonymous %}
+  <div class="d-flex p-3 flex-column text-center text-white bg-dark col align-items-center">
+    <main class="px-3">
+      <h1>Demeter Farms Client Management System</h1>    
+    </main>
+  </div>
+
+{% else %}
+  <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
+    <a href="{{ url_for('admin.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <span class="bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
+    </a>
+
+    <ul class="list-unstyled ps-0">
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+          User
+        </button>
+        <div class="collapse" id="home-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="{{ url_for('admin.signup') }}" class="link-light rounded">Add user</a></li>
+            <li><a href="#" class="link-light rounded">Remove user</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+          Customer
+        </button>
+        <div class="collapse" id="dashboard-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded">Add</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded">Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded">Modify</a></li>
+            <li><a href="#" class="link-light rounded">Taxes</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+          Billing
+        </button>
+        <div class="collapse" id="orders-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="#" class="link-light rounded">New</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="border-top my-3"></li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+          Account
+        </button>
+        <div class="collapse" id="account-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">            
+            <li><a href="#" class="link-light rounded">Profile</a></li>            
+            <li><a href="#" class="link-light rounded">Sign out</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Sidebar Message -->    
+    <div class="text-center text-white">
+      <footer class="mt-auto text-white-50">
+        <span>Copyright &copy Demeter farms</span>      
+      </footer> 
+    </div> 
+  </div>
+
+  <!-- Main canvas info banner -->
+  <div class="d-flex p-3 flex-column text-center text-white bg-dark col border">
+    <main class="px-3">
+      <h1>Demeter Farms Client Management System</h1>    
+    </main>
+  </div>
+{% endif %}
+
 </div>
+{% endblock %}
+
+{% block script %}
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
 {% endblock %}
