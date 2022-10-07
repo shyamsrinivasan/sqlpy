@@ -10,8 +10,9 @@ Homepage
 <link href="{{ url_for('static', filename='css/home.css') }}" type="text/css" rel="stylesheet" /> 
 {% endblock %}
 
+
 {% block content %}
-<div class="row align-self-start gx-1">
+<div class="row align-self-start gx-1 mx-1">
 
 {% if current_user.is_anonymous %}
   <div class="d-flex p-3 flex-column text-center text-white bg-dark col align-items-center">
@@ -87,10 +88,8 @@ Homepage
   </div>
 
   <!-- Main canvas info banner -->
-  <div class="d-flex p-3 flex-column text-center text-white bg-dark col border">
-    <main class="px-3">
-      <h1>Demeter Farms Client Management System</h1>    
-    </main>
+  <div class="d-flex p-3 h-100 flex-column text-center text-white bg-dark col-md-9 border">
+    <h1>Demeter Farms Client Management System</h1>   
   </div>
 {% endif %}
 
