@@ -52,7 +52,9 @@ def login_home():
     """login page"""
     # deal with a currently logged user pressing login
     if current_user.is_authenticated:
-        return redirect(url_for('admin.index'))
+        flash('User {} already logged in'.format(current_user.username))
+        return redirect(url_for('admin.dashboard',
+                                username=current_user.username))
 
     form = LoginForm()
     if form.validate_on_submit():
