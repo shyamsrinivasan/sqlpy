@@ -9,6 +9,8 @@ from flask_login import login_required
 def add():
     """route to access customer addition form/page"""
     form = CustomerSignup()
+    if form.validate_on_submit():
+        return 'Customer added successfully'
     return render_template('/add.html', form=form)
 
 
