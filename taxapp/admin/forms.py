@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms import HiddenField, EmailField, TextAreaField
+from wtforms import HiddenField, EmailField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Email, Length
 from wtforms.validators import Optional, ValidationError, EqualTo
 
@@ -34,6 +34,8 @@ class SignupForm(FlaskForm):
     last_name = StringField('Last Name', [DataRequired(message='Please provide your last name')])
     # dob = DateField('Date of Birth', [DataRequired()])
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+    country_code = SelectField('Code', [Optional()], choices=[('india', '+91'),
+                                                              ('usa', '+1')])
     phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
 
     # login details
@@ -52,6 +54,17 @@ class SignupForm(FlaskForm):
     #                                                                         ('Hybrid', 'hybrid')])
     # recaptcha = RecaptchaField()
     submit = SubmitField('Create User')
+
+
+class RemoveUser(FlaskForm):
+    """form to remove user from db"""
+
+    user_id = StringField('User ID', [Optional()])
+    first_name = StringField('First Name', [Optional()])
+    last_name = StringField('Last Name', [Optional()])
+    username = StringField('Username', [Optional(),
+                                        Length(min=6,
+                                               message='Your username should be minimum 6 characters')])
 
 
 class ContactForm(FlaskForm):

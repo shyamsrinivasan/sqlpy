@@ -124,9 +124,9 @@ User Sign-up
             {% endfor %}        
           </div>  
           <div class="form-floating mb-3 col-md-2">
-            {{ form.email(class="form-control", id="floatingInput") }}
-            {{ form.email.label }}  
-            {% for error in form.email.errors %}
+            {{ form.country_code(class="form-control", id="floatingInput") }}
+            {{ form.country_code.label }}  
+            {% for error in form.country_code.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}        
           </div>
