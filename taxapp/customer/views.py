@@ -1,9 +1,9 @@
-from flask import render_template, request, flash
+from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
 from .forms import CustomerSignup
 from .models import Customer
 from taxapp import db
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 @customer_bp.route('/customer/add', methods=['GET', 'POST'])
@@ -23,14 +23,17 @@ def add():
         # set phone number
         new_customer_obj.set_full_phone(country_code=request.form['country_code'],
                                         phone_number=request.form['phone'])
+        # set added user
+        new_customer_obj.set_added_user(change_type='add',
+                                        username=current_user.username)
 
         # add user object to session and commit to db
         db.session.add(new_customer_obj)
         db.session.commit()
 
         flash('Addition of new customer {} successful'.format(customer_name))
-        return 'Customer added successfully'
-        # return redirect(url_for('admin.dashboard', username=current_user.username))
+        # return 'Customer added successfully'
+        return redirect(url_for('admin.dashboard', username=current_user.username))
     return render_template('/add.html', form=form)
 
 
