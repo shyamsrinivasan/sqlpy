@@ -3,7 +3,7 @@ from taxapp import db, flask_bcrypt
 from taxapp import login_manager
 
 
-class Customer(UserMixin, db.Model):
+class Customer(db.Model):
     __tablename__ = 'test_customers'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -11,7 +11,7 @@ class Customer(UserMixin, db.Model):
     lastname = db.Column(db.String(20), nullable=False)
     fullname = db.Column(db.String(40), index=True)
     email = db.Column(db.String(30), index=True)
-    phone = db.Column(db.String(10))
+    phone = db.Column(db.String(14))
     type = db.Column(db.Enum('personal', 'commercial', name='customer_type'), nullable=False)
     date_added = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
     date_updated = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
