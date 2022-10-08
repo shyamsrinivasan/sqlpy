@@ -59,7 +59,7 @@ class CustomerSignup(FlaskForm):
 class RemoveCustomer(FlaskForm):
     """form to remove customer from db"""
 
-    customer_id = StringField('Customer Number', [Optional()])
+    customer_id = StringField('Customer ID', [Optional()])
     first_name = StringField('First Name', [Optional()])
     last_name = StringField('Last Name', [Optional()])
     pan = StringField('PAN', [Optional(),
@@ -70,5 +70,9 @@ class RemoveCustomer(FlaskForm):
                                       Length(min=12, max=12,
                                              message='Aadhaar should to 12 digits')
                                       ])
+    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
+                                                              ('+1', 'USA')])
     phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+
+    submit = SubmitField('Search Customer')

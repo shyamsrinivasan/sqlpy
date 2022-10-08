@@ -1,6 +1,6 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
-from .forms import CustomerSignup
+from .forms import CustomerSignup, RemoveCustomer
 from .models import Customer
 from taxapp import db
 from flask_login import login_required, current_user
@@ -37,11 +37,12 @@ def add():
     return render_template('/add.html', form=form)
 
 
-@customer_bp.route('/customer/remove')
+@customer_bp.route('/customer/remove', methods=['GET', 'POST'])
 # @login_required
 def remove():
     """route access customer removal form/page"""
-    return render_template('/remove.html')
+    form = RemoveCustomer()
+    return render_template('/remove.html', form=form)
 
 
 @customer_bp.route('/customer/modify')
