@@ -35,7 +35,7 @@ def create_app():
         pass
 
     from .admin import admin_bp
-    from.customer import customer_bp
+    from .customer import customer_bp
 
     # register blueprints
     app.register_blueprint(admin_bp)
