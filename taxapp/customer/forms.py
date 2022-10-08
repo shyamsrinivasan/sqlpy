@@ -23,8 +23,8 @@ class CustomerSignup(FlaskForm):
     last_name = StringField('Last Name', [DataRequired(message='Please provide a last name')])
     customer_type = SelectField('Customer Type', [DataRequired()], choices=[('personal', 'individual'),
                                                                             ('commercial', 'business')])
-    country_code = SelectField('Code', [Optional()], choices=[('india', '+91'),
-                                                              ('usa', '+1')])
+    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
+                                                              ('+1', 'USA')])
     phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
