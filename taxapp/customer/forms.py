@@ -29,7 +29,7 @@ class CustomerSignup(FlaskForm):
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     # id details
-    dob = DateField('Date of Birth', [DataRequired()])
+    dob = DateField('Date of Birth', [DataRequired(message='Date of birth is required')])
     pan = StringField('PAN', [DataRequired('Please provide customer PAN'),
                               Length(min=10, max=10,
                                      message='PAN should be 10 characters')
@@ -39,7 +39,7 @@ class CustomerSignup(FlaskForm):
                                              message='Aadhaar should to 12 digits')])
 
     # address details
-    street_num = StringField('Street Number', [DataRequired('Please provide a street number')])
+    street_num = StringField('Street Number', [DataRequired('Street number required')])
     house_num = StringField('House/Unit Number', [Optional()])
     street_name = StringField('Street Name', [DataRequired('Please provide street name')])
     locality = StringField('Area/Locality', [Optional()])
