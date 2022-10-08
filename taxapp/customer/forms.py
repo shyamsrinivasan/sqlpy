@@ -54,3 +54,21 @@ class CustomerSignup(FlaskForm):
 
     # recaptcha = RecaptchaField()
     submit = SubmitField('Add Customer')
+
+
+class RemoveCustomer(FlaskForm):
+    """form to remove customer from db"""
+
+    customer_id = StringField('Customer Number', [Optional()])
+    first_name = StringField('First Name', [Optional()])
+    last_name = StringField('Last Name', [Optional()])
+    pan = StringField('PAN', [Optional(),
+                              Length(min=10, max=10,
+                                     message='PAN should be 10 characters')
+                              ])
+    aadhaar = StringField('Aadhaar', [Optional(),
+                                      Length(min=12, max=12,
+                                             message='Aadhaar should to 12 digits')
+                                      ])
+    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
