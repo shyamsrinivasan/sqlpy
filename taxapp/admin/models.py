@@ -9,10 +9,14 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(20), nullable=False)
     lastname = db.Column(db.String(20), nullable=False)
+    fullname = db.Column(db.String(40), nullable=False, index=True)
     email = db.Column(db.String(30))
-    phone = db.Column(db.String(10))
-    username = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(14))
+    username = db.Column(db.String(20), nullable=False, index=True)
     password_hash = db.Column(db.String(60))
+    added_on = db.Column(db.DateTime(timezone=True), nullable=False,
+                         server_default=db.func.now())
+    added_by = db.Column(db.String(20))
 
     def __repr__(self):
         return f"User(id={self.id!r}, firstname={self.firstname!r}," \
@@ -42,6 +46,14 @@ class User(UserMixin, db.Model):
             return True
         else:
             return False
+
+    def set_full_name(self):
+        """set value of fullname column using first and last name"""
+        self.fullname = self.firstname + ' ' + self.lastname
+
+    def set_added_user(self, username):
+        """set added_user and updated_user"""
+        self.added_by = username
 
 
 @login_manager.user_loader

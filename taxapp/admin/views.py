@@ -28,8 +28,10 @@ def signup():
                             email=request.form['email'],
                             phone=request.form['phone'],
                             username=request.form['username'])
-        # add hashed password to db
+        # add hashed password to db, full name and added_by
         new_user_obj.set_password(request.form['password'])
+        new_user_obj.set_full_name()
+        new_user_obj.set_added_user(current_user.username)
 
         # check if user with username exists and redirect to enter data again
         if new_user_obj.is_username_exist():
