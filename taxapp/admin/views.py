@@ -33,18 +33,24 @@ def signup():
         new_user_obj.set_full_name()
         new_user_obj.set_added_user(current_user.username)
 
-        # check if user with username exists and redirect to enter data again
-        if new_user_obj.is_username_exist():
-            return redirect(url_for('admin.signup'))
-
         # check if user with firstname/lastname exists and redirect to enter data again
         if new_user_obj.is_user_exist():
+            flash(message='User with name {} already exists'.format(new_user_obj.fullname),
+                  category='primary')
+            return redirect(url_for('admin.signup'))
+
+        # check if user with username exists and redirect to enter data again
+        if new_user_obj.is_username_exist():
+            flash(message='User {} already exist. '
+                          'Provide a different username'.format(new_user_obj.username),
+                  category='primary')
             return redirect(url_for('admin.signup'))
 
         # add user object to session and commit to db
         db.session.add(new_user_obj)
         db.session.commit()
-        flash('Addition of new user {} successful'.format(form.username))
+        flash('Addition of new user {} successful'.format(form.username),
+              category='success')
         return redirect(url_for('admin.dashboard', username=current_user.username))
     return render_template('/signup.html', form=form)
 
@@ -54,7 +60,8 @@ def login_home():
     """login page"""
     # deal with a currently logged user pressing login
     if current_user.is_authenticated:
-        flash('User {} already logged in'.format(current_user.username))
+        flash('User {} already logged in'.format(current_user.username),
+              category='primary')
         return redirect(url_for('admin.dashboard',
                                 username=current_user.username))
 
@@ -69,10 +76,10 @@ def login_home():
             next_page = request.form['next']
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('admin.dashboard', username=username)
-            flash('You are successfully logged in', 'info')
+            flash('You are successfully logged in', category='success')
             return redirect(next_page)
         else:
-            flash('Wrong username or password', 'error')
+            flash('Wrong username or password', category='error')
             return render_template('/login.html', form=form)
     else:
         return render_template('/login.html', form=form)
@@ -96,14 +103,16 @@ def logout_home():
     if current_user.is_username_exist():
         username = current_user.username
     logout_user()
-    flash('User {} logged out succesfully'.format(username))
+    flash('User {} logged out succesfully'.format(username),
+          category='success')
     return redirect(url_for('admin.index'))
 
 
 @admin_bp.route('/dashboard')
 def dashboard_no_login():
     """dashboard without username input - redirect to login page"""
-    flash('Need to login to access user dashboard', 'error')
+    flash('Need to login to access user dashboard',
+          category='error')
     return redirect(url_for('admin.login_home'))
 
 
@@ -113,7 +122,8 @@ def dashboard(username):
     """route to user dashboard"""
     user_obj = User.query.filter(User.username == username).first()
     if user_obj is None:
-        flash('No user with username {} exist'.format(username), 'error')
+        flash('No user with username {} exist'.format(username),
+              category='error')
         return redirect(url_for('admin.login_home'))
     return render_template('/dashboard.html', user=user_obj)
 
