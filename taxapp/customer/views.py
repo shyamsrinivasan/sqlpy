@@ -1,12 +1,12 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
-from .forms import CustomerSignup, RemoveCustomer
+from .forms import CustomerSignup, RemoveCustomer, SearchCustomer
 from .models import Customer
 from taxapp import db
 from flask_login import login_required, current_user
 
 
-@customer_bp.route('/customer/add', methods=['GET', 'POST'])
+@customer_bp.route('/add', methods=['GET', 'POST'])
 # @login_required
 def add():
     """route to access customer addition form/page"""
@@ -31,21 +31,35 @@ def add():
         db.session.add(new_customer_obj)
         db.session.commit()
 
-        flash('Addition of new customer {} successful'.format(customer_name))
+        flash('Addition of new customer {} successful'.format(customer_name),
+              category='success')
         # return 'Customer added successfully'
         return redirect(url_for('admin.dashboard', username=current_user.username))
     return render_template('/add.html', form=form)
 
 
-@customer_bp.route('/customer/remove', methods=['GET', 'POST'])
+@customer_bp.route('/remove', methods=['GET', 'POST'])
 # @login_required
 def remove():
-    """route access customer removal form/page"""
-    form = RemoveCustomer()
-    return render_template('/remove.html', form=form)
+    """route access first customer removal form/page (choose search category)"""
+    # go to search category page -> details page -> remove page
+    form = SearchCustomer()
+    if form.validate_on_submit():  # if request.method == 'POST':
+        return redirect(url_for('customer.search_customer', category=request.form['search_by']))
+
+    return render_template('/remove_1.html', form=form)
 
 
-@customer_bp.route('/customer/modify')
+@customer_bp.route('/search/<category>', methods=['GET', 'POST'])
+def search_customer(category):
+    """access page to enter customer search details"""
+    details_form = RemoveCustomer()
+    # enter customer details to search
+    # customers = search_customer(request.form)
+    return render_template('/find_customer.html', form=details_form)
+
+
+@customer_bp.route('/modify')
 # @login_required
 def modify():
     """route to change customer details"""
@@ -62,5 +76,12 @@ def _add_customer(form_obj):
     # db.session.add(new_user_obj)
     # db.session.commit()
     return None
+
+
+def search_customer(form_obj):
+    """seacrh for customer given in form object in db"""
+    # form_obj.customer_id
+    customers = db.session.query(Customer).all()
+    return customers
 
 
