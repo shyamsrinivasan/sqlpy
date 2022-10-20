@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, DateField, SelectField
-from wtforms import SubmitField, IntegerField
+from wtforms import SubmitField, IntegerField, FormField, RadioField
 from wtforms.validators import DataRequired, Email, Optional, Length
 from wtforms.validators import ValidationError
 
@@ -13,6 +13,13 @@ def phone_num(minimum=-1, maximum=-1):
         if l < minimum or maximum != -1 and l > maximum:
             raise ValidationError(message)
     return _phone_num
+
+
+class PhoneNumber(FlaskForm):
+    """phone number form for use in FormFields and FieldList"""
+    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
+                                                              ('+1', 'USA')])
+    phone_num = StringField('Phone Number', [Optional(), Length(min=10, max=10)])
 
 
 class CustomerSignup(FlaskForm):
@@ -39,15 +46,15 @@ class CustomerSignup(FlaskForm):
                                              message='Aadhaar should to 12 digits')])
 
     # address details
-    street_num = StringField('Street Number', [DataRequired('Street number required')])
-    house_num = StringField('House/Unit Number', [Optional()])
+    street_num = StringField('Street #', [DataRequired('Street number required')])
+    house_num = StringField('House/Unit #', [Optional()])
     street_name = StringField('Street Name', [DataRequired('Please provide street name')])
     locality = StringField('Area/Locality', [Optional()])
     locality_2 = StringField('Area/Locality 2', [Optional()])
-    city = StringField('City', [DataRequired('City is required')])
-    state = SelectField('State', [DataRequired()], choices=[('tn', 'Tanilnadu'),
+    state = SelectField('State', [DataRequired()], choices=[('tn', 'Tamilnadu'),
                                                             ('ka', 'Karnataka'),
                                                             ('kl', 'Kerala')])
+    city = StringField('City', [DataRequired('City is required')])
     pincode = StringField('PIN', [DataRequired('Please provide a pin/postal code'),
                                   Length(min=6, max=6,
                                          message='PIN should be 6 characters long')])
@@ -56,9 +63,19 @@ class CustomerSignup(FlaskForm):
     submit = SubmitField('Add Customer')
 
 
+class SearchCustomer(FlaskForm):
+    """form to search for cutomer - search categories only"""
+    search_by = RadioField('Search Using', [DataRequired()], choices=[('customer_id', 'Customer ID'),
+                                                                      ('first_name', 'First Name'),
+                                                                      ('last_name', 'Last Name'),
+                                                                      ('pan', 'PAN'),
+                                                                      ('phone', 'Phone #'),
+                                                                      ('email', 'Email')])
+    submit = SubmitField('Enter Customer Details')
+
+
 class RemoveCustomer(FlaskForm):
     """form to remove customer from db"""
-
     customer_id = StringField('Customer ID', [Optional()])
     first_name = StringField('First Name', [Optional()])
     last_name = StringField('Last Name', [Optional()])
