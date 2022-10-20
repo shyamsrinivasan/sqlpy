@@ -27,6 +27,7 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'admin.login_home'
     login_manager.login_message = 'Please log in for further access'
+    login_manager.login_message_category = 'message'
 
     # ensure the instance folder exists
     try:
@@ -39,7 +40,7 @@ def create_app():
 
     # register blueprints
     app.register_blueprint(admin_bp)
-    app.register_blueprint(customer_bp)
+    app.register_blueprint(customer_bp, url_prefix='/customer')
 
     db.init_app(app)
     migrate.init_app(app, db)
