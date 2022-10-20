@@ -65,12 +65,12 @@
 					<div class="alert-warning alert alert-dismissible fade show align-text-center " role="alert">
 						<p class="text-center">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></p>
 					</div>
-					{% elif category == 'info' %}
+					{% elif category == 'success' %}
 					<div class="alert-success alert alert-dismissible fade show align-text-center " role="alert">
 						<p class="text-center">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></p>
 					</div>
-					{% elif category == 'message' %}
-					<div class="alert-info alert alert-dismissible fade show align-text-center " role="alert">
+					{% elif category == 'primary' %}
+					<div class="alert-primary alert alert-dismissible fade show align-text-center " role="alert">
 						<p class="text-center">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></p>
 					</div>
 					{% else %}
