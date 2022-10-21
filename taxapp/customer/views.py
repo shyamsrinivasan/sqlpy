@@ -47,7 +47,7 @@ def remove():
     if form.validate_on_submit():  # if request.method == 'POST':
         return redirect(url_for('customer.search_customer', category=request.form['search_by']))
 
-    return render_template('/remove_1.html', form=form)
+    return render_template('/search_customer.html', form=form)
 
 
 @customer_bp.route('/search/<category>', methods=['GET', 'POST'])
@@ -56,7 +56,7 @@ def search_customer(category):
     details_form = RemoveCustomer()
     # enter customer details to search
     # customers = search_customer(request.form)
-    return render_template('/find_customer.html', form=details_form)
+    return render_template('/remove.html', form=details_form)
 
 
 @customer_bp.route('/modify')
