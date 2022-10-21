@@ -53,10 +53,26 @@ def remove():
 @customer_bp.route('/search/<category>', methods=['GET', 'POST'])
 def search_customer(category):
     """access page to enter customer search details"""
-    details_form = RemoveCustomer()
-    # enter customer details to search
-    # customers = search_customer(request.form)
-    return render_template('/remove.html', form=details_form)
+    form = RemoveCustomer()
+    if category == 'customer_id':
+        del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
+    elif category == 'first_name':
+        del form.customer_id, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
+    elif category == 'last_name':
+        del form.customer_id, form.first_name, form.pan, form.aadhaar, form.phone_num, form.email
+    elif category == 'pan':
+        del form.customer_id, form.first_name, form.last_name, form.aadhaar, form.phone_num, form.email
+    elif category == 'aadhaar':
+        del form.customer_id, form.first_name, form.last_name, form.pan, form.phone_num, form.email
+    elif category == 'phone_num':
+        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.email
+    elif category == 'email':
+        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num
+
+    if form.validate_on_submit():
+        # enter customer details to search
+        customers = search_customer_in_db(request.form, category)
+    return render_template('/remove.html', form=form, category=category)
 
 
 @customer_bp.route('/modify')
@@ -78,10 +94,19 @@ def _add_customer(form_obj):
     return None
 
 
-def search_customer(form_obj):
+def search_customer_in_db(form_obj, category):
     """seacrh for customer given in form object in db"""
-    # form_obj.customer_id
-    customers = db.session.query(Customer).all()
+    customers = None
+    if category == 'customer_id':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['customer_id']).all()
     return customers
+
+
+def search_category(category):
+    """return proper function depending on category"""
+
+    if category == 'customer_id':
+        return
 
 
