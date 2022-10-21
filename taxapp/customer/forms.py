@@ -17,7 +17,7 @@ def phone_num(minimum=-1, maximum=-1):
 
 class PhoneNumber(FlaskForm):
     """phone number form for use in FormFields and FieldList"""
-    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
+    country_code = SelectField('Country Code', [Optional()], choices=[('+91', 'India'),
                                                               ('+1', 'USA')])
     phone_num = StringField('Phone Number', [Optional(), Length(min=10, max=10)])
 
@@ -33,6 +33,7 @@ class CustomerSignup(FlaskForm):
     country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
                                                               ('+1', 'USA')])
     phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    # phone_num = FormField(PhoneNumber)
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     # id details
@@ -69,8 +70,10 @@ class SearchCustomer(FlaskForm):
                                                                       ('first_name', 'First Name'),
                                                                       ('last_name', 'Last Name'),
                                                                       ('pan', 'PAN'),
+                                                                      ('aadhaar', 'Aadhaar'),
                                                                       ('phone', 'Phone #'),
-                                                                      ('email', 'Email')])
+                                                                      ('email', 'Email')],
+                           default='customer_id')
     submit = SubmitField('Enter Customer Details')
 
 
@@ -87,9 +90,10 @@ class RemoveCustomer(FlaskForm):
                                       Length(min=12, max=12,
                                              message='Aadhaar should to 12 digits')
                                       ])
-    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
-                                                              ('+1', 'USA')])
-    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    # country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
+    #                                                           ('+1', 'USA')])
+    # phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    phone_num = FormField(PhoneNumber)
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     submit = SubmitField('Search Customer')
