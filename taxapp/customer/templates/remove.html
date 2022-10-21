@@ -87,77 +87,85 @@ Remove customer
       <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
       <p class="fs-4">Please enter customer information to remove</p>
     </div>
-    <form action="{{ url_for('customer.add') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+    <form action="{{ url_for('customer.search_customer', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
       {{ form.csrf_token() }}
 
       <!-- Row 1 -->
       <div class="row mb-4">
-        <div class="col-md-2">
-          {{ form.customer_id.label }}
-          {{ form.customer_id(class="form-control", id="floatingInput") }}          
-          {% for error in form.customer_id.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}          
+        <div class="col-md-2">          
         </div>
+        
+        <div class="col-md-8">   
+          {% if category == 'customer_id' %}
 
-        <div class="col-md-5">
-          {{ form.last_name.label }}
-          {{ form.last_name(class="form-control", id="floatingInput") }}          
-          {% for error in form.last_name.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}          
-        </div>
+            {{ form.customer_id.label }}       
+            {{ form.customer_id(class="form-control", id="floatingInput", placeholder="ID") }}          
+            {% for error in form.customer_id.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
 
-        <div class="col-md-5">
-          {{ form.first_name.label }}
-          {{ form.first_name(class="form-control", id="floatingInput") }}          
-          {% for error in form.first_name.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}          
-        </div>
+          {% elif category == 'first_name' %}
+
+            {{ form.first_name.label }}        
+            {{ form.first_name(class="form-control", id="floatingInput", placeholder="First name") }}          
+            {% for error in form.first_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
+
+          {% elif category == 'last_name' %}
+
+            {{ form.last_name.label }}        
+            {{ form.last_name(class="form-control", id="floatingInput", placeholder="Last name") }}          
+            {% for error in form.last_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}    
+
+          {% elif category == 'pan' %}
+
+            {{ form.pan.label }}       
+            {{ form.pan(class="form-control", id="floatingInput", placeholder="PAN") }}          
+            {% for error in form.pan.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+
+          {% elif category == 'aadhaar' %}
+
+            {{ form.aadhaar.label }}
+            {{ form.aadhaar(class="form-control", id="floatingInput", placeholder="Aadhaar") }}          
+            {% for error in form.aadhaar.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+
+          {% elif category == 'email' %}
+
+            {{ form.email.label }}
+            {{ form.email(class="form-control", id="floatingInput") }}          
+            {% for error in form.email.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %} 
+
+          {% elif category == 'phone' %} 
+            <div class="col-md-3">
+              {{ form.phone_num.country_code.label }}
+              {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}
+            </div>
+            
+            <div class="col-md-3">
+              {{ form.phone_num.phone_num.label }}
+              {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}
+              {% for error in form.phone_num.phone_num.errors %}
+                <small class="form-text text-muted">{{ error }}</small>    
+              {% endfor %} 
+            </div> 
+          {% endif %}
+
+        </div>        
       </div>
 
-      <!-- Row 2 -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          {{ form.pan.label }}
-          {{ form.pan(class="form-control", id="floatingInput") }}          
-          {% for error in form.pan.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}
-        </div>
+      <!-- Row 2 -->      
+      <div class="row mb-4"> 
+             
 
-        <div class="col-md-6">
-          {{ form.aadhaar.label }}
-          {{ form.aadhaar(class="form-control", id="floatingInput") }}          
-          {% for error in form.aadhaar.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}
-        </div>         
-      </div>   
-
-      <!-- Row 3 -->
-      <div class="row mb-4">
-        <div class="col-md-2">
-          {{ form.country_code.label }}
-          {{ form.country_code(class="form-control", id="floatingInput") }}                         
-        </div>   
-
-        <div class="col-md-4">
-          {{ form.phone.label }}
-          {{ form.phone(class="form-control", id="floatingInput") }}          
-          {% for error in form.phone.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}          
-        </div>   
-
-        <div class="col-md-6">
-          {{ form.email.label }}
-          {{ form.email(class="form-control", id="floatingInput") }}          
-          {% for error in form.email.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
-          {% endfor %}   
-        </div>   
       </div>          
 
       <hr class="my-4">
