@@ -85,7 +85,7 @@ Remove customer
   <div class="col py-5 mx-1">
     <div class="col text-center">
       <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
-      <p class="fs-4">Please enter customer information to remove</p>
+      <p class="fs-4">Please enter customer information to search</p>
     </div>
     <form action="{{ url_for('customer.search_customer', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
       {{ form.csrf_token() }}
