@@ -53,6 +53,7 @@ def remove():
 @customer_bp.route('/search/<category>', methods=['GET', 'POST'])
 def search_customer(category):
     """access page to enter customer search details"""
+
     form = RemoveCustomer()
     if category == 'customer_id':
         del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
@@ -70,8 +71,11 @@ def search_customer(category):
         del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num
 
     if form.validate_on_submit():
-        # enter customer details to search
-        customers = search_customer_in_db(request.form, category)
+        # search customer in db
+        customers = _search_customer_in_db(request.form, category)
+        return render_template('/search_result.html', form=form, category=category)
+
+    # enter customer details to search
     return render_template('/remove.html', form=form, category=category)
 
 
@@ -94,19 +98,30 @@ def _add_customer(form_obj):
     return None
 
 
-def search_customer_in_db(form_obj, category):
+def _search_customer_in_db(form_obj, category):
     """seacrh for customer given in form object in db"""
+
     customers = None
     if category == 'customer_id':
         customers = db.session.query(Customer).filter(Customer.id ==
                                                       form_obj['customer_id']).all()
+    elif category == 'first_name':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['first_name']).all()
+    elif category == 'last_name':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['last_name']).all()
+    elif category == 'pan':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['pan']).all()
+    elif category == 'aadhaar':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['aadhaar']).all()
+    elif category == 'email':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['email']).all()
+    elif category == 'phone':
+        customers = db.session.query(Customer).filter(Customer.id ==
+                                                      form_obj['phone']).all()
     return customers
-
-
-def search_category(category):
-    """return proper function depending on category"""
-
-    if category == 'customer_id':
-        return
-
 
