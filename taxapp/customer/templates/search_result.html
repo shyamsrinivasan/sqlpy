@@ -87,7 +87,7 @@ Remove customer
     <div class="col text-center">      
       <p class="fs-4">Please enter customer information to remove</p>
     </div>
-    <form action="{{ url_for('customer.search_category', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+    <form action="{{ url_for('customer.search_category', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
       {{ form.csrf_token() }}
 
       <!-- Row 1 -->
@@ -166,7 +166,7 @@ Remove customer
       
       <div class="col align-items-center text-center">
         <div class="col">
-          <small class="text-muted">By clicking add, the customer agrees to the terms of use</small> 
+          <small class="text-muted">By clicking search, the customer agrees to the terms of use</small> 
         </div>
         <div class="col">
           {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
@@ -194,6 +194,7 @@ Remove customer
         <tr>
           <th scope="col">ID</th>
           <th scope="col">Name</th>
+          <th scope="col">PAN</th>
           <th scope="col">Email</th>
           <th scope="col">Date added</th>
         </tr>
@@ -204,6 +205,7 @@ Remove customer
         <tr>
           <th scope="row">{{ customer.id }}</th>
           <td>{{ customer.fullname }}</td>
+          <td>{{ customer.pan }}</td>
           <td>{{ customer.email }}</td>
           <td>{{ customer.date_added }}</td>
         </tr>
