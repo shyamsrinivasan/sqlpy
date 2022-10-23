@@ -94,8 +94,8 @@ Remove customer
         <div class="col-md-2">          
         </div>
         
-        <div class="col-md-8">   
-          {% if category == 'customer_id' %}
+        <div class="form-group col-md-8">   
+          {% if category == 'customerid' %}
 
             {{ form.customer_id.label }}       
             {{ form.customer_id(class="form-control", id="floatingInput", placeholder="ID") }}          
@@ -103,7 +103,7 @@ Remove customer
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}  
 
-          {% elif category == 'first_name' %}
+          {% elif category == 'firstname' %}
 
             {{ form.first_name.label }}        
             {{ form.first_name(class="form-control", id="floatingInput", placeholder="First name") }}          
@@ -111,7 +111,7 @@ Remove customer
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}  
 
-          {% elif category == 'last_name' %}
+          {% elif category == 'lastname' %}
 
             {{ form.last_name.label }}        
             {{ form.last_name(class="form-control", id="floatingInput", placeholder="Last name") }}          

@@ -55,17 +55,17 @@ def search_customer(category):
     """access page to enter customer search details"""
 
     form = RemoveCustomer()
-    if category == 'customer_id':
+    if category == 'customerid':
         del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
-    elif category == 'first_name':
+    elif category == 'firstname':
         del form.customer_id, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
-    elif category == 'last_name':
+    elif category == 'lastname':
         del form.customer_id, form.first_name, form.pan, form.aadhaar, form.phone_num, form.email
     elif category == 'pan':
         del form.customer_id, form.first_name, form.last_name, form.aadhaar, form.phone_num, form.email
     elif category == 'aadhaar':
         del form.customer_id, form.first_name, form.last_name, form.pan, form.phone_num, form.email
-    elif category == 'phone_num':
+    elif category == 'phone':
         del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.email
     elif category == 'email':
         del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num
@@ -73,7 +73,10 @@ def search_customer(category):
     if form.validate_on_submit():
         # search customer in db
         customers = _search_customer_in_db(request.form, category)
-        return render_template('/search_result.html', form=form, category=category)
+        if not customers:
+            flash(message='no customers found with given details', category='error')
+        return render_template('/search_result.html', form=form,
+                               category=category, result=customers)
 
     # enter customer details to search
     return render_template('/remove.html', form=form, category=category)
@@ -106,22 +109,25 @@ def _search_customer_in_db(form_obj, category):
         customers = db.session.query(Customer).filter(Customer.id ==
                                                       form_obj['customer_id']).all()
     elif category == 'first_name':
-        customers = db.session.query(Customer).filter(Customer.id ==
+        customers = db.session.query(Customer).filter(Customer.firstname ==
                                                       form_obj['first_name']).all()
     elif category == 'last_name':
-        customers = db.session.query(Customer).filter(Customer.id ==
+        customers = db.session.query(Customer).filter(Customer.lastname ==
                                                       form_obj['last_name']).all()
     elif category == 'pan':
-        customers = db.session.query(Customer).filter(Customer.id ==
+        customers = db.session.query(Customer).filter(Customer.pan ==
                                                       form_obj['pan']).all()
     elif category == 'aadhaar':
-        customers = db.session.query(Customer).filter(Customer.id ==
+        customers = db.session.query(Customer).filter(Customer.aadhaar ==
                                                       form_obj['aadhaar']).all()
     elif category == 'email':
-        customers = db.session.query(Customer).filter(Customer.id ==
+        customers = db.session.query(Customer).filter(Customer.email ==
                                                       form_obj['email']).all()
     elif category == 'phone':
-        customers = db.session.query(Customer).filter(Customer.id ==
-                                                      form_obj['phone']).all()
+        phone_number = form_obj['phone_num-country_code'] + \
+                       form_obj['phone_num-phone_num']
+        customers = db.session.query(Customer).filter(Customer.phone ==
+                                                      phone_number).all()
     return customers
+
 
