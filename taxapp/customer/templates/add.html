@@ -93,7 +93,7 @@ Add customer
 
       <!-- Row 1 -->
       <div class="row mb-4">
-        <div class="col-md-5">
+        <div class="col-md-4">
           {{ form.first_name.label }}
           {{ form.first_name(class="form-control", id="floatingInput") }}          
           {% for error in form.first_name.errors %}
@@ -109,7 +109,7 @@ Add customer
           {% endfor %}          
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-3">
           {{ form.customer_type.label }}
           {{ form.customer_type(class="form-control", id="floatingInput") }}                    
         </div>
@@ -117,7 +117,7 @@ Add customer
 
       <!-- Row 2 -->
       <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="form-group col-md-4">
           {{ form.dob.label }}
           {{ form.dob(class="form-control", id="floatingInput") }}          
           {% for error in form.dob.errors %}
@@ -125,35 +125,35 @@ Add customer
           {% endfor %}          
         </div>  
 
-        <div class="col-md-4">
+        <div class="form-group col-md-4">
           {{ form.pan.label }}
           {{ form.pan(class="form-control", id="floatingInput") }}          
           {% for error in form.pan.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
+            <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}
         </div>
 
-        <div class="col-md-4">
+        <div class="form-group col-md-4">
           {{ form.aadhaar.label }}
           {{ form.aadhaar(class="form-control", id="floatingInput") }}          
           {% for error in form.aadhaar.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
+            <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}
         </div>         
       </div>   
 
       <!-- Row 3 -->
       <div class="row mb-4">
-        <div class="col-md-2">
-          {{ form.country_code.label }}
-          {{ form.country_code(class="form-control", id="floatingInput") }}                         
+        <div class="form-group col-md-3">
+          {{ form.phone_num.country_code.label }}
+          {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}                         
         </div>   
 
-        <div class="col-md-4">
-          {{ form.phone.label }}
-          {{ form.phone(class="form-control", id="floatingInput") }}          
-          {% for error in form.phone.errors %}
-          <small class="form-text text-muted">{{ error }}</small>    
+        <div class="col-md-3">
+          {{ form.phone_num.phone_num.label }}
+          {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}          
+          {% for error in form.phone_num.phone_num.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}          
         </div>      
 
@@ -171,17 +171,17 @@ Add customer
       <!-- Row 4 -->
       <div class="row mb-4">
         <div class="col-md-2">
-          {{ form.street_num.label }}
-          {{ form.street_num(class="form-control", id="floatingInput") }}          
-          {% for error in form.street_num.errors %}
+          {{ form.address.street_num.label }}
+          {{ form.address.street_num(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.street_num.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div>   
 
         <div class="col-md-10">
-          {{ form.street_name.label }}
-          {{ form.street_name(class="form-control", id="floatingInput") }}          
-          {% for error in form.street_name.errors %}
+          {{ form.address.street_name.label }}
+          {{ form.address.street_name(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.street_name.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div>               
@@ -190,25 +190,25 @@ Add customer
       <!-- Row 5 -->
       <div class="row mb-4">
         <div class="col-md-3">
-          {{ form.house_num.label }}
-          {{ form.house_num(class="form-control", id="floatingInput") }}          
-          {% for error in form.house_num.errors %}
+          {{ form.address.house_num.label }}
+          {{ form.address.house_num(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.house_num.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div> 
 
         <div class="col-md-5">
-          {{ form.locality.label }}
-          {{ form.locality(class="form-control", id="floatingInput") }}          
-          {% for error in form.locality.errors %}
+          {{ form.address.locality.label }}
+          {{ form.address.locality(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.locality.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div>   
 
         <div class="col-md-4">
-          {{ form.locality_2.label }}
-          {{ form.locality_2(class="form-control", id="floatingInput") }}          
-          {% for error in form.locality_2.errors %}
+          {{ form.address.locality_2.label }}
+          {{ form.address.locality_2(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.locality_2.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div>               
@@ -217,22 +217,22 @@ Add customer
       <!-- Row 6 -->
       <div class="row mb-4">
         <div class="col-md-4">
-          {{ form.city.label }}
-          {{ form.city(class="form-control", id="floatingInput") }}          
-          {% for error in form.city.errors %}
+          {{ form.address.city.label }}
+          {{ form.address.city(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.city.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div> 
 
         <div class="col-md-4">
-          {{ form.state.label }}
-          {{ form.state(class="form-control", id="floatingInput") }}                     
+          {{ form.address.state.label }}
+          {{ form.address.state(class="form-control", id="floatingInput") }}                     
         </div>    
 
         <div class="col-md-4">
-          {{ form.pincode.label }}
-          {{ form.pincode(class="form-control", id="floatingInput") }}          
-          {% for error in form.pincode.errors %}
+          {{ form.address.pincode.label }}
+          {{ form.address.pincode(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.pincode.errors %}
           <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}   
         </div>      
