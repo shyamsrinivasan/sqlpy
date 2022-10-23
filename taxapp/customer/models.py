@@ -24,6 +24,7 @@ class Customer(db.Model):
     def set_full_name(self):
         """set value of fullname column using first and last name"""
         self.fullname = self.firstname + ' ' + self.lastname
+        return self.fullname
 
     def set_full_phone(self, country_code, phone_number):
         """set phone number with country code"""
@@ -65,8 +66,16 @@ class Address(db.Model):
     updated_user = db.Column(db.String(20))
     last_update = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
-    customer_info = db.relationship('Customer', back_populates='address_info',
+    customer_info = db.relationship('Customer', foreign_keys='Customer.id',
+                                    back_populates='address_info',
                                     cascade='all, delete')
+
+    def set_added_user(self, change_type, username):
+        """set added_user and updated_user"""
+        if change_type == 'add':
+            self.added_user = username
+        elif change_type == 'update':
+            self.updated_user = username
 
     def __repr__(self):
         return f"Address(id={self.id!r}, customer_id={self.customer_id!r}, " \

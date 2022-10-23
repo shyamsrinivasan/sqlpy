@@ -1,7 +1,7 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
 from .forms import CustomerSignup, RemoveCustomer, SearchCustomer
-from .models import Customer
+from .models import Customer, Address
 from taxapp import db
 from flask_login import login_required, current_user
 
@@ -17,7 +17,7 @@ def add():
                                     type=request.form['customer_type'],
                                     email=request.form['email'])
         # set full name-
-        new_customer_obj.set_full_name()
+        fullname = new_customer_obj.set_full_name()
         customer_name = new_customer_obj.fullname
 
         # set phone number
@@ -26,9 +26,29 @@ def add():
         # set added user
         new_customer_obj.set_added_user(change_type='add',
                                         username=current_user.username)
-
         # add user object to session and commit to db
         db.session.add(new_customer_obj)
+        db.session.commit()
+
+        # get customer id
+        customer_info = db.session.query(Customer).filter(Customer.fullname == fullname).first()
+        # set address
+        new_address_obj = Address(customer_id=customer_info.id,
+                                  customer_name=customer_info.fullname,
+                                  street_num=request.form['address-street_num'],
+                                  street_name=request.form['address-street_name'],
+                                  house_num=request.form['address-house_num'],
+                                  locality=request.form['address-locality'],
+                                  city=request.form['address-city'],
+                                  state=request.form['address-state'],
+                                  pin=request.form['address-pin'])
+        # set added user
+        new_address_obj.set_added_user(change_type='add',
+                                       username=current_user.username)
+        # type = db.Column(db.Enum('house', 'apartment', 'business - single',
+        #                          'business - complex', name='address_type'))
+        # add user object to session and commit to db
+        db.session.add(new_address_obj)
         db.session.commit()
 
         flash('Addition of new customer {} successful'.format(customer_name),
