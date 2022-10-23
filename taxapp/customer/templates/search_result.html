@@ -42,6 +42,7 @@ Remove customer
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li><a href="#" class="link-light rounded">Overview</a></li>
             <li><a href="{{ url_for('customer.add') }}" class="link-light rounded">Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded">Search</a></li>
             <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded">Remove</a></li>
             <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded">Modify</a></li>
             <li><a href="#" class="link-light rounded">Taxes</a></li>
@@ -86,7 +87,7 @@ Remove customer
     <div class="col text-center">      
       <p class="fs-4">Please enter customer information to remove</p>
     </div>
-    <form action="{{ url_for('customer.search_customer', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+    <form action="{{ url_for('customer.search_category', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
       {{ form.csrf_token() }}
 
       <!-- Row 1 -->
@@ -145,7 +146,7 @@ Remove customer
 
           {% elif category == 'phone' %} 
             <div class="row align">
-              <div class="form-group col-md-3">
+              <div class="form-group col-md-4">
                 {{ form.phone_num.country_code.label }}
                 {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}
               </div>
@@ -176,7 +177,7 @@ Remove customer
     <!-- Return to category page --> 
     <div class="col align-items-center text-center mt-2">
       <div class="col">
-        <a href="{{ url_for('customer.remove') }}" class="link-primary" >Change Category</a>  
+        <a href="{{ url_for('customer.search') }}" class="link-primary" >Change Category</a>  
       </div>
     </div> 
 

@@ -40,18 +40,18 @@ def add():
 
 @customer_bp.route('/search', methods=['GET', 'POST'])
 # @login_required
-def remove():
+def search():
     """route access first customer removal form/page (choose search category)"""
     # go to search category page -> details page -> remove page
     form = SearchCustomer()
     if form.validate_on_submit():  # if request.method == 'POST':
-        return redirect(url_for('customer.search_customer', category=request.form['search_by']))
+        return redirect(url_for('customer.search_category', category=request.form['search_by']))
 
     return render_template('/search_customer.html', form=form)
 
 
 @customer_bp.route('/search/<category>', methods=['GET', 'POST'])
-def search_customer(category):
+def search_category(category):
     """access page to enter customer search details"""
 
     form = RemoveCustomer()
@@ -98,7 +98,13 @@ def search_customer(category):
                                category=category, result=customers)
 
     # enter customer details to search
-    return render_template('/remove.html', form=form, category=category)
+    return render_template('/search.html', form=form, category=category)
+
+
+@customer_bp.route('/remove')
+def remove():
+    """route to remove customer"""
+    return render_template('/remove.html')
 
 
 @customer_bp.route('/modify')
