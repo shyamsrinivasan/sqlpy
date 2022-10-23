@@ -162,39 +162,6 @@ Remove customer
 
         </div>        
       </div>
-
-      <hr class="my-4">
-
-      <!-- Row 2 -->      
-      <div class="col text-center"> 
-        <p class="fs-4">Matching customers in database</p>
-      </div>         
-
-      <table class="table table-hover table-dark">
-        <thead>
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Email</th>
-            <th scope="col">Date added</th>
-          </tr>
-        </thead>
-        
-        <tbody>
-          {% for customer in result %}
-          <tr>
-            <th scope="row">{{ customer.id }}</th>
-            <td>{{ customer.fullname }}</td>
-            <td>{{ customer.email }}</td>
-            <td>{{ customer.date_added }}</td>
-          </tr>
-          {% endfor %}          
-        </tbody>
-      </table> 
-
-      
-
-      <hr class="my-4">
       
       <div class="col align-items-center text-center">
         <div class="col">
@@ -202,17 +169,51 @@ Remove customer
         </div>
         <div class="col">
           {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
-        </div> 
-        
-              
+        </div>             
       </div>              
-    </form>  
+    </form> 
+
+    <!-- Return to category page --> 
+    <div class="col align-items-center text-center mt-2">
+      <div class="col">
+        <a href="{{ url_for('customer.remove') }}" class="link-primary" >Change Category</a>  
+      </div>
+    </div> 
+
+    <hr class="my-4">     
+
+    <!-- Row 2 -->  
+
+    <div class="col text-center"> 
+      <p class="fs-4">Matching customers in database</p>
+    </div>         
+
+    <table class="table table-hover table-dark">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Date added</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        {% for customer in result %}
+        <tr>
+          <th scope="row">{{ customer.id }}</th>
+          <td>{{ customer.fullname }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.date_added }}</td>
+        </tr>
+        {% endfor %}          
+      </tbody>
+    </table>  
+
+    
 
     <hr class="my-4">
-
-    <div class="col text-center">
-      
-    </div>        
+          
   </div>
   {% endif %}
 
