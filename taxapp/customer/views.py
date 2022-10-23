@@ -38,7 +38,7 @@ def add():
     return render_template('/add.html', form=form)
 
 
-@customer_bp.route('/remove', methods=['GET', 'POST'])
+@customer_bp.route('/search', methods=['GET', 'POST'])
 # @login_required
 def remove():
     """route access first customer removal form/page (choose search category)"""
@@ -55,6 +55,7 @@ def search_customer(category):
     """access page to enter customer search details"""
 
     form = RemoveCustomer()
+    data = []
     if category == 'customerid':
         del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
     elif category == 'firstname':
@@ -72,7 +73,25 @@ def search_customer(category):
 
     if form.validate_on_submit():
         # search customer in db
-        customers = _search_customer_in_db(request.form, category)
+        if category == 'customerid':
+            data = request.form['customer_id']
+        elif category == 'firstname':
+            data = request.form['first_name']
+        elif category == 'lastname':
+            data = request.form['last_name']
+        elif category == 'pan':
+            data = request.form['pan']
+        elif category == 'aadhaar':
+            data = request.form['aadhaar']
+        elif category == 'phone':
+            data = request.form['phone_num-country_code'] + \
+                   request.form['phone_num-phone_num']
+        elif category == 'email':
+            data = request.form['email']
+        else:
+            data = []
+
+        customers = _search_customer_in_db(data, category)
         if not customers:
             flash(message='no customers found with given details', category='error')
         return render_template('/search_result.html', form=form,
@@ -104,30 +123,31 @@ def _add_customer(form_obj):
 def _search_customer_in_db(form_obj, category):
     """seacrh for customer given in form object in db"""
 
-    customers = None
-    if category == 'customer_id':
-        customers = db.session.query(Customer).filter(Customer.id ==
-                                                      form_obj['customer_id']).all()
-    elif category == 'first_name':
+    # customers = None
+    if category == 'customerid':
+        customers = db.session.query(Customer).filter(Customer.id == form_obj).all()
+    elif category == 'firstname':
         customers = db.session.query(Customer).filter(Customer.firstname ==
-                                                      form_obj['first_name']).all()
-    elif category == 'last_name':
+                                                      form_obj).all()
+    elif category == 'lastname':
         customers = db.session.query(Customer).filter(Customer.lastname ==
-                                                      form_obj['last_name']).all()
+                                                      form_obj).all()
     elif category == 'pan':
         customers = db.session.query(Customer).filter(Customer.pan ==
-                                                      form_obj['pan']).all()
+                                                      form_obj).all()
     elif category == 'aadhaar':
         customers = db.session.query(Customer).filter(Customer.aadhaar ==
-                                                      form_obj['aadhaar']).all()
+                                                      form_obj).all()
     elif category == 'email':
         customers = db.session.query(Customer).filter(Customer.email ==
-                                                      form_obj['email']).all()
+                                                      form_obj).all()
     elif category == 'phone':
-        phone_number = form_obj['phone_num-country_code'] + \
-                       form_obj['phone_num-phone_num']
+        # phone_number = form_obj['phone_num-country_code'] + \
+        #                form_obj['phone_num-phone_num']
         customers = db.session.query(Customer).filter(Customer.phone ==
-                                                      phone_number).all()
+                                                      form_obj).all()
+    else:
+        customers = []
     return customers
 
 
