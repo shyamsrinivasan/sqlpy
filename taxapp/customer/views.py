@@ -21,8 +21,8 @@ def add():
         customer_name = new_customer_obj.fullname
 
         # set phone number
-        new_customer_obj.set_full_phone(country_code=request.form['country_code'],
-                                        phone_number=request.form['phone'])
+        new_customer_obj.set_full_phone(country_code=request.form['phone_num-country_code'],
+                                        phone_number=request.form['phone_num-phone_num'])
         # set added user
         new_customer_obj.set_added_user(change_type='add',
                                         username=current_user.username)
