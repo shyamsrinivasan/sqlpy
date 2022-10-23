@@ -22,6 +22,23 @@ class PhoneNumber(FlaskForm):
     phone_num = StringField('Phone Number', [Optional(), Length(min=10, max=10)])
 
 
+class Address(FlaskForm):
+    """address form class to be used with FormFields"""
+
+    street_num = StringField('Street #', [DataRequired('Street number required')])
+    house_num = StringField('House/Unit #', [Optional()])
+    street_name = StringField('Street Name', [DataRequired('Please provide street name')])
+    locality = StringField('Area/Locality', [Optional()])
+    locality_2 = StringField('Area/Locality 2', [Optional()])
+    state = SelectField('State', [DataRequired()], choices=[('TN', 'Tamilnadu'),
+                                                            ('KA', 'Karnataka'),
+                                                            ('KL', 'Kerala')])
+    city = StringField('City', [DataRequired('City is required')])
+    pincode = StringField('PIN', [DataRequired('Please provide a pin/postal code'),
+                                  Length(min=6, max=6,
+                                         message='PIN should be 6 characters long')])
+
+
 class CustomerSignup(FlaskForm):
     """form to add customer to database"""
 
@@ -30,10 +47,7 @@ class CustomerSignup(FlaskForm):
     last_name = StringField('Last Name', [DataRequired(message='Please provide a last name')])
     customer_type = SelectField('Customer Type', [DataRequired()], choices=[('personal', 'individual'),
                                                                             ('commercial', 'business')])
-    country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
-                                                              ('+1', 'USA')])
-    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
-    # phone_num = FormField(PhoneNumber)
+    phone_num = FormField(PhoneNumber)
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     # id details
@@ -47,18 +61,7 @@ class CustomerSignup(FlaskForm):
                                              message='Aadhaar should to 12 digits')])
 
     # address details
-    street_num = StringField('Street #', [DataRequired('Street number required')])
-    house_num = StringField('House/Unit #', [Optional()])
-    street_name = StringField('Street Name', [DataRequired('Please provide street name')])
-    locality = StringField('Area/Locality', [Optional()])
-    locality_2 = StringField('Area/Locality 2', [Optional()])
-    state = SelectField('State', [DataRequired()], choices=[('tn', 'Tamilnadu'),
-                                                            ('ka', 'Karnataka'),
-                                                            ('kl', 'Kerala')])
-    city = StringField('City', [DataRequired('City is required')])
-    pincode = StringField('PIN', [DataRequired('Please provide a pin/postal code'),
-                                  Length(min=6, max=6,
-                                         message='PIN should be 6 characters long')])
+    address = FormField(Address)
 
     # recaptcha = RecaptchaField()
     submit = SubmitField('Add Customer')
