@@ -145,18 +145,20 @@ Remove customer
             {% endfor %} 
 
           {% elif category == 'phone' %} 
-            <div class="col-md-3">
-              {{ form.phone_num.country_code.label }}
-              {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}
+            <div class="row">
+              <div class="form-group col-md-3">
+                {{ form.phone_num.country_code.label }}
+                {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}
+              </div>
+              
+              <div class="form-group col">
+                {{ form.phone_num.phone_num.label }}
+                {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}
+                {% for error in form.phone_num.phone_num.errors %}
+                  <small class="form-text text-muted">{{ error }}</small>    
+                {% endfor %} 
+              </div> 
             </div>
-            
-            <div class="col-md-3">
-              {{ form.phone_num.phone_num.label }}
-              {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}
-              {% for error in form.phone_num.phone_num.errors %}
-                <small class="form-text text-muted">{{ error }}</small>    
-              {% endfor %} 
-            </div> 
           {% endif %}
 
         </div>        
