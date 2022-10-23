@@ -73,7 +73,7 @@ class SearchCustomer(FlaskForm):
                                                                       ('aadhaar', 'Aadhaar'),
                                                                       ('phone', 'Phone #'),
                                                                       ('email', 'Email')],
-                           default='customer_id')
+                           default='customerid')
     submit = SubmitField('Enter Customer Details')
 
 
