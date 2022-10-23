@@ -66,9 +66,9 @@ class CustomerSignup(FlaskForm):
 
 class SearchCustomer(FlaskForm):
     """form to search for cutomer - search categories only"""
-    search_by = RadioField('Search Using', [DataRequired()], choices=[('customer_id', 'Customer ID'),
-                                                                      ('first_name', 'First Name'),
-                                                                      ('last_name', 'Last Name'),
+    search_by = RadioField('Search Using', [DataRequired()], choices=[('customerid', 'Customer ID'),
+                                                                      ('firstname', 'First Name'),
+                                                                      ('lastname', 'Last Name'),
                                                                       ('pan', 'PAN'),
                                                                       ('aadhaar', 'Aadhaar'),
                                                                       ('phone', 'Phone #'),
@@ -79,14 +79,17 @@ class SearchCustomer(FlaskForm):
 
 class RemoveCustomer(FlaskForm):
     """form to remove customer from db"""
-    customer_id = StringField('Customer ID', [Optional()])
-    first_name = StringField('First Name', [Optional()])
-    last_name = StringField('Last Name', [Optional()])
-    pan = StringField('PAN', [Optional(),
+    customer_id = StringField('Customer ID',
+                              [DataRequired(message='Please provide a customer # to search for')])
+    first_name = StringField('First Name',
+                             [DataRequired(message='Please provide a first name to search')])
+    last_name = StringField('Last Name',
+                            [DataRequired(message='Please provide a last name to search')])
+    pan = StringField('PAN', [DataRequired(message='Please provide a PAN to search'),
                               Length(min=10, max=10,
                                      message='PAN should be 10 characters')
                               ])
-    aadhaar = StringField('Aadhaar', [Optional(),
+    aadhaar = StringField('Aadhaar', [DataRequired(message='Please provide a aadhaar number to search'),
                                       Length(min=12, max=12,
                                              message='Aadhaar should to 12 digits')
                                       ])
@@ -94,6 +97,10 @@ class RemoveCustomer(FlaskForm):
     #                                                           ('+1', 'USA')])
     # phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
     phone_num = FormField(PhoneNumber)
-    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+    email = EmailField('Email', [Email(message='Not a valid email address'),
+                                 DataRequired(message='Please provide a email to search')])
 
+    # submit_new_category = RadioField('Choose Different Category', [Optional()],
+    #                                  choices=[('new_choice', 'Choose Different Category')])
     submit = SubmitField('Search Customer')
+
