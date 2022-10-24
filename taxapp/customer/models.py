@@ -66,8 +66,7 @@ class Address(db.Model):
     updated_user = db.Column(db.String(20))
     last_update = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
-    customer_info = db.relationship('Customer', foreign_keys='Customer.id',
-                                    back_populates='address_info',
+    customer_info = db.relationship('Customer', back_populates='address_info',
                                     cascade='all, delete')
 
     def set_added_user(self, change_type, username):
@@ -82,3 +81,15 @@ class Address(db.Model):
                f"name={self.customer_name!r}, locality={self.locality!r}, " \
                f"city={self.city!r}, pin={self.pin!r}, " \
                f"added_on={self.date_added!r})"
+
+
+class TaxInfo(db.Model):
+    __tablename__ = 'test_taxinfo'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('test_customers.id', onupdate='CASCADE',
+                                                      ondelete='CASCADE'), nullable=False)
+    customer_name = db.Column(db.String(30), index=True)
+
+    # customer_info = db.relationship(Customer, back_populates='tax_info',
+    #                                 cascade='all, delete')
