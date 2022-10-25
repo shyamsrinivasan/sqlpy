@@ -25,6 +25,10 @@ class PhoneNumber(FlaskForm):
 class Address(FlaskForm):
     """address form class to be used with FormFields"""
 
+    house_type = SelectField('Type', [DataRequired()], choices=[('house', 'House'),
+                                                                ('apartment', 'Apartment'),
+                                                                ('single_bus', 'Single Store'),
+                                                                ('complex_bus', 'Complex Store')])
     street_num = StringField('Street #', [DataRequired('Street number required')])
     house_num = StringField('House/Unit #', [Optional()])
     street_name = StringField('Street Name', [DataRequired('Please provide street name')])
@@ -67,7 +71,7 @@ class CustomerSignup(FlaskForm):
     submit = SubmitField('Add Customer')
 
 
-class SearchCustomer(FlaskForm):
+class SearchCustomerCategory(FlaskForm):
     """form to search for cutomer - search categories only"""
     search_by = RadioField('Search Using', [DataRequired()], choices=[('customerid', 'Customer ID'),
                                                                       ('firstname', 'First Name'),
@@ -80,7 +84,7 @@ class SearchCustomer(FlaskForm):
     submit = SubmitField('Enter Customer Details')
 
 
-class RemoveCustomer(FlaskForm):
+class SearchCustomer(FlaskForm):
     """form to remove customer from db"""
     customer_id = StringField('Customer ID',
                               [DataRequired(message='Please provide a customer # to search for')])

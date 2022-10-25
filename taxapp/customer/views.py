@@ -1,6 +1,6 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
-from .forms import CustomerSignup, RemoveCustomer, SearchCustomer
+from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory
 from .models import Customer, Address
 from taxapp import db
 from flask_login import login_required, current_user
@@ -41,7 +41,7 @@ def add():
                                   locality=request.form['address-locality'],
                                   city=request.form['address-city'],
                                   state=request.form['address-state'],
-                                  pin=request.form['address-pin'])
+                                  pin=request.form['address-pincode'])
         # set added user
         new_address_obj.set_added_user(change_type='add',
                                        username=current_user.username)
@@ -63,7 +63,7 @@ def add():
 def search():
     """route access first customer removal form/page (choose search category)"""
     # go to search category page -> details page -> remove page
-    form = SearchCustomer()
+    form = SearchCustomerCategory()
     if form.validate_on_submit():  # if request.method == 'POST':
         return redirect(url_for('customer.search_category', category=request.form['search_by']))
 
@@ -74,7 +74,7 @@ def search():
 def search_category(category):
     """access page to enter customer search details"""
 
-    form = RemoveCustomer()
+    form = SearchCustomer()
     data = []
     if category == 'customerid':
         del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
