@@ -72,7 +72,7 @@ class CustomerSignup(FlaskForm):
 
 
 class SearchCustomerCategory(FlaskForm):
-    """form to search for cutomer - search categories only"""
+    """form to search for customer - search categories only"""
     search_by = RadioField('Search Using', [DataRequired()], choices=[('customerid', 'Customer ID'),
                                                                       ('firstname', 'First Name'),
                                                                       ('lastname', 'Last Name'),
@@ -85,7 +85,7 @@ class SearchCustomerCategory(FlaskForm):
 
 
 class SearchCustomer(FlaskForm):
-    """form to remove customer from db"""
+    """form to search customer from db - input form for details to search"""
     customer_id = StringField('Customer ID',
                               [DataRequired(message='Please provide a customer # to search for')])
     first_name = StringField('First Name',
@@ -110,4 +110,16 @@ class SearchCustomer(FlaskForm):
     # submit_new_category = RadioField('Choose Different Category', [Optional()],
     #                                  choices=[('new_choice', 'Choose Different Category')])
     submit = SubmitField('Search Customer')
+
+
+class RemoveCustomer(FlaskForm):
+    """form to enter id or pan to remove customer"""
+
+    customer_id = StringField('Customer ID',
+                              [DataRequired(message='Please provide a customer # to search for')])
+    # pan = StringField('PAN', [DataRequired(message='Please provide a PAN to search'),
+    #                           Length(min=10, max=10,
+    #                                  message='PAN should be 10 characters')
+    #                           ])
+    submit = SubmitField('Review customer details')
 
