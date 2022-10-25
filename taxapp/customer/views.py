@@ -12,6 +12,7 @@ def add():
     """route to access customer addition form/page"""
     form = CustomerSignup()
     if form.validate_on_submit():
+        # create customer object
         new_customer_obj = Customer(firstname=request.form['first_name'],
                                     lastname=request.form['last_name'],
                                     type=request.form['customer_type'],
@@ -26,15 +27,26 @@ def add():
         # set added user
         new_customer_obj.set_added_user(change_type='add',
                                         username=current_user.username)
-        # add user object to session and commit to db
-        db.session.add(new_customer_obj)
-        db.session.commit()
 
-        # get customer id
-        customer_info = db.session.query(Customer).filter(Customer.fullname == fullname).first()
-        # set address
+        # check if customer is present in db
+        customer_not_present = True
+        customer_info = db.session.query(Customer).filter(Customer.fullname == customer_name).first()
+        if customer_info:
+            customer_not_present = False
+
+        if customer_not_present:
+            # add user object to session and commit to db
+            db.session.add(new_customer_obj)
+            db.session.commit()
+            # get customer id for newly added customer
+            customer_info = db.session.query(Customer).filter(Customer.fullname == fullname).first()
+            flash('Addition of new customer {} successful'.format(customer_name),
+                  category='success')
+
+        # create address object
         new_address_obj = Address(customer_id=customer_info.id,
                                   customer_name=customer_info.fullname,
+                                  type=request.form['address-house_type'],
                                   street_num=request.form['address-street_num'],
                                   street_name=request.form['address-street_name'],
                                   house_num=request.form['address-house_num'],
@@ -45,16 +57,30 @@ def add():
         # set added user
         new_address_obj.set_added_user(change_type='add',
                                        username=current_user.username)
-        # type = db.Column(db.Enum('house', 'apartment', 'business - single',
-        #                          'business - complex', name='address_type'))
-        # add user object to session and commit to db
-        db.session.add(new_address_obj)
-        db.session.commit()
 
-        flash('Addition of new customer {} successful'.format(customer_name),
-              category='success')
-        # return 'Customer added successfully'
+        # check if customer address is present in db
+        address_not_present = True
+        address_info = db.session.query(Address).filter(Address.customer_id == customer_info.id).first()
+        if address_info:
+            address_not_present = False
+
+        if address_not_present:
+            # add address object to session and commit to db
+            db.session.add(new_address_obj)
+            db.session.commit()
+
+        if customer_not_present and address_not_present:
+            flash('Addition of new customer {} and address successful'.format(customer_name),
+                  category='success')
+        elif not customer_not_present and address_not_present:
+            flash('Customer {} already exists. Address addition successful'.format(customer_name),
+                  category='success')
+        else:
+            flash('Customer {} and address already present. No additions made.'.format(customer_name),
+                  category='info')
+
         return redirect(url_for('admin.dashboard', username=current_user.username))
+
     return render_template('/add.html', form=form)
 
 
@@ -193,32 +219,35 @@ def _add_customer(form_obj):
     return None
 
 
-def _search_customer_in_db(form_obj, category):
+def _search_customer_in_db(value, category):
     """seacrh for customer given in form object in db"""
 
     # customers = None
     if category == 'customerid':
-        customers = db.session.query(Customer).filter(Customer.id == form_obj).all()
+        customers = db.session.query(Customer).filter(Customer.id == value).all()
     elif category == 'firstname':
         customers = db.session.query(Customer).filter(Customer.firstname ==
-                                                      form_obj).all()
+                                                      value).all()
     elif category == 'lastname':
         customers = db.session.query(Customer).filter(Customer.lastname ==
-                                                      form_obj).all()
+                                                      value).all()
+    elif category == 'fullname':
+        customers = db.session.query(Customer).filter(Customer.fullname ==
+                                                      value).all()
     elif category == 'pan':
         customers = db.session.query(Customer).filter(Customer.pan ==
-                                                      form_obj).all()
+                                                      value).all()
     elif category == 'aadhaar':
         customers = db.session.query(Customer).filter(Customer.aadhaar ==
-                                                      form_obj).all()
+                                                      value).all()
     elif category == 'email':
         customers = db.session.query(Customer).filter(Customer.email ==
-                                                      form_obj).all()
+                                                      value).all()
     elif category == 'phone':
         # phone_number = form_obj['phone_num-country_code'] + \
         #                form_obj['phone_num-phone_num']
         customers = db.session.query(Customer).filter(Customer.phone ==
-                                                      form_obj).all()
+                                                      value).all()
     elif category == 'all':
         customers = db.session.query(Customer).all()
     else:
