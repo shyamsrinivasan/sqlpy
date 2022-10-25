@@ -79,7 +79,8 @@ class SearchCustomerCategory(FlaskForm):
                                                                       ('pan', 'PAN'),
                                                                       ('aadhaar', 'Aadhaar'),
                                                                       ('phone', 'Phone #'),
-                                                                      ('email', 'Email')],
+                                                                      ('email', 'Email'),
+                                                                      ('all', 'Display All')],
                            default='customerid')
     submit = SubmitField('Enter Customer Details')
 
