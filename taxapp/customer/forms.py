@@ -63,7 +63,6 @@ class CustomerSignup(FlaskForm):
     aadhaar = StringField('Aadhaar', [Optional(),
                                       Length(min=12, max=12,
                                              message='Aadhaar should to 12 digits')])
-
     # address details
     address = FormField(Address)
 
