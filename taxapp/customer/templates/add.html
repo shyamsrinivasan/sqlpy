@@ -170,6 +170,14 @@ Add customer
 
       <!-- Row 4 -->
       <div class="row mb-4">
+        <div class="col-md-3">
+          {{ form.address.house_type.label }}
+          {{ form.address.house_type(class="form-control", id="floatingInput") }}          
+          {% for error in form.address.house_type.errors %}
+          <small class="form-text text-muted">{{ error }}</small>    
+          {% endfor %}   
+        </div>   
+
         <div class="col-md-2">
           {{ form.address.street_num.label }}
           {{ form.address.street_num(class="form-control", id="floatingInput") }}          
@@ -178,7 +186,7 @@ Add customer
           {% endfor %}   
         </div>   
 
-        <div class="col-md-10">
+        <div class="col-md-7">
           {{ form.address.street_name.label }}
           {{ form.address.street_name(class="form-control", id="floatingInput") }}          
           {% for error in form.address.street_name.errors %}
