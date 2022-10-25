@@ -164,10 +164,10 @@ def remove_customer(customer_id):
     """remove specific customer with customer_id from db"""
     # run delete row query on customer/address/taxinfo
     db.session.query(Address).filter(Address.customer_id == customer_id).delete()
-    # db.session.commit()
+    db.session.commit()
     # db.session.query(TaxInfo).filter(TaxInfo.customer_id == customer_id).delete()
     # db.session.commit()
-    db.session.query(Customer).filter(id == customer_id).delete()
+    db.session.query(Customer).filter(Customer.id == customer_id).delete()
     db.session.commit()
 
     flash(message='customer with ID {} removed'.format(customer_id), category='success')
