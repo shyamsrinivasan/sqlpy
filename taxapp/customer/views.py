@@ -36,12 +36,11 @@ def add():
 
         if customer_not_present:
             # add user object to session and commit to db
-            db.session.add(new_customer_obj)
-            db.session.commit()
+            _add_table_row(new_customer_obj)
+
             # get customer id for newly added customer
-            customer_info = db.session.query(Customer).filter(Customer.fullname == fullname).first()
-            flash('Addition of new customer {} successful'.format(customer_name),
-                  category='success')
+            customer_info = db.session.query(Customer).\
+                filter(Customer.fullname == fullname).first()
 
         # create address object
         new_address_obj = Address(customer_id=customer_info.id,
@@ -60,14 +59,18 @@ def add():
 
         # check if customer address is present in db
         address_not_present = True
-        address_info = db.session.query(Address).filter(Address.customer_id == customer_info.id).first()
+        address_info = db.session.query(Address).\
+            filter(Address.customer_id == customer_info.id).first()
         if address_info:
             address_not_present = False
 
         if address_not_present:
             # add address object to session and commit to db
-            db.session.add(new_address_obj)
-            db.session.commit()
+            _add_table_row(new_address_obj)
+
+            # get address id for newly added customer address
+            customer_info = db.session.query(Address).\
+                filter(Address.customer_id == customer_info.id).first()
 
         if customer_not_present and address_not_present:
             flash('Addition of new customer {} and address successful'.format(customer_name),
@@ -207,15 +210,12 @@ def modify():
     return render_template('/modify.html')
 
 
-def _add_customer(form_obj):
-    """take user details in form_obj to create Customer object and
-    add as row to customer table"""
-    # generate user object
+def _add_table_row(table_class_obj):
+    """take any table ORM class object and
+    add as row to corresponding table"""
 
-    # # add hashed password to db
-    # new_user_obj.set_password(form_obj['password'])
-    # db.session.add(new_user_obj)
-    # db.session.commit()
+    db.session.add(table_class_obj)
+    db.session.commit()
     return None
 
 
