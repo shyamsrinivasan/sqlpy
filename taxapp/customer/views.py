@@ -1,7 +1,7 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
-from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory
-from .models import Customer, Address
+from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory, RemoveCustomer
+from .models import Customer, Address, TaxInfo
 from taxapp import db
 from flask_login import login_required, current_user
 
@@ -75,6 +75,7 @@ def search_category(category):
     """access page to enter customer search details"""
 
     form = SearchCustomer()
+    remove_form = RemoveCustomer()
     data = []
     if category == 'customerid':
         del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
@@ -114,17 +115,41 @@ def search_category(category):
         customers = _search_customer_in_db(data, category)
         if not customers:
             flash(message='no customers found with given details', category='error')
-        return render_template('/search_result.html', form=form,
+        # return redirect(url_for('customer.search_result',
+        #                         category=category, result=customers))
+        return render_template('/search_result.html', form=form, remove_form=remove_form,
                                category=category, result=customers)
 
     # enter customer details to search
     return render_template('/search.html', form=form, category=category)
 
 
-@customer_bp.route('/remove')
+@customer_bp.route('/remove', methods=['GET', 'POST'])
 def remove():
     """route to remove customer"""
-    return render_template('/remove.html')
+
+    form = RemoveCustomer()
+    review_form = CustomerSignup()
+    review_list = []
+    if form.validate_on_submit():
+        # retrieve customer with matching customer id
+        review_list = db.session.query(Customer).\
+            filter(Customer.id == request.form['customer_id']).first()
+
+        if review_list:
+            review_form.first_name.data = review_list.firstname
+            review_form.last_name.data = review_list.lastname
+            review_form.customer_type.data = review_list.type
+            # review_form.dob.data = review_list.dob
+            # review_form.pan.data = review_list.pan
+            # review_form.aadhaar.data = review_list.aadhaar
+            # review_form.customer_type.data = review_list.type
+            # review_form.phone_num.phone_num.data = review_list.phone
+            review_form.email.data = review_list.email
+
+        # return render_template('/remove.html', form=form, result=review_list)
+    return render_template('/remove.html', form=form, result=review_list,
+                           review_form=review_form)
 
 
 @customer_bp.route('/modify')
