@@ -171,19 +171,31 @@ def remove():
         customer_id = request.form['customer_id']
         review_list = db.session.query(Customer).\
             filter(Customer.id == customer_id).first()
+        # review_list = db.session.query(Customer).join(Address).\
+        #     filter(Customer.id == customer_id).first()
+        # db.session.query(Customer, Address).filter(Customer.id == Address.customer_id).all()
 
         if review_list:
+            # customer table
             review_form.first_name.data = review_list.firstname
             review_form.last_name.data = review_list.lastname
             review_form.customer_type.data = review_list.type
             # review_form.dob.data = review_list.dob
             # review_form.pan.data = review_list.pan
             # review_form.aadhaar.data = review_list.aadhaar
-            # review_form.customer_type.data = review_list.type
-            # review_form.phone_num.phone_num.data = review_list.phone
+            review_form.phone_num.phone_num.data = review_list.phone
             review_form.email.data = review_list.email
 
-        # return render_template('/remove.html', form=form, result=review_list)
+            # address table
+            review_form.address.street_num.data = review_list.address_info.street_num
+            review_form.address.street_name.data = review_list.address_info.street_name
+            review_form.address.house_num.data = review_list.address_info.house_num
+            review_form.address.locality.data = review_list.address_info.locality
+            # review_form.address.locality_2.data = review_list.address_info.locality_2
+            review_form.address.state.data = review_list.address_info.state
+            review_form.address.city.data = review_list.address_info.city
+            review_form.address.pincode.data = review_list.address_info.pin
+
     return render_template('/remove.html', form=form, result=review_list,
                            review_form=review_form, customer_id=customer_id)
 
