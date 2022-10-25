@@ -96,39 +96,125 @@ Remove customer
       <div class="form-group row">
         <div class="col-md-4">          
           {{ review_form.first_name.label }}
-          {{ review_form.first_name(class="form-control-plaintext", id="floatingInput", readonly=True) }}          
+          {{ review_form.first_name(class="form-control", id="floatingInput", readonly=True) }}          
         </div>
         <div class="col-md-4">   
           {{ review_form.last_name.label }}
-          {{ review_form.last_name(class="form-control-plaintext", id="floatingInput", readonly=True) }}       
+          {{ review_form.last_name(class="form-control", id="floatingInput", readonly=True) }}       
         </div>
         <div class="col-md-4">  
           {{ review_form.customer_type.label }} 
-          {{ review_form.customer_type(class="form-control-plaintext", id="floatingInput",disabled=True, readonly=True) }}       
+          {{ review_form.customer_type(class="form-control", id="floatingInput",disabled=True, readonly=True) }}       
         </div>        
-      </div>  
+      </div>       
 
       <!-- Row 2 -->   
 
-      <div class="form-group row">
+      <div class="form-group row mb-4">
         <div class="col-md-4">
           {{ review_form.dob.label }}
-          {{ review_form.dob(class="form-control-plaintext", id="floatingInput", readonly=True) }}                           
+          {{ review_form.dob(class="form-control", id="floatingInput", readonly=True) }}                           
         </div>  
 
         <div class="col-md-4">
           {{ review_form.pan.label }}
-          {{ review_form.pan(class="form-control-plaintext", id="floatingInput", readonly=True) }}                    
+          {{ review_form.pan(class="form-control", id="floatingInput", readonly=True) }}                    
         </div>
 
         <div class="col-md-4">
           {{ review_form.aadhaar.label }}
-          {{ review_form.aadhaar(class="form-control-plaintext", id="floatingInput", readonly=True) }}                    
+          {{ review_form.aadhaar(class="form-control", id="floatingInput", readonly=True) }}                    
         </div>         
       </div>  
 
+      <!-- Row 3 -->
+
+      <div class="form-group row mb-4">
+        <div class="col-md-3">
+          {{ review_form.phone_num.country_code.label }}
+          {{ review_form.phone_num.country_code(class="form-control", id="floatingInput", readonly=True, disabled=True) }}                         
+        </div>   
+
+        <div class="col-md-3">
+          {{ review_form.phone_num.phone_num.label }}
+          {{ review_form.phone_num.phone_num(class="form-control", id="floatingInput", readonly=True) }}                          
+        </div>      
+
+        <div class="col-md-6">
+          {{ review_form.email.label }}
+          {{ review_form.email(class="form-control", id="floatingInput", readonly=True) }}                      
+        </div>   
+      </div> 
+
+      <hr class="my-4">
+
+      <!-- Row 4 -->
+
+      <div class="row mb-4">
+        <div class="col-md-3">
+          {{ review_form.address.house_type.label }}
+          {{ review_form.address.house_type(class="form-control", id="floatingInput", readonly=True, disabled=True) }}                    
+        </div>   
+
+        <div class="col-md-2">
+          {{ review_form.address.street_num.label }}
+          {{ review_form.address.street_num(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div>   
+
+        <div class="col-md-7">
+          {{ review_form.address.street_name.label }}
+          {{ review_form.address.street_name(class="form-control", id="floatingInput", readonly=True) }}                      
+        </div>               
+      </div>
+
+      <!-- Row 5 -->
+
+      <div class="row mb-4">
+        <div class="col-md-3">
+          {{ review_form.address.house_num.label }}
+          {{ review_form.address.house_num(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div> 
+
+        <div class="col-md-5">
+          {{ review_form.address.locality.label }}
+          {{ review_form.address.locality(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div>   
+
+        <div class="col-md-4">
+          {{ review_form.address.locality_2.label }}
+          {{ review_form.address.locality_2(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div>               
+      </div>
+
+      <!-- Row 6 -->
+
+      <div class="row mb-4">
+        <div class="col-md-4">
+          {{ review_form.address.city.label }}
+          {{ review_form.address.city(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div> 
+
+        <div class="col-md-4">
+          {{ review_form.address.state.label }}
+          {{ review_form.address.state(class="form-control", id="floatingInput", readonly=True, disabled=True) }}                     
+        </div>    
+
+        <div class="col-md-4">
+          {{ review_form.address.pincode.label }}
+          {{ review_form.address.pincode(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div>      
+      </div>
 
       <hr class="my-4">   
+
+      {% if customer_id %}
+        <!-- Return to category page --> 
+        <div class="col align-items-center text-center mt-2">
+          <div class="col">
+            <a href="{{ url_for('customer.remove_customer', customer_id=customer_id) }}" class="btn btn-primary" >Confirm customer removal</a>  
+          </div>
+        </div> 
+      {% endif %}
 
     {% else %}
       <div class="col text-center"> 
@@ -151,11 +237,17 @@ Remove customer
 
           <div class="col mt-4">
             {{ form.submit(class="col align-items-center btn btn-primary") }}
-          </div>  
+          </div>           
+        </div>
 
+        <!-- Row 2 -->
+        <div class="row mt-4">
+          <div class="col-md-8">            
+          </div>
+          
           <div class="col align-items-center text-center">
-            <a href="{{ url_for('customer.search', category=category) }}" class="link-primary">Search customer</a>
-          </div>   
+            <a href="{{ url_for('customer.search', category=category) }}" class="align-items-center btn btn-info">Search customer</a>
+          </div>  
         </div>      
       </form>    
     {% endif %}

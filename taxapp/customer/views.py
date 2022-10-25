@@ -91,6 +91,9 @@ def search_category(category):
         del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.email
     elif category == 'email':
         del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num
+    elif category == 'all':
+        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, \
+            form.phone_num, form.email
 
     if form.validate_on_submit():
         # search customer in db
@@ -109,6 +112,8 @@ def search_category(category):
                    request.form['phone_num-phone_num']
         elif category == 'email':
             data = request.form['email']
+        elif category == 'all':
+            data = request.form
         else:
             data = []
 
@@ -131,10 +136,12 @@ def remove():
     form = RemoveCustomer()
     review_form = CustomerSignup()
     review_list = []
+    customer_id = ''
     if form.validate_on_submit():
         # retrieve customer with matching customer id
+        customer_id = request.form['customer_id']
         review_list = db.session.query(Customer).\
-            filter(Customer.id == request.form['customer_id']).first()
+            filter(Customer.id == customer_id).first()
 
         if review_list:
             review_form.first_name.data = review_list.firstname
@@ -149,7 +156,22 @@ def remove():
 
         # return render_template('/remove.html', form=form, result=review_list)
     return render_template('/remove.html', form=form, result=review_list,
-                           review_form=review_form)
+                           review_form=review_form, customer_id=customer_id)
+
+
+@customer_bp.route('/remove/<customer_id>', methods=['GET'])
+def remove_customer(customer_id):
+    """remove specific customer with customer_id from db"""
+    # run delete row query on customer/address/taxinfo
+    db.session.query(Address).filter(Address.customer_id == customer_id).delete()
+    # db.session.commit()
+    # db.session.query(TaxInfo).filter(TaxInfo.customer_id == customer_id).delete()
+    # db.session.commit()
+    db.session.query(Customer).filter(id == customer_id).delete()
+    db.session.commit()
+
+    flash(message='customer with ID {} removed'.format(customer_id), category='success')
+    return redirect(url_for('customer.remove'))
 
 
 @customer_bp.route('/modify')
@@ -197,6 +219,8 @@ def _search_customer_in_db(form_obj, category):
         #                form_obj['phone_num-phone_num']
         customers = db.session.query(Customer).filter(Customer.phone ==
                                                       form_obj).all()
+    elif category == 'all':
+        customers = db.session.query(Customer).all()
     else:
         customers = []
     return customers
