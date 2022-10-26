@@ -175,7 +175,7 @@ def remove():
         #     filter(Customer.id == customer_id).first()
         # db.session.query(Customer, Address).filter(Customer.id == Address.customer_id).all()
 
-        if review_list:
+        if review_list is not None:
             # customer table
             review_form.first_name.data = review_list.firstname
             review_form.last_name.data = review_list.lastname
@@ -187,14 +187,21 @@ def remove():
             review_form.email.data = review_list.email
 
             # address table
-            review_form.address.street_num.data = review_list.address_info.street_num
-            review_form.address.street_name.data = review_list.address_info.street_name
-            review_form.address.house_num.data = review_list.address_info.house_num
-            review_form.address.locality.data = review_list.address_info.locality
-            # review_form.address.locality_2.data = review_list.address_info.locality_2
-            review_form.address.state.data = review_list.address_info.state
-            review_form.address.city.data = review_list.address_info.city
-            review_form.address.pincode.data = review_list.address_info.pin
+            if review_list.address_info is not None:
+                review_form.address.street_num.data = review_list.address_info.street_num
+                review_form.address.street_name.data = review_list.address_info.street_name
+                review_form.address.house_num.data = review_list.address_info.house_num
+                review_form.address.locality.data = review_list.address_info.locality
+                # review_form.address.locality_2.data = review_list.address_info.locality_2
+                review_form.address.state.data = review_list.address_info.state
+                review_form.address.city.data = review_list.address_info.city
+                review_form.address.pincode.data = review_list.address_info.pin
+
+            return render_template('/remove_customer.html', form=form, result=review_list,
+                                   review_form=review_form, customer_id=customer_id)
+        else:
+            flash('Customer with ID {} does not exist'.format(customer_id), category='error')
+            return redirect(url_for('customer.search'))
 
     return render_template('/remove_customer.html', form=form, result=review_list,
                            review_form=review_form, customer_id=customer_id)

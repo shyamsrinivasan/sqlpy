@@ -203,7 +203,7 @@ def remove():
         #     filter(Customer.id == customer_id).first()
         # db.session.query(Customer, Address).filter(Customer.id == Address.customer_id).all()
 
-        if review_list:
+        if review_list is not None:
             # customer table
             review_form.first_name.data = review_list.firstname
             review_form.last_name.data = review_list.lastname
@@ -220,6 +220,12 @@ def remove():
             # review_form.address.state.data = review_list.address_info.state
             # review_form.address.city.data = review_list.address_info.city
             # review_form.address.pincode.data = review_list.address_info.pin
+
+            return render_template('/remove.html', form=form, result=review_list,
+                                   review_form=review_form, username=username)
+        else:
+            flash('User with username {} does not exist'.format(username), category='error')
+            return redirect(url_for('user.search'))
 
     return render_template('/remove.html', form=form, result=review_list,
                            review_form=review_form, username=username)
