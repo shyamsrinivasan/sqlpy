@@ -151,11 +151,11 @@ def search_category(category):
             flash(message='no customers found with given details', category='error')
         # return redirect(url_for('customer.search_result',
         #                         category=category, result=customers))
-        return render_template('/search_result.html', form=form, remove_form=remove_form,
+        return render_template('/search_result_customer.html', form=form, remove_form=remove_form,
                                category=category, result=customers)
 
     # enter customer details to search
-    return render_template('/search.html', form=form, category=category)
+    return render_template('/search_customer_category.html', form=form, category=category)
 
 
 @customer_bp.route('/remove', methods=['GET', 'POST'])
@@ -196,7 +196,7 @@ def remove():
             review_form.address.city.data = review_list.address_info.city
             review_form.address.pincode.data = review_list.address_info.pin
 
-    return render_template('/remove.html', form=form, result=review_list,
+    return render_template('/remove_customer.html', form=form, result=review_list,
                            review_form=review_form, customer_id=customer_id)
 
 
