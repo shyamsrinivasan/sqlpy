@@ -92,23 +92,23 @@ User Sign-up
 
         <!-- Row 1 -->
         <div class="row mb-4">
-          <div class="form-floating col-md-4 mt-2">
-            {{ form.first_name(class="form-control", id="floatingInput") }}
+          <div class="form-group col-md-4 mt-2">
             {{ form.first_name.label }}
+            {{ form.first_name(class="form-control", id="floatingInput", placeholder="First name") }}            
             {% for error in form.first_name.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}
           </div>
-          <div class="form-floating col-md-4 mt-2">
-            {{ form.last_name(class="form-control", id="floatingInput") }}
+          <div class="form-group col-md-4 mt-2">
             {{ form.last_name.label }}    
+            {{ form.last_name(class="form-control", id="floatingInput", placeholder="Last name") }}            
             {% for error in form.last_name.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}      
           </div>  
-          <div class="form-floating col-md-4 mt-2">
-            {{ form.username(class="form-control", id="floatingInput") }}
+          <div class="form-group col-md-4 mt-2">
             {{ form.username.label }}   
+            {{ form.username(class="form-control", id="floatingInput", placeholder="username") }}            
             {% for error in form.username.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}
@@ -117,41 +117,38 @@ User Sign-up
         
         <!-- Row 2 -->
         <div class="row mb-4">
-          <div class="form-floating mb-3 col-md-6">
-            {{ form.email(class="form-control", id="floatingInput") }}
+          <div class="form-group col-md-5">
             {{ form.email.label }}  
+            {{ form.email(class="form-control", id="floatingInput", placeholder="name@example.com") }}            
             {% for error in form.email.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}        
           </div>  
-          <div class="form-floating mb-3 col-md-2">
-            {{ form.country_code(class="form-control", id="floatingInput") }}
-            {{ form.country_code.label }}  
-            {% for error in form.country_code.errors %}
-            <small class="form-text text-muted">{{ error }}</small>    
-            {% endfor %}        
+          <div class="form-group col-md-3">
+            {{ form.phone_num.country_code.label }}
+            {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}         
           </div>
-          <div class="form-floating mb-3 col-md-4">
-            {{ form.phone(class="form-control", id="floatingInput") }}
-            {{ form.phone.label }}   
-            {% for error in form.phone.errors %}
-            <small class="form-text text-muted">{{ error }}</small>    
-            {% endfor %}        
+          <div class="form-group col-md-4">
+            {{ form.phone_num.phone_num.label }}
+            {{ form.phone_num.phone_num(class="form-control", id="floatingInput", placeholder="1234567892") }}          
+            {% for error in form.phone_num.phone_num.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}    
           </div>  
         </div>
 
         <!-- Row 3 -->
         <div class="row mb-4">
-          <div class="form-floating mb-3 col-md-6">
-            {{ form.password(class="form-control floatingPassword", id="floatingInput") }}
-            {{ form.password.label }}      
+          <div class="form-group col-md-6">
+            {{ form.password.label }}    
+            {{ form.password(class="form-control floatingPassword", id="floatingInput", placeholder="Enter account password") }}              
             {% for error in form.password.errors %}
             <small class="form-text text-muted">{{ error }}</small>       
             {% endfor %}
           </div>
-          <div class="form-floating mb-3 col-md-6">
-            {{ form.confirm_pass(class="form-control floatingPassword", id="floatingInput") }}
+          <div class="form-group col-md-6">
             {{ form.confirm_pass.label }}
+            {{ form.confirm_pass(class="form-control floatingPassword", id="floatingInput", placeholder="Re-Enter account password") }}            
             {% for error in form.confirm_pass.errors %}
             <small class="form-text text-muted invalid-feedback">{{ error }}</small>       
             {% endfor %}          
