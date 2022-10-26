@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from . import user_bp
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, SignupForm, SearchUserCategory, SearchUser, RemoveUser
 from .models import User
 from taxapp import db, flask_bcrypt
 from flask_login import current_user, login_user, logout_user, login_required
@@ -119,3 +119,100 @@ def dashboard(username):
               category='error')
         return redirect(url_for('user.login_home'))
     return render_template('/dashboard.html', user=user_obj)
+
+
+@user_bp.route('/search', methods=['GET', 'POST'])
+# @login_required
+def search():
+    """search user in db - follows same template as search customer"""
+    form = SearchUserCategory()
+    if form.validate_on_submit():
+        return redirect(url_for('user.search_user', category=request.form['search_by']))
+
+    return render_template('/search_user.html', form=form)
+
+
+@user_bp.route('/search/<category>', methods=['GET', 'POST'])
+def search_user(category):
+    """search user based on category given"""
+
+    form = SearchUser()
+    remove_form = RemoveUser()
+    data = []
+
+    if category == 'userid':
+        del form.first_name, form.last_name, form.username, form.phone_num, form.email
+    elif category == 'firstname':
+        del form.user_id, form.last_name, form.username, form.phone_num, form.email
+    elif category == 'lastname':
+        del form.user_id, form.first_name, form.username, form.phone_num, form.email
+    elif category == 'username':
+        del form.user_id, form.first_name, form.last_name, form.phone_num, form.email
+    elif category == 'phone':
+        del form.user_id, form.first_name, form.last_name, form.username, form.email
+    elif category == 'email':
+        del form.user_id, form.first_name, form.last_name, form.username, form.phone_num
+    elif category == 'all':
+        del form.user_id, form.first_name, form.last_name, form.username, \
+            form.phone_num, form.email
+
+    if form.validate_on_submit():
+        # search customer in db
+        if category == 'userid':
+            data = request.form['user_id']
+        elif category == 'firstname':
+            data = request.form['first_name']
+        elif category == 'lastname':
+            data = request.form['last_name']
+        elif category == 'username':
+            data = request.form['username']
+        elif category == 'phone':
+            data = request.form['phone_num-country_code'] + \
+                   request.form['phone_num-phone_num']
+        elif category == 'email':
+            data = request.form['email']
+        elif category == 'all':
+            data = request.form
+        else:
+            data = []
+
+        users = _search_user_in_db(data, category)
+        if not users:
+            flash(message='no users found with given details', category='error')
+
+        return render_template('/search_result.html', form=form,
+                               category=category, result=users, remove_form=remove_form)
+
+    return render_template('/search.html', category=category, form=form)
+
+
+@user_bp.route('/remove')
+# @login_required
+def remove():
+    """remove user from db"""
+    return render_template('/remove.html')
+
+
+def _search_user_in_db(value, category):
+    """seacrh for customer given in form object in db"""
+
+    # customers = None
+    if category == 'customerid':
+        users = db.session.query(User).filter(User.id == value).all()
+    elif category == 'firstname':
+        users = db.session.query(User).filter(User.firstname == value).all()
+    elif category == 'lastname':
+        users = db.session.query(User).filter(User.lastname == value).all()
+    elif category == 'fullname':
+        users = db.session.query(User).filter(User.fullname == value).all()
+    elif category == 'username':
+        users = db.session.query(User).filter(User.username == value).all()
+    elif category == 'email':
+        users = db.session.query(User).filter(User.email == value).all()
+    elif category == 'phone':
+        users = db.session.query(User).filter(User.phone == value).all()
+    elif category == 'all':
+        users = db.session.query(User).all()
+    else:
+        users = []
+    return users
