@@ -97,8 +97,6 @@ class RemoveUser(FlaskForm):
     """form to remove user from db"""
 
     # user_id = StringField('User ID', [Optional()])
-    # first_name = StringField('First Name', [Optional()])
-    # last_name = StringField('Last Name', [Optional()])
     username = StringField('Username', [Optional(),
                                         Length(min=6,
                                                message='Your username should be minimum 6 characters')])
