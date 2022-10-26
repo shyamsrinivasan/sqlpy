@@ -29,7 +29,7 @@ def phone_num(minimum=-1, maximum=-1):
 class PhoneNumber(FlaskForm):
     """phone number form for use in FormFields and FieldList"""
     country_code = SelectField('Country Code', [Optional()], choices=[('+91', 'India'),
-                                                              ('+1', 'USA')])
+                                                                      ('+1', 'USA')])
     phone_num = StringField('Phone Number', [Optional(), Length(min=10, max=10)])
 
 
@@ -41,9 +41,10 @@ class SignupForm(FlaskForm):
     last_name = StringField('Last Name', [DataRequired(message='Please provide your last name')])
     # dob = DateField('Date of Birth', [DataRequired()])
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
-    country_code = SelectField('Code', [Optional()], choices=[('india', '+91'),
-                                                              ('usa', '+1')])
-    phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    # country_code = SelectField('Code', [Optional()], choices=[('india', '+91'),
+    #                                                           ('usa', '+1')])
+    # phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
+    phone_num = FormField(PhoneNumber)
 
     # login details
     username = StringField('Username', [DataRequired(),
