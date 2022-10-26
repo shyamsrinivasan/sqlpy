@@ -16,10 +16,12 @@ def signup():
     if form.validate_on_submit():
         # process sign-up information using func into db add info to db here
         # generate user object
+        phone_number = request.form['phone_num-country_code'] + \
+                       request.form['phone_num-phone_num']
         new_user_obj = User(firstname=request.form['first_name'],
                             lastname=request.form['last_name'],
                             email=request.form['email'],
-                            phone=request.form['phone'],
+                            phone=phone_number,
                             username=request.form['username'])
         # add hashed password to db, full name and added_by
         new_user_obj.set_password(request.form['password'])
