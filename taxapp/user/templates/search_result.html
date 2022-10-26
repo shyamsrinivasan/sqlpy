@@ -212,7 +212,7 @@ Remove user
       <p class="fs-4">Enter Username to be removed</p>
     </div>
 
-    <form action="{{ url_for('user.remove', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
+    <form action="{{ url_for('user.remove', category=category) }}" method="POST" class="g-3 rounded-3 bg-light px-2 pb-2">
       {{ remove_form.csrf_token() }}
 
       <div class="row mb-4">
