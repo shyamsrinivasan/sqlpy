@@ -100,15 +100,9 @@ class SearchCustomer(FlaskForm):
                                       Length(min=12, max=12,
                                              message='Aadhaar should to 12 digits')
                                       ])
-    # country_code = SelectField('Code', [Optional()], choices=[('+91', 'India'),
-    #                                                           ('+1', 'USA')])
-    # phone = StringField('Phone', [Optional(), phone_num(minimum=10, maximum=14)])
     phone_num = FormField(PhoneNumber)
     email = EmailField('Email', [Email(message='Not a valid email address'),
                                  DataRequired(message='Please provide a email to search')])
-
-    # submit_new_category = RadioField('Choose Different Category', [Optional()],
-    #                                  choices=[('new_choice', 'Choose Different Category')])
     submit = SubmitField('Search Customer')
 
 
