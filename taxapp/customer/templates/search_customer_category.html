@@ -31,7 +31,7 @@ Search customer
             <li><a href="#" class="link-light rounded">Overview</a></li>
             <li><a href="{{ url_for('user.signup') }}" class="link-light rounded">Add user</a></li>
             <li><a href="{{ url_for('user.search') }}" class="link-light rounded">Search user</a></li>
-            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded">Remove user</a></li>            
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded">Remove user</a></li>          
           </ul>
         </div>
       </li>
@@ -97,11 +97,11 @@ Search customer
         </div>
         
         <div class="col-md-8">   
-          {% if category == 'userid' %}
+          {% if category == 'customerid' %}
 
-            {{ form.user_id.label }}       
-            {{ form.user_id(class="form-control", id="floatingInput", placeholder="ID") }}          
-            {% for error in form.user_id.errors %}
+            {{ form.customer_id.label }}       
+            {{ form.customer_id(class="form-control", id="floatingInput", placeholder="ID") }}          
+            {% for error in form.customer_id.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}  
 
@@ -121,13 +121,21 @@ Search customer
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}    
 
-          {% elif category == 'username' %}
+          {% elif category == 'pan' %}
 
-            {{ form.username.label }}       
+            {{ form.pan.label }}       
             {{ form.pan(class="form-control", id="floatingInput", placeholder="PAN") }}          
-            {% for error in form.username.errors %}
+            {% for error in form.pan.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
-            {% endfor %}          
+            {% endfor %}
+
+          {% elif category == 'aadhaar' %}
+
+            {{ form.aadhaar.label }}
+            {{ form.aadhaar(class="form-control", id="floatingInput", placeholder="Aadhaar") }}          
+            {% for error in form.aadhaar.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
 
           {% elif category == 'email' %}
 
@@ -172,7 +180,7 @@ Search customer
     <!-- Return to category page --> 
     <div class="col align-items-center text-center mt-2">
       <div class="col">
-        <a href="{{ url_for('user.search') }}" class="btn btn-link" >Change Category</a>  
+        <a href="{{ url_for('customer.search') }}" class="btn btn-link" >Change Category</a>  
       </div>
     </div>       
   </div>
