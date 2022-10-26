@@ -37,9 +37,11 @@ def create_app():
 
     from .admin import admin_bp
     from .customer import customer_bp
+    from .user import user_bp
 
     # register blueprints
     app.register_blueprint(admin_bp)
+    app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(customer_bp, url_prefix='/customer')
 
     db.init_app(app)

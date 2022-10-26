@@ -17,7 +17,7 @@ User Sign-up
   {% if current_user.is_anonymous %}
   {% else %}
   <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
-    <a href="{{ url_for('admin.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
     <span class="bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
     </a>
 
@@ -29,7 +29,7 @@ User Sign-up
         <div class="collapse" id="home-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li><a href="#" class="link-light rounded">Overview</a></li>
-            <li><a href="{{ url_for('admin.signup') }}" class="link-light rounded">Add user</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded">Add user</a></li>
             <li><a href="#" class="link-light rounded">Remove user</a></li>            
           </ul>
         </div>
@@ -86,7 +86,7 @@ User Sign-up
     <div class="col text-center">      
       <p class="fs-4">Please fill form for new user registration</p>
     </div>
-      <form action="{{ url_for('admin.signup') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+      <form action="{{ url_for('user.signup') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
         {{ form.csrf_token() }}  
 
         <!-- Row 1 -->

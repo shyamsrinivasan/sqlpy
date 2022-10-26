@@ -12,7 +12,7 @@ User Login
 {% block main %}
 <main>
 	<div class="container-md form-signin">
-		<form id="signin_form" action="{{ url_for('admin.login_home') }}" method="post" novalidate>
+		<form id="signin_form" action="{{ url_for('user.login_home') }}" method="post" novalidate>
 	    <!-- <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
 	    {{ form.csrf_token() }}
 	    {{ form.next(value=request.args.get('next', '')) }}	    
