@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}
+Review remove user
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<!-- Custom styles for this template-->
+<link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+<div class="row align-self-start gx-1 mx-1">
+  {% if current_user.is_anonymous %}
+  {% else %}
+  <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
+    <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <span class="bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
+    </a>
+
+    <ul class="list-unstyled ps-0">
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+          User
+        </button>
+        <div class="collapse" id="home-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded">Add user</a></li>
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded">Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded">Remove user</a></li>        
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+          Customer
+        </button>
+        <div class="collapse" id="dashboard-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded">Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded">Search</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded">Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded">Modify</a></li>
+            <li><a href="#" class="link-light rounded">Taxes</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+          Billing
+        </button>
+        <div class="collapse" id="orders-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="#" class="link-light rounded">New</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="border-top my-3"></li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+          Account
+        </button>
+        <div class="collapse" id="account-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">            
+            <li><a href="#" class="link-light rounded">Profile</a></li>            
+            <li><a href="#" class="link-light rounded">Sign out</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Sidebar Message -->    
+    <div class="text-center text-white">
+      <footer class="mt-auto text-white-50">
+        <span>Copyright &copy Demeter farms</span>      
+      </footer> 
+    </div> 
+  </div>
+
+  <!-- Main canvas form -->
+  <div class="col py-5 mx-1">    
+    
+    <!-- Row 1 -->  
+
+    {% if result %}      
+      <div class="col text-center"> 
+        <p class="fs-4">Review user details to be removed</p>
+      </div>
+
+      <!-- Row 1 -->
+      <div class="form-group row">
+        <div class="col-md-4">          
+          {{ review_form.first_name.label }}
+          {{ review_form.first_name(class="form-control", id="floatingInput", readonly=True) }}          
+        </div>
+        <div class="col-md-4">   
+          {{ review_form.last_name.label }}
+          {{ review_form.last_name(class="form-control", id="floatingInput", readonly=True) }}       
+        </div>   
+        <div class="col-md-4">
+          {{ review_form.username.label }}
+          {{ review_form.username(class="form-control", id="floatingInput", readonly=True) }}                    
+        </div>       
+      </div>            
+
+      <!-- Row 2 -->
+
+      <div class="form-group row mb-4">
+        <div class="col-md-3">
+          {{ review_form.phone_num.country_code.label }}
+          {{ review_form.phone_num.country_code(class="form-control", id="floatingInput", readonly=True, disabled=True) }}                         
+        </div>   
+
+        <div class="col-md-3">
+          {{ review_form.phone_num.phone_num.label }}
+          {{ review_form.phone_num.phone_num(class="form-control", id="floatingInput", readonly=True) }}                          
+        </div>      
+
+        <div class="col-md-6">
+          {{ review_form.email.label }}
+          {{ review_form.email(class="form-control", id="floatingInput", readonly=True) }}                      
+        </div>   
+      </div> 
+
+      <hr class="my-4">   
+
+      {% if username %}
+        <!-- Return to category page --> 
+        <div class="col align-items-center text-center mt-2">
+          <div class="col">
+            <small class="text-muted">Clicking confirm deletes above user. Operation cannot be reversed.</small> 
+          </div>
+          <div class="col">
+            <a href="{{ url_for('user.remove_user', username=username) }}" class="btn btn-danger" >Confirm user removal</a>  
+          </div>
+        </div> 
+      {% endif %}
+
+    {% else %}
+      <div class="col text-center"> 
+        <p class="fs-4">Enter Username of user to be removed</p>
+      </div>
+
+      <form action="{{ url_for('user.remove') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+
+        <div class="row mb-4">
+          <div class="form-group col-md-8">
+            {{ form.username.label }}
+            {{ form.username(class="form-control", id="floatingInput", placeholder="Username") }}          
+              {% for error in form.username.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+              {% endfor %}  
+          </div>    
+
+          <div class="col mt-4">
+            {{ form.submit(class="col align-items-center btn btn-primary") }}
+          </div>           
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row mt-4">
+          <div class="col-md-8">            
+          </div>
+          
+          <div class="col align-items-center text-center">
+            <a href="{{ url_for('user.search', category=category) }}" class="align-items-center btn btn-info">Search user</a>
+          </div>  
+        </div>      
+      </form>    
+    {% endif %}
+
+  </div>
+  {% endif %}
+
+  
+</div>
+{% endblock %}
+
+
+{% block script %}
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+{% endblock %}

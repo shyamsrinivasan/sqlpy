@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from . import user_bp
-from .forms import LoginForm, SignupForm, SearchUserCategory, SearchUser, RemoveUser
+from .forms import LoginForm, SignupForm, SearchUserCategory, SearchUser, RemoveUser, SignupForm
 from .models import User
 from taxapp import db, flask_bcrypt
 from flask_login import current_user, login_user, logout_user, login_required
@@ -186,11 +186,54 @@ def search_user(category):
     return render_template('/search.html', category=category, form=form)
 
 
-@user_bp.route('/remove')
+@user_bp.route('/remove', methods=['GET', 'POST'])
 # @login_required
 def remove():
     """remove user from db"""
-    return render_template('/remove.html')
+    form = RemoveUser()
+    review_form = SignupForm()
+    review_list = []
+    username = ''
+    if form.validate_on_submit():
+        # retrieve customer with matching customer id
+        username = request.form['username']
+        review_list = db.session.query(User). \
+            filter(User.username == username).first()
+        # review_list = db.session.query(Customer).join(Address).\
+        #     filter(Customer.id == customer_id).first()
+        # db.session.query(Customer, Address).filter(Customer.id == Address.customer_id).all()
+
+        if review_list:
+            # customer table
+            review_form.first_name.data = review_list.firstname
+            review_form.last_name.data = review_list.lastname
+            # review_form.phone_num.phone_num.data = review_list.phone
+            review_form.email.data = review_list.email
+            review_form.username.data = review_list.username
+
+            # address table
+            # review_form.address.street_num.data = review_list.address_info.street_num
+            # review_form.address.street_name.data = review_list.address_info.street_name
+            # review_form.address.house_num.data = review_list.address_info.house_num
+            # review_form.address.locality.data = review_list.address_info.locality
+            # review_form.address.locality_2.data = review_list.address_info.locality_2
+            # review_form.address.state.data = review_list.address_info.state
+            # review_form.address.city.data = review_list.address_info.city
+            # review_form.address.pincode.data = review_list.address_info.pin
+
+    return render_template('/remove.html', form=form, result=review_list,
+                           review_form=review_form, username=username)
+
+
+@user_bp.route('/remove/<username>', methods=['GET'])
+def remove_user(username):
+    """remove specific customer with customer_id from db"""
+    # run delete row query on customer/address/taxinfo
+    db.session.query(User).filter(User.username == username).delete()
+    db.session.commit()
+
+    flash(message='User with username {} removed'.format(username), category='success')
+    return redirect(url_for('user.remove'))
 
 
 def _search_user_in_db(value, category):
