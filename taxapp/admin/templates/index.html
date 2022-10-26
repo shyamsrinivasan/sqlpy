@@ -36,7 +36,8 @@ Homepage
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li><a href="#" class="link-light rounded">Overview</a></li>
             <li><a href="{{ url_for('user.signup') }}" class="link-light rounded">Add user</a></li>
-            <li><a href="#" class="link-light rounded">Remove user</a></li>            
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded">Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded">Remove user</a></li>          
           </ul>
         </div>
       </li>
