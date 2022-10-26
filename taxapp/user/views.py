@@ -42,7 +42,7 @@ def signup():
         # add user object to session and commit to db
         db.session.add(new_user_obj)
         db.session.commit()
-        flash('Addition of new user {} successful'.format(form.username),
+        flash('Addition of new user {} successful'.format(request.form['username']),
               category='success')
         return redirect(url_for('user.dashboard', username=current_user.username))
     return render_template('/signup.html', form=form)

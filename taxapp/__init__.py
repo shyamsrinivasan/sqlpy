@@ -25,7 +25,7 @@ def create_app():
 
     csrf.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'admin.login_home'
+    login_manager.login_view = 'user.login_home'
     login_manager.login_message = 'Please log in for further access'
     login_manager.login_message_category = 'message'
 
