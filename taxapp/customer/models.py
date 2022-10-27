@@ -37,6 +37,14 @@ class Customer(db.Model):
         elif change_type == 'update':
             self.updated_user = username
 
+    def is_customer_exist(self):
+        """check if user object row already exists in db with given username"""
+        customer_obj = db.session.query(Customer).filter(Customer.fullname == self.fullname).first()
+        if customer_obj is not None:
+            return True
+        else:
+            return False
+
     def __repr__(self):
         return f"Customer(id={self.id!r}, name={self.fullname!r}, email={self.email!r}, " \
                f"phone={self.phone!r}, type={self.type!r}, added_on={self.date_added!r})"
@@ -75,6 +83,15 @@ class Address(db.Model):
             self.added_user = username
         elif change_type == 'update':
             self.updated_user = username
+
+    def is_customer_exist(self):
+        """check if user object row already exists in db with given username"""
+        address_obj = db.session.query(Address).filter(Address.customer_id ==
+                                                       self.customer_id).first()
+        if address_obj is not None:
+            return True
+        else:
+            return False
 
     def __repr__(self):
         return f"Address(id={self.id!r}, customer_id={self.customer_id!r}, " \

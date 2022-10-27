@@ -24,23 +24,23 @@ def add():
         # set phone number
         new_customer_obj.set_full_phone(country_code=request.form['phone_num-country_code'],
                                         phone_number=request.form['phone_num-phone_num'])
+
         # set added user
         new_customer_obj.set_added_user(change_type='add',
                                         username=current_user.username)
 
         # check if customer is present in db
-        customer_not_present = True
-        customer_info = db.session.query(Customer).filter(Customer.fullname == customer_name).first()
-        if customer_info:
-            customer_not_present = False
+        if new_customer_obj.is_customer_exist:
+            flash(message='Customer with name {} already exists'.format(new_customer_obj.fullname),
+                  category='primary')
+            return redirect(url_for('customer.add'))
 
-        if customer_not_present:
-            # add user object to session and commit to db
-            _add_table_row(new_customer_obj)
+        # add user object to session and commit to db
+        _add_table_row(new_customer_obj)
 
-            # get customer id for newly added customer
-            customer_info = db.session.query(Customer).\
-                filter(Customer.fullname == fullname).first()
+        # get customer id for newly added customer
+        customer_info = db.session.query(Customer).\
+            filter(Customer.fullname == fullname).first()
 
         # create address object
         new_address_obj = Address(customer_id=customer_info.id,
@@ -57,32 +57,29 @@ def add():
         new_address_obj.set_added_user(change_type='add',
                                        username=current_user.username)
 
-        # check if customer address is present in db
-        address_not_present = True
-        address_info = db.session.query(Address).\
+        # check if customer is present in address table in db
+        if new_address_obj.is_customer_exist:
+            flash(message='Address for {} with ID {} already exists'.format(new_address_obj.customer_name,
+                                                                           new_address_obj.customer_id),
+                  category='primary')
+            return redirect(url_for('customer.add'))
+
+        # add address object to session and commit to db
+        _add_table_row(new_address_obj)
+
+        # get address id for newly added customer address
+        customer_info = db.session.query(Address).\
             filter(Address.customer_id == customer_info.id).first()
-        if address_info:
-            address_not_present = False
 
-        if address_not_present:
-            # add address object to session and commit to db
-            _add_table_row(new_address_obj)
+        # # set identity
+        # new_customer_obj.set_idenity(dob=request.form['identity-dob'],
+        #                              pan=request.form['identity-pan'],
+        #                              aadhaar=request.form['identity-aadhaar'])
 
-            # get address id for newly added customer address
-            customer_info = db.session.query(Address).\
-                filter(Address.customer_id == customer_info.id).first()
-
-        if customer_not_present and address_not_present:
-            flash('Addition of new customer {} and address successful'.format(customer_name),
-                  category='success')
-        elif not customer_not_present and address_not_present:
-            flash('Customer {} already exists. Address addition successful'.format(customer_name),
-                  category='success')
-        else:
-            flash('Customer {} and address already present. No additions made.'.format(customer_name),
-                  category='info')
-
-        return redirect(url_for('admin.dashboard', username=current_user.username))
+        # if customer_not_present and address_not_present:
+        flash('Addition of new customer {} and address successful'.format(customer_name),
+              category='success')
+        return redirect(url_for('user.dashboard', username=current_user.username))
 
     return render_template('/add.html', form=form)
 
