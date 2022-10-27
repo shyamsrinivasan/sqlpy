@@ -5,16 +5,6 @@ from wtforms.validators import DataRequired, Email, Optional, Length
 from wtforms.validators import ValidationError
 
 
-def phone_num(minimum=-1, maximum=-1):
-    message = 'Must be between %d (without +country code) and %d (with +country code) characters long' % (minimum, maximum)
-
-    def _phone_num(form, field):
-        l = field.data and len(field.data) or 0
-        if l < minimum or maximum != -1 and l > maximum:
-            raise ValidationError(message)
-    return _phone_num
-
-
 class PhoneNumber(FlaskForm):
     """phone number form for use in FormFields and FieldList"""
     country_code = SelectField('Country Code', [Optional()], choices=[('+91', 'India'),
