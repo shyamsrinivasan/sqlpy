@@ -18,8 +18,7 @@ def add():
                                     type=request.form['customer_type'],
                                     email=request.form['email'])
         # set full name-
-        fullname = new_customer_obj.set_full_name()
-        customer_name = new_customer_obj.fullname
+        customer_name = new_customer_obj.set_full_name()
 
         # set phone number
         new_customer_obj.set_full_phone(country_code=request.form['phone_num-country_code'],
@@ -30,7 +29,7 @@ def add():
                                         username=current_user.username)
 
         # check if customer is present in db
-        if new_customer_obj.is_customer_exist:
+        if new_customer_obj.is_customer_exist():
             flash(message='Customer with name {} already exists'.format(new_customer_obj.fullname),
                   category='primary')
             return redirect(url_for('customer.add'))
@@ -40,7 +39,7 @@ def add():
 
         # get customer id for newly added customer
         customer_info = db.session.query(Customer).\
-            filter(Customer.fullname == fullname).first()
+            filter(Customer.fullname == customer_name).first()
 
         # create address object
         new_address_obj = Address(customer_id=customer_info.id,
@@ -58,7 +57,7 @@ def add():
                                        username=current_user.username)
 
         # check if customer is present in address table in db
-        if new_address_obj.is_customer_exist:
+        if new_address_obj.is_customer_exist():
             flash(message='Address for {} with ID {} already exists'.format(new_address_obj.customer_name,
                                                                            new_address_obj.customer_id),
                   category='primary')
@@ -68,7 +67,7 @@ def add():
         _add_table_row(new_address_obj)
 
         # get address id for newly added customer address
-        customer_info = db.session.query(Address).\
+        address_info = db.session.query(Address).\
             filter(Address.customer_id == customer_info.id).first()
 
         # # set identity
@@ -77,7 +76,8 @@ def add():
         #                              aadhaar=request.form['identity-aadhaar'])
 
         # if customer_not_present and address_not_present:
-        flash('Addition of new customer {} and address successful'.format(customer_name),
+        flash('Addition of new customer {} '
+              'with ID {} and address successful'.format(customer_name, customer_info.id),
               category='success')
         return redirect(url_for('user.dashboard', username=current_user.username))
 
