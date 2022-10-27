@@ -27,7 +27,7 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'user.login_home'
     login_manager.login_message = 'Please log in for further access'
-    login_manager.login_message_category = 'message'
+    login_manager.login_message_category = 'error'
 
     # ensure the instance folder exists
     try:
