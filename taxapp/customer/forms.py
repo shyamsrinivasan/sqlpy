@@ -33,6 +33,19 @@ class Address(FlaskForm):
                                          message='PIN should be 6 characters long')])
 
 
+class CustomerID(FlaskForm):
+    """form to encapsulate customer id details"""
+
+    dob = DateField('Date of Birth', [DataRequired(message='Date of birth is required')])
+    pan = StringField('PAN', [DataRequired('Please provide customer PAN'),
+                              Length(min=10, max=10,
+                                     message='PAN should be 10 characters')
+                              ])
+    aadhaar = StringField('Aadhaar', [Optional(),
+                                      Length(min=12, max=12,
+                                             message='Aadhaar should to 12 digits')])
+
+
 class CustomerSignup(FlaskForm):
     """form to add customer to database"""
 
@@ -45,14 +58,16 @@ class CustomerSignup(FlaskForm):
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     # id details
-    dob = DateField('Date of Birth', [DataRequired(message='Date of birth is required')])
-    pan = StringField('PAN', [DataRequired('Please provide customer PAN'),
-                              Length(min=10, max=10,
-                                     message='PAN should be 10 characters')
-                              ])
-    aadhaar = StringField('Aadhaar', [Optional(),
-                                      Length(min=12, max=12,
-                                             message='Aadhaar should to 12 digits')])
+    # dob = DateField('Date of Birth', [DataRequired(message='Date of birth is required')])
+    # pan = StringField('PAN', [DataRequired('Please provide customer PAN'),
+    #                           Length(min=10, max=10,
+    #                                  message='PAN should be 10 characters')
+    #                           ])
+    # aadhaar = StringField('Aadhaar', [Optional(),
+    #                                   Length(min=12, max=12,
+    #                                          message='Aadhaar should to 12 digits')])
+    identity = FormField(CustomerID)
+
     # address details
     address = FormField(Address)
 
