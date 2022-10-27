@@ -16,7 +16,7 @@ User Login
 	    <!-- <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
 	    {{ form.csrf_token() }}
 	    {{ form.next(value=request.args.get('next', '')) }}	    
-	    <h1 class="h3 mb-3 fw-normal text-center">User Login</h1>
+	    <h1 class="h3 mb-3 fw-normal text-center"><i class="fa-solid fa-user fa-fw"></i>&nbsp;Login</h1>
 	    <div class="form-floating">
 	      {{ form.username(class="form-control", id="floatingInput") }}
 	      {{ form.username.label }}

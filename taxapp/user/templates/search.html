@@ -18,7 +18,7 @@ Search user
   {% else %}
   <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
     <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
-    <span class="bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
+    <span class="bi me-2 fs-4"><i class="fa-solid fa-user fa-fw"></i>&nbsp;{{ current_user.username }}</span>
     </a>
 
     <ul class="list-unstyled ps-0">
@@ -100,8 +100,8 @@ Search user
           {% if category == 'userid' %}
 
             {{ form.user_id.label }}       
-            {{ form.customer_id(class="form-control", id="floatingInput", placeholder="ID") }}          
-            {% for error in form.customer_id.errors %}
+            {{ form.user_id(class="form-control", id="floatingInput", placeholder="ID") }}          
+            {% for error in form.user_id.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}  
 
