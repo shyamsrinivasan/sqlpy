@@ -20,6 +20,8 @@ class Customer(db.Model):
 
     address_info = db.relationship('Address', back_populates='customer_info',
                                    cascade="all, delete", uselist=False)
+    identity_info = db.relationship('Identity', back_populates='identity_customer_info',
+                                    cascade="all, delete", uselist=False)
 
     def set_full_name(self):
         """set value of fullname column using first and last name"""
@@ -56,11 +58,11 @@ class Address(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('test_customers.id', onupdate='CASCADE',
                                                       ondelete='CASCADE'), nullable=False)
-    customer_name = db.Column(db.String(30), index=True)
+    customer_name = db.Column(db.String(40), index=True)
 
     # add address columns from taxdata db table
     type = db.Column(db.Enum('house', 'apartment', 'business - single',
-                             'business - complex', name='address_type'))
+                             'business - complex', name='address_type'), default='house')
     street_num = db.Column(db.String(8))
     street_name = db.Column(db.String(30))
     house_num = db.Column(db.String(8))
@@ -83,6 +85,11 @@ class Address(db.Model):
             self.added_user = username
         elif change_type == 'update':
             self.updated_user = username
+
+    def set_customer_id(self, customer_id):
+        """set customer id of identity object"""
+        # if change_type == 'add':
+        self.customer_id = customer_id
 
     def is_customer_exist(self):
         """check if user object row already exists in db with given username"""
@@ -108,5 +115,53 @@ class TaxInfo(db.Model):
                                                       ondelete='CASCADE'), nullable=False)
     customer_name = db.Column(db.String(30), index=True)
 
-    # customer_info = db.relationship(Customer, back_populates='tax_info',
-    #                                 cascade='all, delete')
+
+class Identity(db.Model):
+    __tablename__ = 'test_identity'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('test_customers.id', onupdate='CASCADE',
+                                                      ondelete='CASCADE'), nullable=False)
+    customer_name = db.Column(db.String(40), nullable=False)
+
+    dob = db.Column(db.Date, nullable=False)
+    pan = db.Column(db.String(10), nullable=False, index=True)
+    aadhaar = db.Column(db.String(12))
+
+    identity_customer_info = db.relationship('Customer', back_populates='identity_info',
+                                             cascade='all, delete')
+
+    def set_customer_id(self, customer_id):
+        """set customer id of identity object"""
+        # if change_type == 'add':
+        self.customer_id = customer_id
+        # elif change_type == 'update':
+        #     self.customer_id = customer_id
+
+    def is_customer_name_exist(self):
+        """check if identity object row already exists in db with given name"""
+        id_name_obj = db.session.query(Identity).filter(Identity.customer_name ==
+                                                        self.customer_name).first()
+        if id_name_obj is not None:
+            return True
+
+        return False
+
+    def is_customer_pan_exist(self):
+        """check if identity object row exists in db with given pan"""
+        identity_obj = db.session.query(Identity).filter(Identity.pan == self.pan).first()
+        if identity_obj is not None:
+            return True
+
+        return False
+
+    def is_customer_exist(self):
+        if self.is_customer_name_exist() and self.is_customer_pan_exist():
+            return True
+
+        return False
+
+    def __repr__(self):
+        return f"Identity(id={self.id!r}, customer_id={self.customer_id!r}, " \
+               f"name={self.customer_name!r}, dob={self.dob!r}, " \
+               f"pan={self.pan!r}, aadhaar={self.aadhaar!r})"
