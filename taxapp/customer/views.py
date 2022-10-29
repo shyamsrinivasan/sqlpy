@@ -56,66 +56,66 @@ def add():
             # set customer id for address object
             new_address_obj.set_customer_id(customer_info.id)
 
+            # check if customer is present in address table in db
             if new_identity_obj.is_customer_exist():
-                identity_info = db.session.query(Identity). \
-                    filter(Identity.customer_name == customer_name).first()
-                # check if customer is present in address table in db
                 if new_address_obj.is_customer_exist():
-                    # get customer and address id for existing customer
-                    address_info = db.session.query(Address). \
-                        filter(Address.customer_id == customer_info.id).first()
                     flash(message='Customer with name {}, PAN {} and address ID {} already exists'.
                           format(customer_info.fullname,
-                                 identity_info.pan,
-                                 address_info.id),
+                                 customer_info.identity_info.pan,
+                                 customer_info.address_info.id),
                           category='primary')
                     return redirect(url_for('customer.add'))
 
                 # add address object to session and commit to db
                 _add_table_row(new_address_obj)
-
                 flash(message='Customer with name {} and PAN {} already exists. Address added'.
                       format(customer_info.fullname,
-                             identity_info.pan),
+                             customer_info.identity_info.pan),
                       category='primary')
                 return redirect(url_for('user.dashboard', username=current_user.username))
 
+            # add identity object to session and commit to db
             _add_table_row(new_identity_obj)
-            flash(message='Customer {} does not have any PAN details. Added PAN details.'.
-                  format(customer_info.fullname),
+
+            if new_address_obj.is_customer_exist():
+                flash(message='Customer with name {}, PAN {} and address ID {} already exists'.
+                      format(customer_info.fullname,
+                             new_identity_obj.pan,
+                             customer_info.address_info.id),
+                      category='primary')
+                return redirect(url_for('customer.add'))
+
+            # add address object to session and commit to db
+            _add_table_row(new_address_obj)
+            flash(message='Customer with name {} and PAN {} already exists. Address added'.
+                  format(customer_info.fullname,
+                         customer_info.identity_info.pan),
                   category='primary')
             return redirect(url_for('user.dashboard', username=current_user.username))
 
-        # add user object to session and commit to db
+        # add customer object to session and commit to db
         _add_table_row(new_customer_obj)
-
         # get customer id for new customer
         customer_info = db.session.query(Customer). \
             filter(Customer.fullname == customer_name).first()
         # set customer id for identity object
         new_identity_obj.set_customer_id(customer_info.id)
-        # add identity object to session and commit to db
-        _add_table_row(new_identity_obj)
-
         # set customer id for address object
         new_address_obj.set_customer_id(customer_info.id)
+        # add identity object to session and commit to db
+        _add_table_row(new_identity_obj)
         # add address object to session and commit to db
         _add_table_row(new_address_obj)
-
-        # get identity for newly added customer identity
-        identity_info = db.session.query(Identity). \
-            filter(Identity.customer_id == customer_info.id).first()
-
-        # get address id for newly added customer address
-        address_info = db.session.query(Address).\
-            filter(Address.customer_id == customer_info.id).first()
+        # get all info for newly added customer identity
+        customer_info = db.session.query(Customer). \
+            filter(Customer.id == customer_info.id).first()
 
         flash('Addition of new customer {} '
               'with ID {}, PAN {} and address ID {} successful'.
               format(customer_info.fullname,
                      customer_info.id,
-                     identity_info.pan,
-                     address_info.id),
+                     customer_info.identity_info.pan,
+                     customer_info.address_info.id),
               category='success')
         return redirect(url_for('user.dashboard', username=current_user.username))
 
@@ -322,5 +322,3 @@ def _search_customer_in_db(value, category):
     else:
         customers = []
     return customers
-
-
