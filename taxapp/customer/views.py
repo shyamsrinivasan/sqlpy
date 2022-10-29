@@ -142,21 +142,31 @@ def search_category(category):
     remove_form = RemoveCustomer()
     data = []
     if category == 'customerid':
-        del form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
+        del form.first_name, form.last_name, form.identity, \
+            form.phone_num, form.email
     elif category == 'firstname':
-        del form.customer_id, form.last_name, form.pan, form.aadhaar, form.phone_num, form.email
+        del form.customer_id, form.last_name, form.identity, \
+            form.phone_num, form.email
     elif category == 'lastname':
-        del form.customer_id, form.first_name, form.pan, form.aadhaar, form.phone_num, form.email
-    elif category == 'pan':
-        del form.customer_id, form.first_name, form.last_name, form.aadhaar, form.phone_num, form.email
-    elif category == 'aadhaar':
-        del form.customer_id, form.first_name, form.last_name, form.pan, form.phone_num, form.email
+        del form.customer_id, form.first_name, form.identity, \
+            form.phone_num, form.email
+    elif category == 'pan' or category == 'aadhaar' or category == 'dob':
+        del form.customer_id, form.first_name, form.last_name, form.phone_num, \
+            form.email
+        if category == 'pan':
+            del form.identity.form.aadhaar, form.identity.form.dob
+        elif category == 'aadhaar':
+            del form.identity.form.pan, form.identity.form.dob
+        elif category == 'dob':
+            del form.identity.form.aadhaar, form.identity.form.pan
     elif category == 'phone':
-        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.email
+        del form.customer_id, form.first_name, form.last_name, \
+            form.identity, form.email
     elif category == 'email':
-        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, form.phone_num
+        del form.customer_id, form.first_name, form.last_name, \
+            form.identity, form.phone_num
     elif category == 'all':
-        del form.customer_id, form.first_name, form.last_name, form.pan, form.aadhaar, \
+        del form.customer_id, form.first_name, form.last_name, form.identity, \
             form.phone_num, form.email
 
     if form.validate_on_submit():
@@ -168,9 +178,9 @@ def search_category(category):
         elif category == 'lastname':
             data = request.form['last_name']
         elif category == 'pan':
-            data = request.form['pan']
+            data = request.form['identity-pan']
         elif category == 'aadhaar':
-            data = request.form['aadhaar']
+            data = request.form['identity-aadhaar']
         elif category == 'phone':
             data = request.form['phone_num-country_code'] + \
                    request.form['phone_num-phone_num']
@@ -250,8 +260,8 @@ def remove_customer(customer_id):
     # run delete row query on customer/address/taxinfo
     db.session.query(Address).filter(Address.customer_id == customer_id).delete()
     db.session.commit()
-    # db.session.query(TaxInfo).filter(TaxInfo.customer_id == customer_id).delete()
-    # db.session.commit()
+    db.session.query(Identity).filter(Identity.customer_id == customer_id).delete()
+    db.session.commit()
     db.session.query(Customer).filter(Customer.id == customer_id).delete()
     db.session.commit()
 
@@ -291,11 +301,14 @@ def _search_customer_in_db(value, category):
         customers = db.session.query(Customer).filter(Customer.fullname ==
                                                       value).all()
     elif category == 'pan':
-        customers = db.session.query(Customer).filter(Customer.pan ==
-                                                      value).all()
+        customers = db.session.query(Customer).\
+            join(Identity).filter(Identity.pan == value).all()
     elif category == 'aadhaar':
-        customers = db.session.query(Customer).filter(Customer.aadhaar ==
-                                                      value).all()
+        customers = db.session.query(Customer). \
+            join(Identity).filter(Identity.aadhaar == value).all()
+    elif category == 'dob':
+        customers = db.session.query(Customer). \
+            join(Identity).filter(Identity.dob == value).all()
     elif category == 'email':
         customers = db.session.query(Customer).filter(Customer.email ==
                                                       value).all()

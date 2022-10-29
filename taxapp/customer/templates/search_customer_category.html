@@ -123,17 +123,17 @@ Search customer
 
           {% elif category == 'pan' %}
 
-            {{ form.pan.label }}       
-            {{ form.pan(class="form-control", id="floatingInput", placeholder="PAN") }}          
-            {% for error in form.pan.errors %}
+            {{ form.identity.pan.label }}       
+            {{ form.identity.pan(class="form-control", id="floatingInput", placeholder="PAN") }}          
+            {% for error in form.identity.pan.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}
 
           {% elif category == 'aadhaar' %}
 
-            {{ form.aadhaar.label }}
-            {{ form.aadhaar(class="form-control", id="floatingInput", placeholder="Aadhaar") }}          
-            {% for error in form.aadhaar.errors %}
+            {{ form.identity.aadhaar.label }}
+            {{ form.identity.aadhaar(class="form-control", id="floatingInput", placeholder="Aadhaar") }}          
+            {% for error in form.identity.aadhaar.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
             {% endfor %}
 

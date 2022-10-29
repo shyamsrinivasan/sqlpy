@@ -97,14 +97,7 @@ class SearchCustomer(FlaskForm):
                              [DataRequired(message='Please provide a first name to search')])
     last_name = StringField('Last Name',
                             [DataRequired(message='Please provide a last name to search')])
-    pan = StringField('PAN', [DataRequired(message='Please provide a PAN to search'),
-                              Length(min=10, max=10,
-                                     message='PAN should be 10 characters')
-                              ])
-    aadhaar = StringField('Aadhaar', [DataRequired(message='Please provide a aadhaar number to search'),
-                                      Length(min=12, max=12,
-                                             message='Aadhaar should to 12 digits')
-                                      ])
+    identity = FormField(CustomerID)
     phone_num = FormField(PhoneNumber)
     email = EmailField('Email', [Email(message='Not a valid email address'),
                                  DataRequired(message='Please provide a email to search')])
