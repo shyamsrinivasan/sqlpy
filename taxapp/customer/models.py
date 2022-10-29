@@ -156,9 +156,11 @@ class Identity(db.Model):
         return False
 
     def is_customer_exist(self):
-        if self.is_customer_name_exist() and self.is_customer_pan_exist():
+        identity_info = db.session.query(Identity).\
+            filter(Identity.customer_name == self.customer_name,
+                   Identity.pan == self.pan).first()
+        if identity_info:
             return True
-
         return False
 
     def __repr__(self):
