@@ -215,9 +215,6 @@ def remove():
             review_form.first_name.data = review_list.firstname
             review_form.last_name.data = review_list.lastname
             review_form.customer_type.data = review_list.type
-            # review_form.dob.data = review_list.dob
-            # review_form.pan.data = review_list.pan
-            # review_form.aadhaar.data = review_list.aadhaar
             review_form.phone_num.phone_num.data = review_list.phone
             review_form.email.data = review_list.email
 
@@ -231,6 +228,11 @@ def remove():
                 review_form.address.state.data = review_list.address_info.state
                 review_form.address.city.data = review_list.address_info.city
                 review_form.address.pincode.data = review_list.address_info.pin
+
+            if review_list.identity_info is not None:
+                review_form.identity.dob.data = review_list.identity_info.dob
+                review_form.identity.pan.data = review_list.identity_info.pan
+                review_form.identity.aadhaar.data = review_list.identity_info.aadhaar
 
             return render_template('/remove_customer.html', form=form, result=review_list,
                                    review_form=review_form, customer_id=customer_id)
