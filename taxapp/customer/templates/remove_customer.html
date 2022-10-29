@@ -18,7 +18,7 @@ Review remove customer
   {% else %}
   <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
     <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
-    <span class="bi me-2 fs-4"><svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>{{ current_user.username }}</span>
+    <span class="bi me-2 fs-4"><i class="fa-solid fa-user fa-fw"></i>&nbsp;{{ current_user.username }}</span>
     </a>
 
     <ul class="list-unstyled ps-0">
@@ -28,10 +28,10 @@ Review remove customer
         </button>
         <div class="collapse" id="home-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-light rounded">Overview</a></li>
-            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded">Add user</a></li>
-            <li><a href="{{ url_for('user.search') }}" class="link-light rounded">Search user</a></li>
-            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded">Remove user</a></li>        
+            <li><a href="#" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a></li>
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a></li>        
           </ul>
         </div>
       </li>
@@ -41,12 +41,12 @@ Review remove customer
         </button>
         <div class="collapse" id="dashboard-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-light rounded">Overview</a></li>
-            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded">Add</a></li>
-            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded">Search</a></li>
-            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded">Remove</a></li>
-            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded">Modify</a></li>
-            <li><a href="#" class="link-light rounded">Taxes</a></li>
+            <li><a href="#" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded"><i class="fa-solid fa-scissors fa-fw"></i>&nbsp;&nbsp;Modify</a></li>
+            <li><a href="#" class="link-light rounded"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Taxes</a></li>
           </ul>
         </div>
       </li>
@@ -69,7 +69,7 @@ Review remove customer
         <div class="collapse" id="account-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">            
             <li><a href="#" class="link-light rounded">Profile</a></li>            
-            <li><a href="#" class="link-light rounded">Sign out</a></li>
+            <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
           </ul>
         </div>
       </li>
