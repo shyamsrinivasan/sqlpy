@@ -210,14 +210,25 @@ Review remove customer
 
       {% if customer_id %}
         <!-- Return to category page --> 
-        <div class="col align-items-center text-center mt-2">
+        <div  class="col align-items-center text-center mt-2">
+          <small class="text-muted">Clicking confirm deletes above customer. Delete operation cannot be reversed.</small>          
+        </div>
+          
+        <div class="row align-items-center text-center mt-2">
           <div class="col">
-            <small class="text-muted">Clicking confirm deletes above customer. Operation cannot be reversed.</small> 
+           
+            <a href="{{ url_for('customer.remove_customer', customer_id=customer_id) }}" class="btn btn-danger" >Confirm customer removal</a> 
           </div>
           <div class="col">
-            <a href="{{ url_for('customer.remove_customer', customer_id=customer_id) }}" class="btn btn-danger" >Confirm customer removal</a>  
+            <a href="{{ url_for('customer.modify', customer_id=customer_id) }}" class="btn btn-primary" >Modify customer information</a>  
           </div>
-        </div> 
+        </div>
+
+        <!--<div class="col align-items-center text-center mt-2">
+          <div col="row">
+            
+          </div>         
+        </div> -->
       {% endif %}
 
     {% else %}

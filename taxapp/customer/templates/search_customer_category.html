@@ -160,6 +160,10 @@ Search customer
                 {% endfor %} 
               </div> 
             </div>
+          {% else %}
+            <div>
+              <p>All customers will be shown upon pressing Search customers</p>
+            </div>
           {% endif %}
 
         </div>        
@@ -169,7 +173,7 @@ Search customer
       
       <div class="col align-items-center text-center">
         <div class="col">
-          <small class="text-muted">By clicking add, the customer agrees to the terms of use</small> 
+          <small class="text-muted">By clicking search, you agree to the terms of use</small> 
         </div>
         <div class="col">
           {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
@@ -180,7 +184,7 @@ Search customer
     <!-- Return to category page --> 
     <div class="col align-items-center text-center mt-2">
       <div class="col">
-        <a href="{{ url_for('customer.search') }}" class="btn btn-link" >Change Category</a>  
+        <a href="{{ url_for('customer.search') }}" class="btn btn-link" >Change Search Category</a>          
       </div>
     </div>       
   </div>
