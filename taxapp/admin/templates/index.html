@@ -14,12 +14,17 @@ Homepage
 {% block content %}
 <div class="row align-self-start gx-1 mx-1">
 
-{% if current_user.is_anonymous %}
-  <div class="d-flex p-3 flex-column text-center text-white bg-dark col align-items-center">
+  {% if current_user.is_anonymous %}
+  <div class="jumbotron p-2 bg-light text-dark rounded">
+    <h1 class="text-center">Demeter Farms Client Management System</h1> 
+    <hr class="my-4">  
+    <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+  </div>
+  <!--<div class="d-flex p-3 flex-column text-center text-white bg-dark col align-items-center">
     <main class="px-3">
       <h1>Demeter Farms Client Management System</h1>    
     </main>
-  </div>
+  </div>-->
 
 {% else %}
   <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
@@ -89,15 +94,23 @@ Homepage
     <!-- Sidebar Message -->    
     <div class="text-center text-white">
       <footer class="mt-auto text-white-50">
-        <span>Copyright &copy Demeter farms</span>      
+        <span>&copy Demeter farms</span>      
       </footer> 
     </div> 
   </div>
 
   <!-- Main canvas info banner -->
-  <div class="d-flex p-3 h-100 flex-column text-center text-white bg-dark col-md-9 border">
-    <h1>Demeter Farms Client Management System</h1>   
+  <div class="col-md-9">
+    <div class="jumbotron p-2 bg-light text-dark rounded">
+      <h1 class="text-center">Demeter Farms Client Management System</h1> 
+      <hr class="my-4">  
+      <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+    </div>
   </div>
+  
+  <!--<div class="d-flex p-3 h-100 flex-column text-center text-white bg-dark col-md-9 border">
+    
+  </div>-->
 {% endif %}
 
 </div>
