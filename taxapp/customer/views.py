@@ -181,6 +181,8 @@ def search_category(category):
             data = request.form['identity-pan']
         elif category == 'aadhaar':
             data = request.form['identity-aadhaar']
+        elif category == 'dob':
+            data = request.form['identity-dob']
         elif category == 'phone':
             data = request.form['phone_num-country_code'] + \
                    request.form['phone_num-phone_num']
@@ -322,3 +324,4 @@ def _search_customer_in_db(value, category):
     else:
         customers = []
     return customers
+
