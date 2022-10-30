@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, DateField, SelectField
-from wtforms import SubmitField, IntegerField, FormField, RadioField
+from wtforms import SubmitField, SelectMultipleField, FormField, RadioField
 from wtforms.validators import DataRequired, Email, Optional, Length
 from wtforms.validators import ValidationError
+from wtforms.widgets import html_params
 
 
 class PhoneNumber(FlaskForm):
@@ -58,14 +59,6 @@ class CustomerSignup(FlaskForm):
     email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
 
     # id details
-    # dob = DateField('Date of Birth', [DataRequired(message='Date of birth is required')])
-    # pan = StringField('PAN', [DataRequired('Please provide customer PAN'),
-    #                           Length(min=10, max=10,
-    #                                  message='PAN should be 10 characters')
-    #                           ])
-    # aadhaar = StringField('Aadhaar', [Optional(),
-    #                                   Length(min=12, max=12,
-    #                                          message='Aadhaar should to 12 digits')])
     identity = FormField(CustomerID)
 
     # address details
@@ -114,4 +107,39 @@ class RemoveCustomer(FlaskForm):
     #                                  message='PAN should be 10 characters')
     #                           ])
     submit = SubmitField('Review customer details')
+
+
+def select_multi_checkbox(field, ul_class='', **kwargs):
+    kwargs.setdefault('type', 'checkbox')
+    field_id = kwargs.pop('id', field.id)
+    html = [u'<ul %s>' % html_params(id=field_id, class_=ul_class)]
+    for value, label, checked in field.iter_choices():
+        choice_id = u'%s-%s' % (field_id, value)
+        options = dict(kwargs, name=field.name, value=value, id=choice_id)
+        if checked:
+            options['checked'] = 'checked'
+        html.append(u'<li><input %s /> ' % html_params(**options))
+        html.append(u'<label for="%s">%s</label></li>' % (field_id, label))
+    html.append(u'</ul>')
+    return u''.join(html)
+
+
+class ModifyCustomerCategory(FlaskForm):
+    """different customer form fields to be selected for modification"""
+
+    search_by = SelectMultipleField('Search Using', [DataRequired()],
+                                    choices=[('firstname', 'First Name'),
+                                             ('lastname', 'Last Name'),
+                                             ('phone', 'Phone #'),
+                                             ('email', 'Email'),
+                                             ('dob', 'Date of Birth'),
+                                             ('pan', 'PAN'),
+                                             ('aadhaar', 'Aadhaar'),
+                                             ('address', 'Address')],
+                                    default='email', widget=select_multi_checkbox)
+    submit = SubmitField('Enter Customer Details')
+
+
+
+
 

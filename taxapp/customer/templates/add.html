@@ -68,8 +68,13 @@ Add customer
         </button>
         <div class="collapse" id="account-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">            
-            <li><a href="#" class="link-light rounded">Profile</a></li>            
-            <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
+            {% if current_user.is_anonymous %}           
+              <li><a href="{{ url_for('user.dashboard_no_login') }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+            {% else %}
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change password</a></li>     
+              <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
+            {% endif %}
           </ul>
         </div>
       </li>

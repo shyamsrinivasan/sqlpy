@@ -1,6 +1,7 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
 from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory, RemoveCustomer
+from .forms import ModifyCustomerCategory
 from .models import Customer, Address, Identity, TaxInfo
 from taxapp import db
 from flask_login import login_required, current_user
@@ -275,7 +276,11 @@ def remove_customer(customer_id):
 # @login_required
 def modify():
     """route to change customer details"""
-    return render_template('/modify.html')
+    form = ModifyCustomerCategory()
+    # details_form = ModifyCustomer()
+    if form.validate_on_submit():
+        return 'Category Selected'
+    return render_template('/modify_customer.html', form=form)
 
 
 def _add_table_row(table_class_obj):
