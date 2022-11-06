@@ -332,11 +332,33 @@ def modify_customer(category, customer_id):
     elif category == 'all':
         form = ModifyAllCustomer()
 
+        if review_list is not None:
+            form.first_name.data = review_list.firstname
+            form.last_name.data = review_list.lastname
+            form.customer_type.data = review_list.type
+            form.phone_num.phone_num.data = review_list.phone
+            form.email.data = review_list.email
+
+            if review_list.identity_info is not None:
+                form.identity.dob.data = review_list.identity_info.dob
+                form.identity.pan.data = review_list.identity_info.pan
+                form.identity.aadhaar.data = review_list.identity_info.aadhaar
+
+            if review_list.address_info is not None:
+                form.address.street_num.data = review_list.address_info.street_num
+                form.address.street_name.data = review_list.address_info.street_name
+                form.address.house_num.data = review_list.address_info.house_num
+                form.address.locality.data = review_list.address_info.locality
+                # form.address.locality_2.data = review_list.address_info.locality_2
+                form.address.state.data = review_list.address_info.state
+                form.address.city.data = review_list.address_info.city
+                form.address.pincode.data = review_list.address_info.pin
+
     else:
         form = ModifyCustomer()
 
     return render_template('/modify_customer.html', category=category,
-                           form=form, customer_id=customer_id)
+                           form=form, customer_id=customer_id, result=review_list)
 
 
 @customer_bp.route('/modify/<category>/<customer_id>', methods=['POST'])
@@ -345,12 +367,23 @@ def modify_customer_db(category, customer_id):
 
     existing_entry = db.session.query(Customer). \
         filter(Customer.id == customer_id).first()
+
     if category == 'basic_info':
         form = ModifyCustomerInfo()
+    elif category == 'address':
+        form = ModifyCustomerAddress()
+    elif category == 'contact':
+        form = ModifyCustomerContact()
+    # elif category == 'billing':
+    #     pass
+    elif category == 'all':
+        form = ModifyAllCustomer()
+    else:
+        form = ModifyCustomer()
 
     if form.validate_on_submit():
+        # check which values are different and update relevant customer table
         return 'Customer modified'
-
 
 
 def _add_table_row(table_class_obj):
