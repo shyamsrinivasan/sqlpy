@@ -109,35 +109,75 @@ class ReviewCustomer(FlaskForm):
     submit = SubmitField('Review customer details')
 
 
-def select_multi_checkbox(field, ul_class='', **kwargs):
-    kwargs.setdefault('type', 'checkbox')
-    field_id = kwargs.pop('id', field.id)
-    html = [u'<ul %s>' % html_params(id=field_id, class_=ul_class)]
-    for value, label, checked in field.iter_choices():
-        choice_id = u'%s-%s' % (field_id, value)
-        options = dict(kwargs, name=field.name, value=value, id=choice_id)
-        if checked:
-            options['checked'] = 'checked'
-        html.append(u'<li><input %s /> ' % html_params(**options))
-        html.append(u'<label for="%s">%s</label></li>' % (field_id, label))
-    html.append(u'</ul>')
-    return u''.join(html)
+class ModifyCustomer(FlaskForm):
+    """get customer id to modify information"""
+
+    customer_id = StringField('Customer ID',
+                              [DataRequired(message='Please provide a customer # to search for')])
+    # pan = StringField('PAN', [DataRequired(message='Please provide a PAN to search'),
+    #                           Length(min=10, max=10,
+    #                                  message='PAN should be 10 characters')
+    #                           ])
+    modify_by = RadioField('Modify Categories', choices=[('basic_info', 'Information'),
+                                                         ('contact', 'Contact'),
+                                                         ('address', 'Address'),
+                                                         ('billing', 'Billing'),
+                                                         ('all', 'Any/All')],
+                           default='address')
+    submit = SubmitField('Modify customer details')
 
 
-class ModifyCustomerCategory(FlaskForm):
+class ModifyCustomerInfo(FlaskForm):
     """different customer form fields to be selected for modification"""
 
-    search_by = SelectMultipleField('Search Using', [DataRequired()],
-                                    choices=[('firstname', 'First Name'),
-                                             ('lastname', 'Last Name'),
-                                             ('phone', 'Phone #'),
-                                             ('email', 'Email'),
-                                             ('dob', 'Date of Birth'),
-                                             ('pan', 'PAN'),
-                                             ('aadhaar', 'Aadhaar'),
-                                             ('address', 'Address')],
-                                    default='email', widget=select_multi_checkbox)
-    submit = SubmitField('Enter Customer Details')
+    # personal details
+    first_name = StringField('First Name', [DataRequired(message='Please provide a first name')])
+    last_name = StringField('Last Name', [DataRequired(message='Please provide a last name')])
+    customer_type = SelectField('Customer Type', [DataRequired()], choices=[('personal', 'individual'),
+                                                                            ('commercial', 'business')])
+
+    # id details
+    identity = FormField(CustomerID)
+
+    submit = SubmitField('Change Customer Information')
+
+
+class ModifyCustomerContact(FlaskForm):
+    """change customer contact information"""
+    phone_num = FormField(PhoneNumber)
+    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+
+    submit = SubmitField('Change Customer Contact')
+
+
+class ModifyCustomerAddress(FlaskForm):
+    """change customer address"""
+    address = FormField(Address)
+    submit = SubmitField('Change Customer Address')
+
+
+class ModifyAllCustomer(FlaskForm):
+    """modify more than one aspect for a customer"""
+
+    # personal details
+    first_name = StringField('First Name', [DataRequired(message='Please provide a first name')])
+    last_name = StringField('Last Name', [DataRequired(message='Please provide a last name')])
+    customer_type = SelectField('Customer Type', [DataRequired()], choices=[('personal', 'individual'),
+                                                                            ('commercial', 'business')])
+
+    phone_num = FormField(PhoneNumber)
+    email = EmailField('Email', [Email(message='Not a valid email address'), Optional()])
+
+    # id details
+    identity = FormField(CustomerID)
+
+    address = FormField(Address)
+
+    submit = SubmitField('Change Customer Information')
+
+
+
+
 
 
 

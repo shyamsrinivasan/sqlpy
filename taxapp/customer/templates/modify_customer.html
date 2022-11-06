@@ -85,45 +85,123 @@ Add customer
 
   <!-- Main canvas form -->
   <div class="col py-5 mx-1">
-    <div class="col text-center">
-      <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
-      <p class="fs-4">Please customer ID to modify information</p>
-    </div>
-    <form action="{{ url_for('customer.modify') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
-      {{ form.csrf_token() }}
+    {% if category == 'basic_info' %}
+      <div class="col text-center"> 
+        <p class="fs-4">Replace Customer Information in form to new values</p>
+      </div>
 
-      <!-- Row 1 -->
-      <div class="row col-md-12">
-        <div class="col-md-5">
+      <form action="{{ url_for('customer.modify_customer_db', category=category, customer_id=customer_id) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            {{ form.first_name.label }}
+            {{ form.first_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.first_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-5">
+            {{ form.last_name.label }}
+            {{ form.last_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.last_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-3">
+            {{ form.customer_type.label }}
+            {{ form.customer_type(class="form-control", id="floatingInput") }}                    
+          </div>
         </div>
-        <div class="col-md-6">
-          {% for subfield in form.search_by %}
+
+        <!-- Row 2 -->
+        <div class="row mb-4">
+          <div class="form-group col-md-4">
+            {{ form.identity.dob.label }}
+            {{ form.identity.dob(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.dob.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>  
+
+          <div class="form-group col-md-4">
+            {{ form.identity.pan.label }}
+            {{ form.identity.pan(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.pan.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>
+
+          <div class="form-group col-md-4">
+            {{ form.identity.aadhaar.label }}
+            {{ form.identity.aadhaar(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.aadhaar.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>         
+        </div>
+
+        <hr class="my-4">
+
+        <div class="col align-items-center text-center">
+          <div class="col">
+            <small class="text-muted">By clicking change, the customer agrees to the changes</small> 
+          </div>
+          <div class="col">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+          </div>       
+        </div> 
+        
+      </form>
+        
+    {% elif category == 'address' %}
+    {% elif category == 'contact' %}
+    {% elif category == 'billing' %}
+    {% elif category == 'all' %}
+    {% else %}
+      <div class="col text-center"> 
+        <p class="fs-4">Enter customer ID and select type of information to modify</p>
+      </div>
+
+      <form action="{{ url_for('customer.modify') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+
+        <div class="form-group col">
+          {{ form.customer_id.label }}
+          {{ form.customer_id(class="form-control", id="floatingInput", placeholder="Customer ID") }}          
+            {% for error in form.customer_id.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
+        </div>   
+
+        <div class="row mb-4">
+          {% for subfield in form.modify_by %}
           <div class="col my-2">
             {{ subfield(id="floatingInput") }}
             {{ subfield.label }}
           </div>
           {% endfor %}
-          {% for error in form.search_by.errors %}
+          {% for error in form.modify_by.errors %}
             <small class="form-text text-muted">{{ error }}</small>    
           {% endfor %}  
-          
-        </div>
-      </div>
-      
+        </div> 
 
-      <hr class="my-3">
-      
-      <div class="col align-items-center text-center">
-        <div class="col">
-          <small class="text-muted">By clicking add, the customer agrees to the terms of use</small> 
-        </div>
-        <div class="col">
-          {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
-        </div>       
-      </div>          
-          
-    </form>   
-             
+        <div class="row mb-4">
+          <div class="col">
+            {{ form.submit(class="col align-items-center btn btn-primary") }}
+          </div>    
+          <div class="col align-items-center text-center">
+            <a href="{{ url_for('customer.search', category=category) }}" class="align-items-center btn btn-info">Search customer</a>
+          </div>   
+        </div>             
+      </form>  
+    {% endif %}
+               
   </div>
   {% endif %}
 

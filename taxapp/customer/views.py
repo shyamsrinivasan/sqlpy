@@ -273,15 +273,84 @@ def remove_customer(customer_id):
     return redirect(url_for('customer.remove'))
 
 
-@customer_bp.route('/modify')
+@customer_bp.route('/modify', methods=['GET', 'POST'])
 # @login_required
 def modify():
     """route to change customer details"""
-    form = ModifyCustomerCategory()
-    # details_form = ModifyCustomer()
+
+    form = ModifyCustomer()
     if form.validate_on_submit():
-        return 'Category Selected'
-    return render_template('/modify_customer.html', form=form)
+        customer_id = request.form['customer_id']
+        category = request.form['modify_by']
+        return redirect(url_for('customer.modify_customer', category=category,
+                                customer_id=customer_id))
+    return render_template('/modify_customer.html', form=form, category='')
+
+
+@customer_bp.route('/modify/<category>/<customer_id>', methods=['GET'])
+def modify_customer(category, customer_id):
+    """modify different types of info for customer"""
+
+    review_list = db.session.query(Customer). \
+        filter(Customer.id == customer_id).first()
+
+    if category == 'basic_info':
+        form = ModifyCustomerInfo()
+        if review_list is not None:
+            form.first_name.data = review_list.firstname
+            form.last_name.data = review_list.lastname
+            form.customer_type.data = review_list.type
+
+            if review_list.identity_info is not None:
+                form.identity.dob.data = review_list.identity_info.dob
+                form.identity.pan.data = review_list.identity_info.pan
+                form.identity.aadhaar.data = review_list.identity_info.aadhaar
+
+    elif category == 'address':
+        address_list = db.session.query(Address).\
+            filter(Address.customer_id == customer_id).first()
+        form = ModifyCustomerAddress()
+
+        if address_list is not None:
+            form.address.street_num.data = address_list.street_num
+            form.address.street_name.data = address_list.street_name
+            form.address.house_num.data = address_list.house_num
+            form.address.locality.data = address_list.locality
+            # form.address.locality_2.data = address_list.locality_2
+            form.address.state.data = address_list.state
+            form.address.city.data = address_list.city
+            form.address.pincode.data = address_list.pin
+
+    elif category == 'contact':
+        form = ModifyCustomerContact()
+
+        if review_list is not None:
+            form.phone_num.phone_num.data = review_list.phone
+            form.email.data = review_list.email
+    # elif category == 'billing':
+    #     pass
+    elif category == 'all':
+        form = ModifyAllCustomer()
+
+    else:
+        form = ModifyCustomer()
+
+    return render_template('/modify_customer.html', category=category,
+                           form=form, customer_id=customer_id)
+
+
+@customer_bp.route('/modify/<category>/<customer_id>', methods=['POST'])
+def modify_customer_db(category, customer_id):
+    """change customer info in db"""
+
+    existing_entry = db.session.query(Customer). \
+        filter(Customer.id == customer_id).first()
+    if category == 'basic_info':
+        form = ModifyCustomerInfo()
+
+    if form.validate_on_submit():
+        return 'Customer modified'
+
 
 
 def _add_table_row(table_class_obj):

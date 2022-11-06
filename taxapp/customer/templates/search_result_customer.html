@@ -183,9 +183,8 @@ Remove customer
 
     <!-- Return to category page --> 
     <div class="col align-items-center text-center mt-2">
-      <div class="row align-items-center px-2 pb-2">
-        <a href="{{ url_for('customer.search') }}" class="col btn btn-light mx-1" >Change Search Category</a>  
-        <a href="{{ url_for('customer.modify') }}" class="col btn btn-light mx-1" >Modify Customer Information</a>  
+      <div class="col">
+        <a href="{{ url_for('customer.search') }}" class="col btn btn-light mx-1" >Change Search Category</a>      
       </div>
     </div> 
 
@@ -224,7 +223,7 @@ Remove customer
     <hr class="my-4">
 
     <div class="col text-center"> 
-      <p class="fs-4">Enter ID of cutomer to be removed</p>
+      <p class="fs-4">Enter ID of cutomer to be reviewed</p>
     </div>
 
     <form action="{{ url_for('customer.remove', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
