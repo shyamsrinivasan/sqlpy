@@ -209,31 +209,27 @@ Review remove customer
       <hr class="my-4">   
 
       {% if customer_id %}
-        <!-- Return to category page --> 
-        <div  class="col align-items-center text-center mt-2">
-          <small class="text-muted">Clicking confirm deletes above customer. Delete operation cannot be reversed.</small>          
-        </div>
-          
+        <!-- Return to category page -->           
         <div class="row align-items-center text-center mt-2">
           <div class="col">
            
             <a href="{{ url_for('customer.remove_customer', customer_id=customer_id) }}" class="btn btn-danger" >Confirm customer removal</a> 
+            <div  class="col align-items-center text-center mt-2">
+              <small class="text-muted">Clicking confirm deletes customer. Delete operation cannot be reversed.</small>          
+            </div>
           </div>
           <div class="col">
             <a href="{{ url_for('customer.modify', customer_id=customer_id) }}" class="btn btn-primary" >Modify customer information</a>  
+            <div  class="col align-items-center text-center mt-2">
+              <small class="text-muted">Clicking modify opens fields for editing customer. Operation is reverssible.</small>          
+            </div>
           </div>
-        </div>
-
-        <!--<div class="col align-items-center text-center mt-2">
-          <div col="row">
-            
-          </div>         
-        </div> -->
+        </div>        
       {% endif %}
 
     {% else %}
       <div class="col text-center"> 
-        <p class="fs-4">Enter ID of cutomer to be removed</p>
+        <p class="fs-4">Enter ID of customer to be reviewed</p>
       </div>
 
       <form action="{{ url_for('customer.remove') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">

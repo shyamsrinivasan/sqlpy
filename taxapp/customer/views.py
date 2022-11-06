@@ -1,7 +1,8 @@
 from flask import render_template, request, flash, redirect, url_for
 from . import customer_bp
-from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory, RemoveCustomer
-from .forms import ModifyCustomerCategory
+from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory, ReviewCustomer
+from .forms import ModifyCustomer, ModifyCustomerInfo, ModifyCustomerContact
+from .forms import ModifyCustomerAddress, ModifyAllCustomer
 from .models import Customer, Address, Identity, TaxInfo
 from taxapp import db
 from flask_login import login_required, current_user
@@ -140,7 +141,7 @@ def search_category(category):
     """access page to enter customer search details"""
 
     form = SearchCustomer()
-    remove_form = RemoveCustomer()
+    remove_form = ReviewCustomer()
     data = []
     if category == 'customerid':
         del form.first_name, form.last_name, form.identity, \
@@ -210,7 +211,7 @@ def search_category(category):
 def remove():
     """route to remove customer"""
 
-    form = RemoveCustomer()
+    form = ReviewCustomer()
     review_form = CustomerSignup()
     review_list = []
     customer_id = ''
@@ -247,13 +248,13 @@ def remove():
                 review_form.identity.pan.data = review_list.identity_info.pan
                 review_form.identity.aadhaar.data = review_list.identity_info.aadhaar
 
-            return render_template('/remove_customer.html', form=form, result=review_list,
+            return render_template('/review_customer.html', form=form, result=review_list,
                                    review_form=review_form, customer_id=customer_id)
         else:
             flash('Customer with ID {} does not exist'.format(customer_id), category='error')
             return redirect(url_for('customer.search'))
 
-    return render_template('/remove_customer.html', form=form, result=review_list,
+    return render_template('/review_customer.html', form=form, result=review_list,
                            review_form=review_form, customer_id=customer_id)
 
 

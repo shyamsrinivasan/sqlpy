@@ -97,7 +97,7 @@ class SearchCustomer(FlaskForm):
     submit = SubmitField('Search Customer')
 
 
-class RemoveCustomer(FlaskForm):
+class ReviewCustomer(FlaskForm):
     """form to enter id or pan to remove customer"""
 
     customer_id = StringField('Customer ID',
