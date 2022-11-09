@@ -48,6 +48,12 @@ def add():
         new_address_obj.set_added_user(change_type='add',
                                        username=current_user.username)
 
+        # new_obj = db.session.query(Customer).join(Identity). \
+        #     filter(Customer.firstname == custom_obj.firstname,
+        #            Customer.lastname == custom_obj.lastname,
+        #            Identity.pan == ident_obj.pan,
+        #            Identity.dob == ident_obj.dob).first()
+
         # check if customer is present in db
         if new_customer_obj.is_customer_exist():
             # get customer id for existing customer
@@ -287,7 +293,7 @@ def modify():
     return render_template('/modify_customer.html', form=form, category='')
 
 
-@customer_bp.route('/modify/<category>/<customer_id>', methods=['GET'])
+@customer_bp.route('/modify/<category>/?customer_id=<customer_id>', methods=['GET'])
 def modify_customer(category, customer_id):
     """modify different types of info for customer"""
 
@@ -361,7 +367,7 @@ def modify_customer(category, customer_id):
                            form=form, customer_id=customer_id, result=review_list)
 
 
-@customer_bp.route('/modify/<category>/<customer_id>', methods=['POST'])
+@customer_bp.route('/modify/<category>/?customer_id=<customer_id>', methods=['POST'])
 def modify_customer_db(category, customer_id):
     """change customer info in db"""
 
