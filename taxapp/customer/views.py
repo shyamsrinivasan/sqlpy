@@ -6,6 +6,7 @@ from .forms import ModifyCustomerAddress, ModifyAllCustomer
 from .models import Customer, Address, Identity, TaxInfo
 from taxapp import db
 from flask_login import login_required, current_user
+from datetime import datetime
 
 
 @customer_bp.route('/add', methods=['GET', 'POST'])
@@ -389,7 +390,91 @@ def modify_customer_db(category, customer_id):
 
     if form.validate_on_submit():
         # check which values are different and update relevant customer table
+        new_entry = request.form
+        if existing_entry is not None:
+            update_func = update_customer_factory(category)
+            update_func(existing_entry, new_entry)
+        else:
+            flash(message='Customer with ID {} does not exist'.format(customer_id),
+                  category='error')
+            return redirect((url_for('customer.modify_customer', category=category,
+                                     customer_id=customer_id)))
+
+        if existing_entry.address_info is not None:
+            pass
         return 'Customer modified'
+
+    return redirect((url_for('customer.modify_customer', category=category,
+                             customer_id=customer_id)))
+
+
+def update_customer_factory(category):
+    """factory to return relevant update funcs"""
+    if category == 'basic_info':
+        return update_basic_info
+
+
+def update_basic_info(existing_info, new_info):
+    """check and update basic customer info in db"""
+
+    # updated_info = db.session.query(Customer).
+    if existing_info.firstname != new_info['first_name']:
+        existing_info.firstname = new_info['first_name']
+
+    if existing_info.lastname != new_info['last_name']:
+        existing_info.lastname = new_info['last_name']
+
+    if existing_info.type != new_info['customer_type']:
+        existing_info.type = new_info['customer_type']
+
+    if existing_info.identity_info is not None:
+        new_dob = datetime.strptime(new_info['identity-dob'], '%Y-%m-%d').date()
+        if existing_info.identity_info.dob != new_dob:
+            existing_info.identity_info.dob = new_dob
+
+        if existing_info.identity_info.pan != new_info['identity-pan']:
+            existing_info.identity_info.pan = new_info['identity-pan']
+
+        if existing_info.identity_info.aadhaar != new_info['identity-aadhaar']:
+            existing_info.identity_info.aadhaar = new_info['identity-aadhaar']
+
+    # if existing_info.address_info is not None:
+    #     if existing_info.address_info.type != new_info['']
+
+    db.session.add(existing_info)
+    db.session.commit()
+
+
+def check_entry(custom_obj, ident_obj, address_obj):
+    """check if given entry is present in db (any and all tables)"""
+
+    customer_present, identity_present, address_present = False, False, False
+
+    new_obj = db.session.query(Customer).join(Identity).\
+        filter(Customer.firstname == custom_obj.firstname,
+               Customer.lastname == custom_obj.lastname,
+               Identity.pan == ident_obj.pan,
+               Identity.dob == ident_obj.dob).first()
+
+    if new_obj is not None:
+        customer_present = True
+        custom_obj.id = new_obj.id
+        ident_obj.set_customer_id(new_obj.id)
+        address_obj.set_customer_id(new_obj.id)
+
+    if new_obj.identity_info is not None:
+        if new_obj.identity_info.customer_id == ident_obj.customer_id and \
+                new_obj.identity_info.aadhaar == ident_obj.aadhaar and \
+                new_obj.identity_info.customer_name == ident_obj.customer_name:
+            identity_present = True
+
+    new_address_obj = db.session.query(Address).join(Customer). \
+        filter(Address.customer_name == custom_obj.fullname,
+               Address.customer_id == custom_obj.id,
+               Customer.fullname == custom_obj.fullname).first()
+
+    if new_address_obj is not None:
+        address_present = True
 
 
 def _add_table_row(table_class_obj):
