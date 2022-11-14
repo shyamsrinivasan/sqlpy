@@ -1,6 +1,4 @@
-from flask_login import UserMixin
-from taxapp import db, flask_bcrypt
-from taxapp import login_manager
+from taxapp import db
 
 
 class Customer(db.Model):
@@ -10,8 +8,6 @@ class Customer(db.Model):
     firstname = db.Column(db.String(20), nullable=False)
     lastname = db.Column(db.String(20), nullable=False)
     fullname = db.Column(db.String(40), index=True)
-    email = db.Column(db.String(30), index=True)
-    phone = db.Column(db.String(14))
     type = db.Column(db.Enum('personal', 'commercial', name='customer_type'), nullable=False)
     date_added = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
     date_updated = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
@@ -22,15 +18,13 @@ class Customer(db.Model):
                                    cascade="all, delete", uselist=False)
     identity_info = db.relationship('Identity', back_populates='identity_customer_info',
                                     cascade="all, delete", uselist=False)
+    contact_info = db.relationship('Contact', back_populates='contact_customer_info',
+                                   cascade="all, delete", uselist=False)
 
     def set_full_name(self):
         """set value of fullname column using first and last name"""
         self.fullname = self.firstname + ' ' + self.lastname
         return self.fullname
-
-    def set_full_phone(self, country_code, phone_number):
-        """set phone number with country code"""
-        self.phone = country_code + phone_number
 
     def set_added_user(self, change_type, username):
         """set added_user and updated_user"""
@@ -48,8 +42,8 @@ class Customer(db.Model):
             return False
 
     def __repr__(self):
-        return f"Customer(id={self.id!r}, name={self.fullname!r}, email={self.email!r}, " \
-               f"phone={self.phone!r}, type={self.type!r}, added_on={self.date_added!r})"
+        return f"Customer(id={self.id!r}, name={self.fullname!r}, " \
+               f"type={self.type!r}, added_on={self.date_added!r})"
 
 
 class Address(db.Model):
@@ -180,3 +174,39 @@ class Identity(db.Model):
         return f"Identity(id={self.id!r}, customer_id={self.customer_id!r}, " \
                f"name={self.customer_name!r}, dob={self.dob!r}, " \
                f"pan={self.pan!r}, aadhaar={self.aadhaar!r})"
+
+
+class Contact(db.Model):
+    __tablename__ = 'test_contact'
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('test_customers.id', onupdate='CASCADE',
+                                                      ondelete='CASCADE'), nullable=False)
+    customer_name = db.Column(db.String(40), nullable=False)
+    email = db.Column(db.String(30), index=True)
+    country_code = db.Column(db.String(4))
+    phone = db.Column(db.String(10))
+
+    date_added = db.Column(db.DateTime(timezone=True), nullable=False,
+                           server_default=db.func.now())
+    date_updated = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
+    added_user = db.Column(db.String(20))
+    updated_user = db.Column(db.String(20))
+
+    contact_customer_info = db.relationship('Customer', back_populates='contact_info',
+                                            cascade='all, delete')
+
+    def set_added_user(self, change_type, username):
+        """set added_user and updated_user"""
+        if change_type == 'add':
+            self.added_user = username
+        elif change_type == 'update':
+            self.updated_user = username
+
+    def set_customer_id(self, customer_id):
+        """set customer id of identity object"""
+        self.customer_id = customer_id
+
+    def __repr__(self):
+        return f"Contact(id={self.id!r}, name={self.customer_name!r}, email={self.email!r}, " \
+               f"phone={self.country_code + self.phone!r}, added_on={self.date_added!r})"

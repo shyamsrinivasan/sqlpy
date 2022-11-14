@@ -213,8 +213,8 @@ Remove customer
           <th scope="row">{{ customer.id }}</th>
           <td>{{ customer.fullname }}</td>
           <td>{{ customer.identity_info.pan }}</td>
-          <td>{{ customer.email }}</td>
-          <td>{{ customer.phone }}</td>
+          <td>{{ customer.contact_info.email }}</td>
+          <td>{{ customer.contact_info.country_code + customer.contact_info.phone }}</td>
         </tr>
         {% endfor %}          
       </tbody>

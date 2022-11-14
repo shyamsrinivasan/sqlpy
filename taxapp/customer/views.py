@@ -3,7 +3,7 @@ from . import customer_bp
 from .forms import CustomerSignup, SearchCustomer, SearchCustomerCategory, ReviewCustomer
 from .forms import ModifyCustomer, ModifyCustomerInfo, ModifyCustomerContact
 from .forms import ModifyCustomerAddress, ModifyAllCustomer
-from .models import Customer, Address, Identity, TaxInfo
+from .models import Customer, Address, Identity, Contact, TaxInfo
 from taxapp import db
 from flask_login import login_required, current_user
 from datetime import datetime
@@ -18,22 +18,29 @@ def add():
         # create customer object
         new_customer_obj = Customer(firstname=request.form['first_name'],
                                     lastname=request.form['last_name'],
-                                    type=request.form['customer_type'],
-                                    email=request.form['email'])
+                                    type=request.form['customer_type'])
         # set full name-
         customer_name = new_customer_obj.set_full_name()
-        # set phone number
-        new_customer_obj.set_full_phone(country_code=request.form['phone_num-country_code'],
-                                        phone_number=request.form['phone_num-phone_num'])
         # set added user
         new_customer_obj.set_added_user(change_type='add',
                                         username=current_user.username)
+        # create contact object
+        new_contact_obj = Contact(customer_name=new_customer_obj.fullname,
+                                  email=request.form['email'],
+                                  country_code=request.form['phone_num-country_code'],
+                                  phone=request.form['phone_num-phone_num'])
+        # set added user
+        new_contact_obj.set_added_user(change_type='add',
+                                       username=current_user.username)
 
         # create identity object
         new_identity_obj = Identity(customer_name=new_customer_obj.fullname,
                                     dob=request.form['identity-dob'],
                                     pan=request.form['identity-pan'],
                                     aadhaar=request.form['identity-aadhaar'])
+        # set added user
+        new_identity_obj.set_added_user(change_type='add',
+                                        username=current_user.username)
 
         # create address object
         new_address_obj = Address(customer_name=new_customer_obj.fullname,
@@ -52,14 +59,20 @@ def add():
 
         # check if customer is present in db
         new_customer_obj, \
+        new_contact_obj,  \
         new_identity_obj, \
         new_address_obj, obj_present = check_entry(new_customer_obj,
+                                                   new_contact_obj,
                                                    new_identity_obj,
                                                    new_address_obj)
         if any(obj_present):
             # if customer obj and identity obj is present
-            if obj_present[0] and obj_present[1]:
-                if obj_present[2]:
+            if obj_present[0] and obj_present[2]:
+                if not obj_present[1]:
+                    # add contact object to session and commit to db
+                    _add_table_row(new_contact_obj)
+
+                if obj_present[3]:
                     flash(message='{} with '
                                   'PAN {} and address ID {} already exists. '
                                   'Change entries to modify existing customer'.
@@ -80,10 +93,12 @@ def add():
 
         # add customer object to session and commit to db
         _add_table_row(new_customer_obj)
-        # set customer id for identity object
+        # set customer id for identity object/address object/contact object
         new_identity_obj.set_customer_id(new_customer_obj.id)
-        # set customer id for address object
         new_address_obj.set_customer_id(new_customer_obj.id)
+        new_contact_obj.set_customer_id(new_customer_obj.id)
+        # add contact object to session and commit to db
+        _add_table_row(new_contact_obj)
         # add identity object to session and commit to db
         _add_table_row(new_identity_obj)
         # add address object to session and commit to db
@@ -166,8 +181,8 @@ def search_category(category):
         elif category == 'dob':
             data = request.form['identity-dob']
         elif category == 'phone':
-            data = request.form['phone_num-country_code'] + \
-                   request.form['phone_num-phone_num']
+            data = {'code': request.form['phone_num-country_code'],
+                    'number': request.form['phone_num-phone_num']}
         elif category == 'email':
             data = request.form['email']
         elif category == 'all':
@@ -198,7 +213,7 @@ def remove():
     if form.validate_on_submit():
         # retrieve customer with matching customer id
         customer_id = request.form['customer_id']
-        review_list = db.session.query(Customer).\
+        review_list = db.session.query(Customer). \
             filter(Customer.id == customer_id).first()
         # review_list = db.session.query(Customer).join(Address).\
         #     filter(Customer.id == customer_id).first()
@@ -209,8 +224,11 @@ def remove():
             review_form.first_name.data = review_list.firstname
             review_form.last_name.data = review_list.lastname
             review_form.customer_type.data = review_list.type
-            review_form.phone_num.phone_num.data = review_list.phone
-            review_form.email.data = review_list.email
+
+            if review_list.contact_info is not None:
+                review_form.phone_num.country_code.data = review_list.contact_info.country_code
+                review_form.phone_num.phone_num.data = review_list.contact_info.phone
+                review_form.email.data = review_list.contact_info.email
 
             # address table
             if review_list.address_info is not None:
@@ -218,7 +236,7 @@ def remove():
                 review_form.address.street_name.data = review_list.address_info.street_name
                 review_form.address.house_num.data = review_list.address_info.house_num
                 review_form.address.locality.data = review_list.address_info.locality
-                # review_form.address.locality_2.data = review_list.address_info.locality_2
+                review_form.address.locality_2.data = review_list.address_info.locality_2
                 review_form.address.state.data = review_list.address_info.state
                 review_form.address.city.data = review_list.address_info.city
                 review_form.address.pincode.data = review_list.address_info.pin
@@ -287,26 +305,28 @@ def modify_customer(category, customer_id):
                 form.identity.aadhaar.data = review_list.identity_info.aadhaar
 
     elif category == 'address':
-        address_list = db.session.query(Address).\
-            filter(Address.customer_id == customer_id).first()
+        # address_list = db.session.query(Address). \
+        #     filter(Address.customer_id == customer_id).first()
         form = ModifyCustomerAddress()
 
-        if address_list is not None:
-            form.address.street_num.data = address_list.street_num
-            form.address.street_name.data = address_list.street_name
-            form.address.house_num.data = address_list.house_num
-            form.address.locality.data = address_list.locality
-            form.address.locality_2.data = address_list.locality_2
-            form.address.state.data = address_list.state
-            form.address.city.data = address_list.city
-            form.address.pincode.data = address_list.pin
+        if review_list is not None and review_list.address_info is not None:
+            form.address.street_num.data = review_list.address_info.street_num
+            form.address.street_name.data = review_list.address_info.street_name
+            form.address.house_num.data = review_list.address_info.house_num
+            form.address.locality.data = review_list.address_info.locality
+            form.address.locality_2.data = review_list.address_info.locality_2
+            form.address.state.data = review_list.address_info.state
+            form.address.city.data = review_list.address_info.city
+            form.address.pincode.data = review_list.address_info.pin
 
     elif category == 'contact':
+        # contact_list = db.session.query(Contact).filter()
         form = ModifyCustomerContact()
 
-        if review_list is not None:
-            form.phone_num.phone_num.data = review_list.phone
-            form.email.data = review_list.email
+        if review_list is not None and review_list.contact_info is not None:
+            form.phone_num.country_code.data = review_list.contact_info.country_code
+            form.phone_num.phone_num.data = review_list.contact_info.phone
+            form.email.data = review_list.contact_info.email
     # elif category == 'billing':
     #     pass
     elif category == 'all':
@@ -316,8 +336,11 @@ def modify_customer(category, customer_id):
             form.first_name.data = review_list.firstname
             form.last_name.data = review_list.lastname
             form.customer_type.data = review_list.type
-            form.phone_num.phone_num.data = review_list.phone
-            form.email.data = review_list.email
+
+            if review_list.contact_info is not None:
+                form.phone_num.country_code.data = review_list.contact_info.country_code
+                form.phone_num.phone_num.data = review_list.contact_info.phone
+                form.email.data = review_list.contact_info.email
 
             if review_list.identity_info is not None:
                 form.identity.dob.data = review_list.identity_info.dob
@@ -345,7 +368,7 @@ def modify_customer(category, customer_id):
 def modify_customer_db(category, customer_id):
     """change customer info in db"""
 
-    existing_entry, address_entry, customer_name = None, None, None
+    existing_entry, address_entry, contact_entry, customer_name = None, None, None, None
     if category == 'basic_info':
         form = ModifyCustomerInfo()
         existing_entry = db.session.query(Customer). \
@@ -360,15 +383,17 @@ def modify_customer_db(category, customer_id):
 
     elif category == 'contact':
         form = ModifyCustomerContact()
-        existing_entry = db.session.query(Customer). \
+        existing_entry = db.session.query(Contact). \
             filter(Customer.id == customer_id).first()
-        customer_name = existing_entry.fullname
+        customer_name = existing_entry.customer_name
     # elif category == 'billing':
     #     pass
     elif category == 'all':
         form = ModifyAllCustomer()
         existing_entry = db.session.query(Customer). \
             filter(Customer.id == customer_id).first()
+        contact_entry = db.session.query(Contact).\
+            filter(Contact.customer_id == customer_id).first()
         address_entry = db.session.query(Address). \
             filter(Address.customer_id == customer_id).first()
         customer_name = existing_entry.fullname
@@ -381,7 +406,7 @@ def modify_customer_db(category, customer_id):
         new_entry = request.form
         if existing_entry is not None:
             update_func = update_customer_factory(category)
-            update_func(existing_entry, new_entry, address_entry)
+            update_func(existing_entry, new_entry, address_entry, contact_entry)
 
             flash(message='Customer {}:{} {} modified'.format(customer_id,
                                                               customer_name,
@@ -413,7 +438,7 @@ def update_customer_factory(category):
         return update_all_info
 
 
-def update_basic_info(existing_info, new_info, address_entry=None):
+def update_basic_info(existing_info, new_info, address_entry=None, contact_entry=None):
     """check and update basic customer info in db"""
 
     updated_info = False
@@ -447,14 +472,16 @@ def update_basic_info(existing_info, new_info, address_entry=None):
         db.session.commit()
 
 
-def update_contact_info(existing_info, new_info, address_entry=None):
+def update_contact_info(existing_info, new_info, address_entry=None, contact_entry=None):
     """update customer contact information"""
 
     updated_info = False
-    if existing_info.phone != new_info['phone_num-country_code'] + \
-            new_info['phone_num-phone_num']:
-        existing_info.phone = new_info['phone_num-country_code'] + \
-                              new_info['phone_num-phone_num']
+    if existing_info.country_code != new_info['phone_num-country_code']:
+        existing_info.country_code = new_info['phone_num-country_code']
+        updated_info = True
+
+    if existing_info.phone != new_info['phone_num-phone_num']:
+        existing_info.phone = new_info['phone_num-phone_num']
         updated_info = True
 
     if existing_info.email != new_info['email']:
@@ -468,7 +495,7 @@ def update_contact_info(existing_info, new_info, address_entry=None):
         db.session.commit()
 
 
-def update_address(existing_info, new_info, address_entry=None):
+def update_address(existing_info, new_info, address_entry=None, contact_entry=None):
     """update address of existing customer"""
 
     updated_info = False
@@ -514,20 +541,20 @@ def update_address(existing_info, new_info, address_entry=None):
         db.session.commit()
 
 
-def update_all_info(existing_info, new_info, address_entry):
+def update_all_info(existing_info, new_info, address_entry, contact_entry):
     """update all info for customer in db"""
 
     update_basic_info(existing_info, new_info)
-    update_contact_info(existing_info, new_info)
+    update_contact_info(contact_entry, new_info)
     update_address(address_entry, new_info)
 
 
-def check_entry(custom_obj, ident_obj, address_obj):
+def check_entry(custom_obj, contact_obj, ident_obj, address_obj):
     """check if given entry is present in db (any and all tables)"""
 
-    customer_present, identity_present, address_present = False, False, False
+    customer_present, contact_present, identity_present, address_present = False, False, False, False
 
-    new_obj = db.session.query(Customer).join(Identity).\
+    new_obj = db.session.query(Customer).join(Identity). \
         filter(Customer.firstname == custom_obj.firstname,
                Customer.lastname == custom_obj.lastname,
                Identity.pan == ident_obj.pan,
@@ -536,6 +563,7 @@ def check_entry(custom_obj, ident_obj, address_obj):
     if new_obj is not None:
         customer_present = True
         custom_obj.id = new_obj.id
+        contact_obj.set_customer_id(new_obj.id)
         ident_obj.set_customer_id(new_obj.id)
         address_obj.set_customer_id(new_obj.id)
 
@@ -547,6 +575,13 @@ def check_entry(custom_obj, ident_obj, address_obj):
             # custom_obj.identity_info = new_obj.identity_info
             ident_obj.id = new_obj.identity_info.id
 
+    if new_obj is not None and new_obj.contact_info is not None:
+        if new_obj.contact_info.customer_id == contact_obj.customer_id and \
+                new_obj.contact_info.email == contact_obj.email and \
+                new_obj.contact_info.phone == contact_obj.phone:
+            contact_present = True
+            contact_obj.id = new_obj.contact_info.id
+
     new_address_obj = db.session.query(Address).join(Customer). \
         filter(Address.customer_name == custom_obj.fullname,
                Address.customer_id == custom_obj.id,
@@ -557,7 +592,10 @@ def check_entry(custom_obj, ident_obj, address_obj):
         # custom_obj.address_info = new_obj.address_info
         address_obj.id = new_address_obj.id
 
-    return custom_obj, ident_obj, address_obj, (customer_present, identity_present, address_present)
+    return custom_obj, contact_obj, \
+           ident_obj, address_obj, \
+           (customer_present, contact_present,
+            identity_present, address_present)
 
 
 def _add_table_row(table_class_obj):
@@ -585,7 +623,7 @@ def _search_customer_in_db(value, category):
         customers = db.session.query(Customer).filter(Customer.fullname ==
                                                       value).all()
     elif category == 'pan':
-        customers = db.session.query(Customer).\
+        customers = db.session.query(Customer). \
             join(Identity).filter(Identity.pan == value).all()
     elif category == 'aadhaar':
         customers = db.session.query(Customer). \
@@ -594,16 +632,14 @@ def _search_customer_in_db(value, category):
         customers = db.session.query(Customer). \
             join(Identity).filter(Identity.dob == value).all()
     elif category == 'email':
-        customers = db.session.query(Customer).filter(Customer.email ==
-                                                      value).all()
+        customers = db.session.query(Customer).join(Contact).\
+            filter(Contact.email == value).all()
     elif category == 'phone':
-        # phone_number = form_obj['phone_num-country_code'] + \
-        #                form_obj['phone_num-phone_num']
-        customers = db.session.query(Customer).filter(Customer.phone ==
-                                                      value).all()
+        customers = db.session.query(Customer).join(Contact).\
+            filter(Contact.country_code == value['code'],
+                   Contact.phone == value['number']).all()
     elif category == 'all':
         customers = db.session.query(Customer).all()
     else:
         customers = []
     return customers
-
