@@ -88,3 +88,17 @@ class RemoveUser(FlaskForm):
                                         Length(min=6,
                                                message='Your username should be minimum 6 characters')])
     submit = SubmitField('Review user details')
+
+
+class ChangePassword(FlaskForm):
+    """change password form"""
+    old_pass = PasswordField('Old Password', [DataRequired(message='Please enter old password'),
+                                              Length(min=8,
+                                                     message='Password should be at least 8 characters')])
+    password = PasswordField('Password', [DataRequired(message='Please enter a password'),
+                                          Length(min=8,
+                                                 message='Password should be at least 8 characters')])
+    confirm_pass = PasswordField('Confirm Password',
+                                 [EqualTo('password',
+                                          message='Passwords must match')])
+    submit = SubmitField('Change password')

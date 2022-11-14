@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from . import user_bp
-from .forms import LoginForm, SignupForm, SearchUserCategory, SearchUser, RemoveUser, SignupForm
+from .forms import LoginForm, SearchUserCategory, SearchUser, RemoveUser, SignupForm
+from .forms import ChangePassword
 from .models import User
 from taxapp import db, flask_bcrypt
 from flask_login import current_user, login_user, logout_user, login_required
@@ -30,13 +31,13 @@ def signup():
 
         # check if user with firstname/lastname exists and redirect to enter data again
         if new_user_obj.is_user_exist():
-            flash(message='User with name {} already exists'.format(new_user_obj.fullname),
+            flash(message='User {} already exists'.format(new_user_obj.fullname),
                   category='primary')
             return redirect(url_for('user.signup'))
 
         # check if user with username exists and redirect to enter data again
         if new_user_obj.is_username_exist():
-            flash(message='User {} already exist. '
+            flash(message='Username {} already exist. '
                           'Provide a different username'.format(new_user_obj.username),
                   category='primary')
             return redirect(url_for('user.signup'))
@@ -90,6 +91,17 @@ def _check_user_password(username, password):
             return False, None
     else:
         return False, None
+
+
+def _compare_password(username, new_password):
+    """compare old and new password hashes"""
+    user_obj = db.session.query(User).filter(User.username == username).first()
+    if user_obj is not None:
+        if flask_bcrypt.check_password_hash(user_obj.password_hash, new_password.encode('utf-8')):
+            return True
+        else:
+            return False
+    return False
 
 
 @user_bp.route('/logout')
@@ -242,6 +254,41 @@ def remove_user(username):
 
     flash(message='User with username {} removed'.format(username), category='success')
     return redirect(url_for('user.remove'))
+
+
+@user_bp.route('/<username>/change_password', methods=['GET', 'POST'])
+# @login_required
+def change_password(username):
+    """change password for logged in user"""
+    form = ChangePassword()
+    if form.validate_on_submit():
+        old_password = request.form['old_pass']
+        # new_password = request.form['password']
+        # check if current password is correct
+        check_user, user_obj = _check_user_password(username=username,
+                                                    password=old_password)
+        if check_user:
+            if not _compare_password(username, new_password=request.form['password']):
+                user_obj.set_password(request.form['password'])
+                # new_user_obj.set_added_user(current_user.username)
+
+                # add user object to session and commit to db
+                db.session.add(user_obj)
+                db.session.commit()
+                flash('Password changed successfully',
+                      category='success')
+                return redirect(url_for('user.dashboard', username=username))
+
+            flash('New password cannot be the same as old password.',
+                  category='error')
+            return render_template('change_password.html', form=form)
+
+        else:
+            flash('Wrong password. Enter correct current password to proceed',
+                  category='error')
+            return redirect(url_for('user.change_password', username=username))
+
+    return render_template('change_password.html', form=form)
 
 
 def _search_user_in_db(value, category):
