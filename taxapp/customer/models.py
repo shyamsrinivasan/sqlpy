@@ -61,12 +61,13 @@ class Address(db.Model):
     customer_name = db.Column(db.String(40), index=True)
 
     # add address columns from taxdata db table
-    type = db.Column(db.Enum('house', 'apartment', 'business - single',
-                             'business - complex', name='address_type'), default='house')
+    type = db.Column(db.Enum('house', 'apartment', 'store-single',
+                             'store-complex', name='address_type'), default='house')
     street_num = db.Column(db.String(8))
     street_name = db.Column(db.String(30))
     house_num = db.Column(db.String(8))
     locality = db.Column(db.String(30))
+    locality_2 = db.Column(db.String(30))
     city = db.Column(db.String(20), nullable=False)
     state = db.Column(db.String(15), nullable=False, server_default='Tamil Nadu')
     pin = db.Column(db.String(6), nullable=False)
@@ -127,6 +128,11 @@ class Identity(db.Model):
     dob = db.Column(db.Date, nullable=False)
     pan = db.Column(db.String(10), nullable=False, index=True)
     aadhaar = db.Column(db.String(12))
+    added_user = db.Column(db.String(20))
+    date_added = db.Column(db.DateTime(timezone=True), nullable=False,
+                           server_default=db.func.now())
+    updated_user = db.Column(db.String(20))
+    last_update = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
 
     identity_customer_info = db.relationship('Customer', back_populates='identity_info',
                                              cascade='all, delete')
@@ -162,6 +168,13 @@ class Identity(db.Model):
         if identity_info:
             return True
         return False
+
+    def set_added_user(self, change_type, username):
+        """set added_user and updated_user"""
+        if change_type == 'add':
+            self.added_user = username
+        elif change_type == 'update':
+            self.updated_user = username
 
     def __repr__(self):
         return f"Identity(id={self.id!r}, customer_id={self.customer_id!r}, " \

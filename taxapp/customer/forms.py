@@ -18,8 +18,8 @@ class Address(FlaskForm):
 
     house_type = SelectField('Type', [DataRequired()], choices=[('house', 'House'),
                                                                 ('apartment', 'Apartment'),
-                                                                ('single_bus', 'Single Store'),
-                                                                ('complex_bus', 'Complex Store')])
+                                                                ('store-single', 'Individual Business'),
+                                                                ('store-complex', 'Business Complex')])
     street_num = StringField('Street #', [DataRequired('Street number required')])
     house_num = StringField('House/Unit #', [Optional()])
     street_name = StringField('Street Name', [DataRequired('Please provide street name')])

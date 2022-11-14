@@ -42,6 +42,7 @@ def add():
                                   street_name=request.form['address-street_name'],
                                   house_num=request.form['address-house_num'],
                                   locality=request.form['address-locality'],
+                                  locality_2=request.form['address-locality_2'],
                                   city=request.form['address-city'],
                                   state=request.form['address-state'],
                                   pin=request.form['address-pincode'])
@@ -295,7 +296,7 @@ def modify_customer(category, customer_id):
             form.address.street_name.data = address_list.street_name
             form.address.house_num.data = address_list.house_num
             form.address.locality.data = address_list.locality
-            # form.address.locality_2.data = address_list.locality_2
+            form.address.locality_2.data = address_list.locality_2
             form.address.state.data = address_list.state
             form.address.city.data = address_list.city
             form.address.pincode.data = address_list.pin
@@ -328,7 +329,7 @@ def modify_customer(category, customer_id):
                 form.address.street_name.data = review_list.address_info.street_name
                 form.address.house_num.data = review_list.address_info.house_num
                 form.address.locality.data = review_list.address_info.locality
-                # form.address.locality_2.data = review_list.address_info.locality_2
+                form.address.locality_2.data = review_list.address_info.locality_2
                 form.address.state.data = review_list.address_info.state
                 form.address.city.data = review_list.address_info.city
                 form.address.pincode.data = review_list.address_info.pin
@@ -344,19 +345,34 @@ def modify_customer(category, customer_id):
 def modify_customer_db(category, customer_id):
     """change customer info in db"""
 
-    existing_entry = db.session.query(Customer). \
-        filter(Customer.id == customer_id).first()
-
+    existing_entry, address_entry, customer_name = None, None, None
     if category == 'basic_info':
         form = ModifyCustomerInfo()
+        existing_entry = db.session.query(Customer). \
+            filter(Customer.id == customer_id).first()
+        customer_name = existing_entry.fullname
+
     elif category == 'address':
         form = ModifyCustomerAddress()
+        existing_entry = db.session.query(Address). \
+            filter(Address.customer_id == customer_id).first()
+        customer_name = existing_entry.customer_name
+
     elif category == 'contact':
         form = ModifyCustomerContact()
+        existing_entry = db.session.query(Customer). \
+            filter(Customer.id == customer_id).first()
+        customer_name = existing_entry.fullname
     # elif category == 'billing':
     #     pass
     elif category == 'all':
         form = ModifyAllCustomer()
+        existing_entry = db.session.query(Customer). \
+            filter(Customer.id == customer_id).first()
+        address_entry = db.session.query(Address). \
+            filter(Address.customer_id == customer_id).first()
+        customer_name = existing_entry.fullname
+
     else:
         form = ModifyCustomer()
 
@@ -365,39 +381,53 @@ def modify_customer_db(category, customer_id):
         new_entry = request.form
         if existing_entry is not None:
             update_func = update_customer_factory(category)
-            update_func(existing_entry, new_entry)
+            update_func(existing_entry, new_entry, address_entry)
+
+            flash(message='Customer {}:{} {} modified'.format(customer_id,
+                                                              customer_name,
+                                                              category),
+                  category='primary')
+            return redirect(url_for('user.dashboard', username=current_user.username))
+
         else:
             flash(message='Customer with ID {} does not exist'.format(customer_id),
                   category='error')
             return redirect((url_for('customer.modify_customer', category=category,
                                      customer_id=customer_id)))
 
-        if existing_entry.address_info is not None:
-            pass
-        return 'Customer modified'
-
-    return redirect((url_for('customer.modify_customer', category=category,
-                             customer_id=customer_id)))
+    return redirect(url_for('customer.modify_customer', category=category,
+                            customer_id=customer_id))
 
 
 def update_customer_factory(category):
     """factory to return relevant update funcs"""
     if category == 'basic_info':
         return update_basic_info
+    elif category == 'address':
+        return update_address
+    elif category == 'contact':
+        return update_contact_info
+    # elif category == 'billing':
+    #     return
+    elif category == 'all':
+        return update_all_info
 
 
-def update_basic_info(existing_info, new_info):
+def update_basic_info(existing_info, new_info, address_entry=None):
     """check and update basic customer info in db"""
 
-    # updated_info = db.session.query(Customer).
+    updated_info = False
     if existing_info.firstname != new_info['first_name']:
         existing_info.firstname = new_info['first_name']
+        updated_info = True
 
     if existing_info.lastname != new_info['last_name']:
         existing_info.lastname = new_info['last_name']
+        updated_info = True
 
     if existing_info.type != new_info['customer_type']:
         existing_info.type = new_info['customer_type']
+        updated_info = True
 
     if existing_info.identity_info is not None:
         new_dob = datetime.strptime(new_info['identity-dob'], '%Y-%m-%d').date()
@@ -410,11 +440,86 @@ def update_basic_info(existing_info, new_info):
         if existing_info.identity_info.aadhaar != new_info['identity-aadhaar']:
             existing_info.identity_info.aadhaar = new_info['identity-aadhaar']
 
-    # if existing_info.address_info is not None:
-    #     if existing_info.address_info.type != new_info['']
+    if updated_info:
+        existing_info.set_added_user(change_type='update',
+                                     username=current_user.username)
+        db.session.add(existing_info)
+        db.session.commit()
 
-    db.session.add(existing_info)
-    db.session.commit()
+
+def update_contact_info(existing_info, new_info, address_entry=None):
+    """update customer contact information"""
+
+    updated_info = False
+    if existing_info.phone != new_info['phone_num-country_code'] + \
+            new_info['phone_num-phone_num']:
+        existing_info.phone = new_info['phone_num-country_code'] + \
+                              new_info['phone_num-phone_num']
+        updated_info = True
+
+    if existing_info.email != new_info['email']:
+        existing_info.email = new_info['email']
+        updated_info = True
+
+    if updated_info:
+        existing_info.set_added_user(change_type='update',
+                                     username=current_user.username)
+        db.session.add(existing_info)
+        db.session.commit()
+
+
+def update_address(existing_info, new_info, address_entry=None):
+    """update address of existing customer"""
+
+    updated_info = False
+    if existing_info.type != new_info['address-house_type']:
+        existing_info.type = new_info['address-house_type']
+        updated_info = True
+
+    if existing_info.street_num != new_info['address-street_num']:
+        existing_info.street_num = new_info['address-street_num']
+        updated_info = True
+
+    if existing_info.street_name != new_info['address-street_name']:
+        existing_info.street_name = new_info['address-street_name']
+        updated_info = True
+
+    if existing_info.house_num != new_info['address-house_num']:
+        existing_info.house_num = new_info['address-house_num']
+        updated_info = True
+
+    if existing_info.locality != new_info['address-locality']:
+        existing_info.locality = new_info['address-locality']
+        updated_info = True
+
+    if existing_info.locality_2 != new_info['address-locality_2']:
+        existing_info.locality_2 = new_info['address-locality_2']
+
+    if existing_info.city != new_info['address-city']:
+        existing_info.city = new_info['address-city']
+        updated_info = True
+
+    if existing_info.state != new_info['address-state']:
+        existing_info.state = new_info['address-state']
+        updated_info = True
+
+    if existing_info.pin != new_info['address-pincode']:
+        existing_info.pin = new_info['address-pincode']
+        updated_info = True
+
+    if updated_info:
+        existing_info.set_added_user(change_type='update',
+                                     username=current_user.username)
+        db.session.add(existing_info)
+        db.session.commit()
+
+
+def update_all_info(existing_info, new_info, address_entry):
+    """update all info for customer in db"""
+
+    update_basic_info(existing_info, new_info)
+    update_contact_info(existing_info, new_info)
+    update_address(address_entry, new_info)
 
 
 def check_entry(custom_obj, ident_obj, address_obj):
