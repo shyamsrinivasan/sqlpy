@@ -56,27 +56,26 @@ def add():
                                                    new_identity_obj,
                                                    new_address_obj)
         if any(obj_present):
-            # if customer obj is present
-            if obj_present[0]:
-                if obj_present[1]:
-                    if obj_present[2]:
-                        flash(message='{} with '
-                                      'PAN {} and address ID {} already exists. '
-                                      'Change entries to modify existing customer'.
-                              format(new_customer_obj.fullname,
-                                     new_identity_obj.pan,
-                                     new_address_obj.id),
-                              category='primary')
-                        return redirect(url_for('customer.modify_customer', category='all',
-                                                customer_id=new_customer_obj.id))
-
-                    # add address object to session and commit to db
-                    _add_table_row(new_address_obj)
-                    flash(message='{} with PAN {} already exists. Address added'.
+            # if customer obj and identity obj is present
+            if obj_present[0] and obj_present[1]:
+                if obj_present[2]:
+                    flash(message='{} with '
+                                  'PAN {} and address ID {} already exists. '
+                                  'Change entries to modify existing customer'.
                           format(new_customer_obj.fullname,
-                                 new_customer_obj.identity_info.pan),
+                                 new_identity_obj.pan,
+                                 new_address_obj.id),
                           category='primary')
-                    return redirect(url_for('user.dashboard', username=current_user.username))
+                    return redirect(url_for('customer.modify_customer', category='all',
+                                            customer_id=new_customer_obj.id))
+
+                # add address object to session and commit to db
+                _add_table_row(new_address_obj)
+                flash(message='{} with PAN {} already exists. Address added'.
+                      format(new_customer_obj.fullname,
+                             new_customer_obj.identity_info.pan),
+                      category='primary')
+                return redirect(url_for('user.dashboard', username=current_user.username))
 
         # add customer object to session and commit to db
         _add_table_row(new_customer_obj)
