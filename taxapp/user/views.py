@@ -253,10 +253,11 @@ def change_password(username):
         old_password = request.form['old_pass']
         # new_password = request.form['password']
         # check if current password is correct
-        check_user, user_obj = _check_user_password(username=username,
+        check_user, user_obj = _check_user_password(username=current_user.username,
                                                     password=old_password)
         if check_user:
-            if not _compare_password(username, new_password=request.form['password']):
+            if not _compare_password(current_user.username,
+                                     new_password=request.form['password']):
                 user_obj.set_password(request.form['password'])
                 # new_user_obj.set_added_user(current_user.username)
 
@@ -265,7 +266,8 @@ def change_password(username):
                 db.session.commit()
                 flash('Password changed successfully',
                       category='success')
-                return redirect(url_for('user.dashboard', username=username))
+                return redirect(url_for('user.dashboard',
+                                        username=current_user.username))
 
             flash('New password cannot be the same as old password.',
                   category='error')
@@ -274,7 +276,8 @@ def change_password(username):
         else:
             flash('Wrong password. Enter correct current password to proceed',
                   category='error')
-            return redirect(url_for('user.change_password', username=username))
+            return redirect(url_for('user.change_password',
+                                    username=current_user.username))
 
     return render_template('change_password.html', form=form)
 
