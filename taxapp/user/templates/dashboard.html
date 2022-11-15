@@ -121,7 +121,7 @@ User Dashboard
     <div class="row mt-2">
       <div class="col-sm-6">
         <div class="card">
-          <img class="card-img-top" src="..." alt="card image cap">
+          <img class="card-img-top" src="{{ url_for('static', filename='images/blank.jpg') }}" alt="card image cap">
           <div class="card-body bg-light">
             <h5 class="card-title">Card title</h5>
             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
@@ -130,7 +130,7 @@ User Dashboard
       </div>
       <div class="col-sm-6">
         <div class="card">
-          <img class="card-img-top placeholder img-fluid" src=".../400x300" alt="card image cap">
+          <img class="card-img-top img-fluid" src="{{ url_for('static', filename='images/blank.jpg') }}" alt="card image cap">
           <div class="card-body">
             <h5 class="card-title">Card title</h5>
             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
