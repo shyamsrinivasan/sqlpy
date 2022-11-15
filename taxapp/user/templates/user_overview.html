@@ -115,7 +115,7 @@ User Overview
   		<div class="col-sm-6">
   			<div class="card text-center border-primary">
 	  			<div class="card-body">
-	  				<h5>Total Portal Users: {{ result['users'] }}</h5> 	  				
+	  				<h5><i class="fa-solid fa-user fa-fw"></i>&nbsp;Total Portal Users: {{ result['users'] }}</h5> 	  				
 	  			</div>  			
 	  		</div>
   		</div>
@@ -123,11 +123,25 @@ User Overview
   		<div class="col-sm-6">
   			<div class="card text-center border-primary">
 	  			<div class="card-body">
-	  				<h5>Total Customers: {{ result['customers'] }}</h5>		
+	  				<h5><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Total Customers: {{ result['customers'] }}</h5>		
 	  			</div>
 	  		</div>
   		</div>  		
   	</div> 
+
+    <!-- row 3 -->
+    <div class="card border-info">
+      <div class="card-header bg-info">
+        User portal actions available for {{ current_user.username }}
+      </div> 
+      
+      <div class="card-body">        
+        <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <a href="{{ url_for('user.signup') }}" class="btn btn-info"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a>
+        <a href="{{ url_for('user.search') }}" class="btn btn-info"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a> 
+        <a href="{{ url_for('user.remove') }}" class="btn btn-info"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a>
+      </div>
+    </div>
 
   	     
   </div>
