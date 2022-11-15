@@ -3,6 +3,7 @@ from . import user_bp
 from .forms import LoginForm, SearchUserCategory, SearchUser, RemoveUser, SignupForm
 from .forms import ChangePassword
 from .models import User
+from ..customer.models import Customer
 from taxapp import db, flask_bcrypt
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
@@ -307,4 +308,8 @@ def _search_user_in_db(value, category):
 # @login_required
 def user_overview():
     """overview page for users"""
-    return render_template('user_overview.html')
+    n_users = db.session.query(User).count()
+    n_customers = db.session.query(Customer).count()
+
+    result = {'users': n_users, 'customers': n_customers}
+    return render_template('user_overview.html', result=result)

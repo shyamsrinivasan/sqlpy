@@ -89,8 +89,47 @@ User Overview
 
   <!-- Main canvas -->
   <div class="col py-5 mx-1">
-    
-      
+  	<!-- row 1 -->
+  	<div class="row mb-2">
+  		<div class="col-sm-6">
+  			<div class="card bg-secondary text-white">
+	  			<div class="card-body">
+	  				<h5>Last login</h5> 
+	  				<p class="card-text">login data and time</p>
+	  			</div>  			
+	  		</div>
+  		</div>
+  		
+  		<div class="col-sm-6">
+  			<div class="card bg-secondary text-white">
+	  			<div class="card-body">
+	  				<h5>Last user added</h5> 
+	  				<p class="card-text">card text goes here</p>
+	  			</div>
+	  		</div>
+  		</div>  		
+  	</div>
+
+  	<!-- Row 2 -->
+  	<div class="row mb-2">
+  		<div class="col-sm-6">
+  			<div class="card text-center border-primary">
+	  			<div class="card-body">
+	  				<h5>Total Portal Users: {{ result['users'] }}</h5> 	  				
+	  			</div>  			
+	  		</div>
+  		</div>
+  		
+  		<div class="col-sm-6">
+  			<div class="card text-center border-primary">
+	  			<div class="card-body">
+	  				<h5>Total Customers: {{ result['customers'] }}</h5>		
+	  			</div>
+	  		</div>
+  		</div>  		
+  	</div> 
+
+  	     
   </div>
   {% endif %}
 
