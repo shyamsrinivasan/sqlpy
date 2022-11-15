@@ -424,6 +424,13 @@ def modify_customer_db(category, customer_id):
                             customer_id=customer_id))
 
 
+@customer_bp.route('/overview')
+# @login_required
+def customer_overview():
+    """customer overview page"""
+    return render_template('customer_overview.html')
+
+
 def update_customer_factory(category):
     """factory to return relevant update funcs"""
     if category == 'basic_info':

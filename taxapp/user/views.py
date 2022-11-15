@@ -213,9 +213,6 @@ def remove():
         username = request.form['username']
         review_list = db.session.query(User). \
             filter(User.username == username).first()
-        # review_list = db.session.query(Customer).join(Address).\
-        #     filter(Customer.id == customer_id).first()
-        # db.session.query(Customer, Address).filter(Customer.id == Address.customer_id).all()
 
         if review_list is not None:
             # customer table
@@ -224,16 +221,6 @@ def remove():
             # review_form.phone_num.phone_num.data = review_list.phone
             review_form.email.data = review_list.email
             review_form.username.data = review_list.username
-
-            # address table
-            # review_form.address.street_num.data = review_list.address_info.street_num
-            # review_form.address.street_name.data = review_list.address_info.street_name
-            # review_form.address.house_num.data = review_list.address_info.house_num
-            # review_form.address.locality.data = review_list.address_info.locality
-            # review_form.address.locality_2.data = review_list.address_info.locality_2
-            # review_form.address.state.data = review_list.address_info.state
-            # review_form.address.city.data = review_list.address_info.city
-            # review_form.address.pincode.data = review_list.address_info.pin
 
             return render_template('/remove.html', form=form, result=review_list,
                                    review_form=review_form, username=username)
@@ -314,3 +301,10 @@ def _search_user_in_db(value, category):
     else:
         users = []
     return users
+
+
+@user_bp.route('/overview')
+# @login_required
+def user_overview():
+    """overview page for users"""
+    return render_template('user_overview.html')
