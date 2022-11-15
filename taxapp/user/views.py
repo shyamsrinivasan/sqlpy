@@ -316,3 +316,10 @@ def user_overview():
 
     result = {'users': n_users, 'customers': n_customers}
     return render_template('user_overview.html', result=result)
+
+
+@user_bp.route('/edit-profile')
+# @login_required
+def edit_profile():
+    """edit user profile"""
+    return render_template('edit_profile.html')

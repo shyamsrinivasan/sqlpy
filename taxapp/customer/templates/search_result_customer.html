@@ -28,7 +28,7 @@ Remove customer
         </button>
         <div class="collapse" id="home-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('user.user_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
             <li><a href="{{ url_for('user.signup') }}" class="link-light rounded"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a></li>
             <li><a href="{{ url_for('user.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a></li>
             <li><a href="{{ url_for('user.remove') }}" class="link-light rounded"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a></li>        
@@ -41,7 +41,7 @@ Remove customer
         </button>
         <div class="collapse" id="dashboard-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('customer.customer_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
             <li><a href="{{ url_for('customer.add') }}" class="link-light rounded"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add</a></li>
             <li><a href="{{ url_for('customer.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search</a></li>
             <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove</a></li>
