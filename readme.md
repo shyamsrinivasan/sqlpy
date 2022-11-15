@@ -12,4 +12,8 @@ This package is to be used for locally storing client information on a MySQL dat
 - [x] Enable data query through python API
 - [x] Use SQLAlchemy instead of Python-SQL Connector to access database (to enable use with Flask-SQLAlchemy)
 - [] Convert API to a python package before proceeding to app development
-- [] Use a FLASK web app to add GUI functionality 
+- [x] Use a FLASK web app to add GUI functionality 
+
+## Notes:
+- Database migration carried out in [flaskapp](https://github.com/shyamsrinivasan/flaskapp)
+- Changes need to made in /app/home/models.py in [flaskapp](https://github.com/shyamsrinivasan/flaskapp) for migrations
