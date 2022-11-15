@@ -107,16 +107,90 @@ User Dashboard
   <div class="col-md-9 mt-1">
     <div class="card">
       <div class="card-header">
-        Management system dashboard
+        Management system for {{ user.firstname }} {{ user.lastname }} (username: {{ user.username }})
       </div> 
       
       <div class="card-body">
-        <h5 class="card-title">Special card title</h5>
-        <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <h5 class="card-title">User Profile</h5>
+
+        <!-- row 1 -->
+        <p class="card-text">To make changes to user details, please press edit profile.</p>
+
+        <!-- row 2 -->
+        <div class="row mb-1">
+          <div class="col">
+            <p class="card-text">First name: {{ user.firstname }}</p>
+          </div>
+          <div class="col">
+            <p class="card-text">Last name: {{ user.lastname }}</p>
+          </div>
+        </div>
+
+        <!-- row 3 -->
+        <div class="row mb-1">
+          <div class="col">
+            <p class="card-text">Phone: {{ user.phone }}</p>
+          </div>
+          <div class="col">
+            <p class="card-text">Email: {{ user.email }}</p>
+          </div>          
+        </div>
+
+        <!-- row 4 -->
+        <div class="row mb-3">
+          <div class="col">
+            <p class="card-text">Added on: {{ user.added_on }}</p>
+          </div>
+          <div class="col">
+            <p class="card-text">Last login: {}</p>
+          </div>          
+        </div>
+        
         <a href="{{ url_for('user.user_overview') }}" class="btn btn-primary"><i class="fa-solid fa-user fa-fw"></i>&nbsp;Users</a>
         <a href="{{ url_for('customer.customer_overview') }}" class="btn btn-primary"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Customers</a> 
+        <a href="{{ url_for('user.edit_profile', username=current_user.username) }}" class="btn btn-primary"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Edit Profile</a>
         <a href="{{ url_for('user.change_password', username=current_user.username) }}" class="btn btn-primary"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change Password</a> 
       </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            User Actions
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="{{ url_for('user.signup') }}" class="card-link">Add user</a></li>
+            <li class="list-group-item"><a href="{{ url_for('user.search') }}" class="card-link">Search user</a></li>
+            <li class="list-group-item"><a href="{{ url_for('user.remove') }}" class="card-link">Remove user</a></li>
+          </ul>                    
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Customer Actions
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="{{ url_for('customer.add') }}" class="card-link rounded">Add</a></li>
+            <li class="list-group-item"><a href="{{ url_for('customer.search') }}" class="card-link">Search</a></li>
+            <li class="list-group-item"><a href="{{ url_for('customer.remove') }}" class="card-link">Remove</a></li>
+            <li class="list-group-item"><a href="{{ url_for('customer.modify') }}" class="card-link">Modify</a></li>            
+          </ul>          
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-header">
+            Billing Actions
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><a href="#" class="card-link rounded">New invoice</a></li>
+            <li class="list-group-item"><a href="#" class="card-link">Modify invoice</a></li>
+            <li class="list-group-item"><a href="#" class="card-link">Search invoice</a></li>              
+          </ul>          
+        </div>
+      </div>       
     </div>
 
     <div class="row mt-2">
@@ -137,9 +211,9 @@ User Dashboard
             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
           </div>
         </div>
-      </div>
-      
+      </div>      
     </div>
+
   </div>
   {% endif %}
 
