@@ -650,3 +650,10 @@ def _search_customer_in_db(value, category):
     else:
         customers = []
     return customers
+
+
+@customer_bp.route('/new-invoice')
+def generate_invoice():
+    """generate new invoice - form to enter particulars for new invoice"""
+    # return redirect(url_for('customer.choose_customer'))
+    return render_template('generate_invoice.html')
