@@ -144,6 +144,8 @@ class TaxInfo(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('test_customers.id', onupdate='CASCADE',
                                                       ondelete='CASCADE'), nullable=False)
     customer_name = db.Column(db.String(30), index=True)
+    filed_by = db.Column(db.String(20), nullable=False, index=True)
+    filed_on = db.Column(db.DateTime(timezone=True))
 
 
 class Identity(db.Model):
