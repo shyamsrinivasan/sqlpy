@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+Test page
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/cover.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center text-white bg-dark">
+  <main class="px-3">
+    <h1>About Demeter farms</h1>
+    <p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
+    <p class="lead">
+      <a href="{{ url_for('admin.contact') }}" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Contact Us</a>
+    </p>
+  </main>
+</div>
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center text-white bg-dark">
+  <footer class="mt-auto text-white-50">
+  <p>Adopted by <a href="https://github.com/shyamsrinivasan" class="text-white">Shyam Srinivasan</a> using <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a></p>
+</footer>  
+</div>
+{% endblock %}
+
+

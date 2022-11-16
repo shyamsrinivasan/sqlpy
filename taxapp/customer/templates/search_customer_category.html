@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}
+Search customer
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<!-- Custom styles for this template-->
+<link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row align-self-start gx-1 mx-1">
+  {% if current_user.is_anonymous %}
+  {% else %}
+  <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
+    <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <span class="bi me-2 fs-4"><i class="fa-solid fa-user fa-fw"></i>&nbsp;{{ current_user.username }}</span>
+    </a>
+
+    <ul class="list-unstyled ps-0">
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+          User
+        </button>
+        <div class="collapse" id="home-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('user.user_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a></li>
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+          Customer
+        </button>
+        <div class="collapse" id="dashboard-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('customer.customer_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded"><i class="fa-solid fa-scissors fa-fw"></i>&nbsp;&nbsp;Modify</a></li>
+            <li><a href="#" class="link-light rounded"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Taxes</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+          Billing
+        </button>
+        <div class="collapse" id="orders-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="#" class="link-light rounded">New</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="border-top my-3"></li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+          Account
+        </button>
+        <div class="collapse" id="account-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small"> 
+            {% if current_user.is_anonymous %}           
+              <li><a href="{{ url_for('user.dashboard_no_login') }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+            {% else %}
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change password</a></li>     
+              <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
+            {% endif %}  
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Sidebar Message -->    
+    <div class="text-center text-white">
+      <footer class="mt-auto text-white-50">
+        <span>Copyright &copy Demeter farms</span>      
+      </footer> 
+    </div> 
+  </div>
+
+  <!-- Main canvas form -->
+  <div class="col py-5 mx-1">
+    <div class="col text-center">
+      <!-- <h1 class="display-4 fw-bold lh-1 mb-3">Application Signup</h1> -->
+      <p class="fs-4">Please enter customer information to search</p>
+    </div>
+    <form action="{{ url_for('customer.search_category', category=category) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
+      {{ form.csrf_token() }}
+
+      <!-- Row 1 -->
+      <div class="row mb-4">
+        <div class="col-md-2">          
+        </div>
+        
+        <div class="col-md-8">   
+          {% if category == 'customerid' %}
+
+            {{ form.customer_id.label }}       
+            {{ form.customer_id(class="form-control", id="floatingInput", placeholder="ID") }}          
+            {% for error in form.customer_id.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
+
+          {% elif category == 'firstname' %}
+
+            {{ form.first_name.label }}        
+            {{ form.first_name(class="form-control", id="floatingInput", placeholder="First name") }}          
+            {% for error in form.first_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
+
+          {% elif category == 'lastname' %}
+
+            {{ form.last_name.label }}        
+            {{ form.last_name(class="form-control", id="floatingInput", placeholder="Last name") }}          
+            {% for error in form.last_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}    
+
+          {% elif category == 'pan' %}
+
+            {{ form.identity.pan.label }}       
+            {{ form.identity.pan(class="form-control", id="floatingInput", placeholder="PAN") }}          
+            {% for error in form.identity.pan.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+
+          {% elif category == 'aadhaar' %}
+
+            {{ form.identity.aadhaar.label }}
+            {{ form.identity.aadhaar(class="form-control", id="floatingInput", placeholder="Aadhaar") }}          
+            {% for error in form.identity.aadhaar.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+
+          {% elif category == 'email' %}
+
+            {{ form.email.label }}
+            {{ form.email(class="form-control", id="floatingInput") }}          
+            {% for error in form.email.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %} 
+
+          {% elif category == 'phone' %} 
+            <div class="row">
+              <div class="form-group col-md-4">
+                {{ form.phone_num.country_code.label }}
+                {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}
+              </div>
+              
+              <div class="form-group col">
+                {{ form.phone_num.phone_num.label }}
+                {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}
+                {% for error in form.phone_num.phone_num.errors %}
+                  <small class="form-text text-muted">{{ error }}</small>    
+                {% endfor %} 
+              </div> 
+            </div>
+          {% else %}
+            <div>
+              <p>All customers will be shown upon pressing Search customers</p>
+            </div>
+          {% endif %}
+
+        </div>        
+      </div>                  
+
+      <hr class="my-4">
+      
+      <div class="col align-items-center text-center">
+        <div class="col">
+          <small class="text-muted">By clicking search, you agree to the terms of use</small> 
+        </div>
+        <div class="col">
+          {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+        </div>       
+      </div>              
+    </form>      
+
+    <!-- Return to category page --> 
+    <div class="col align-items-center text-center mt-2">
+      <div class="col">
+        <a href="{{ url_for('customer.search') }}" class="col btn btn-light mx-1" >Change Search Category</a>      
+      </div>
+    </div>       
+  </div>
+  {% endif %}
+
+  
+</div>
+{% endblock %}
+
+
+{% block script %}
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+{% endblock %}

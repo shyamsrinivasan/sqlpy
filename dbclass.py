@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 class Dbcon:
     def __init__(self, engine_config):
-        # self._engine_call = ''
+        # self._engine_call = 'mysql+mysqldb://root:root@localhost/sqlalchemy'
         self._engine_call = engine_config['db_type'] + \
                             '+' + \
                             engine_config['dbapi'] + \

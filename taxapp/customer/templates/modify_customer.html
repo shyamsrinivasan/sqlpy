@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}
+Modify customer
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+<!-- Custom styles for this template-->
+<link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+<div class="row align-self-start gx-1 mx-1">
+  {% if current_user.is_anonymous %}
+  {% else %}
+  <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
+    <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <span class="bi me-2 fs-4"><i class="fa-solid fa-user fa-fw"></i>&nbsp;{{ current_user.username }}</span>
+    </a>
+
+    <ul class="list-unstyled ps-0">
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+          User
+        </button>
+        <div class="collapse" id="home-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('user.user_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a></li>
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a></li>        
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+          Customer
+        </button>
+        <div class="collapse" id="dashboard-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('customer.customer_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded"><i class="fa-solid fa-scissors fa-fw"></i>&nbsp;&nbsp;Modify</a></li>
+            <li><a href="#" class="link-light rounded"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Taxes</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+          Billing
+        </button>
+        <div class="collapse" id="orders-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="#" class="link-light rounded">New</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="border-top my-3"></li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+          Account
+        </button>
+        <div class="collapse" id="account-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small"> 
+            {% if current_user.is_anonymous %}           
+              <li><a href="{{ url_for('user.dashboard_no_login') }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+            {% else %}
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+              <li><a href="{{ url_for('user.change_password', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change password</a></li>     
+              <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
+            {% endif %}  
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Sidebar Message -->    
+    <div class="text-center text-white">
+      <footer class="mt-auto text-white-50">
+        <span>Copyright &copy Demeter farms</span>      
+      </footer> 
+    </div> 
+  </div>
+
+  <!-- Main canvas form -->
+  <div class="col py-5 mx-1">
+
+    {% if category == 'basic_info' %}
+
+      <div class="col text-center"> 
+        <p class="fs-4">Replace Customer Information in form with new values</p>
+      </div>
+
+      <form action="{{ url_for('customer.modify_customer_db', category=category, customer_id=customer_id) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+        <div class="row mb-4">
+          <div class="col-md-2">
+            <label>ID</label>
+            <p class="form-control bg-secondary text-white my-0", id="floatingInput">{{ result.id }}</p> 
+          </div>
+
+          <div class="col-md-4">
+            {{ form.first_name.label }}
+            {{ form.first_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.first_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-4">
+            {{ form.last_name.label }}
+            {{ form.last_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.last_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-2">
+            {{ form.customer_type.label }}
+            {{ form.customer_type(class="form-control", id="floatingInput") }}                    
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row mb-4">
+          <div class="form-group col-md-4">
+            {{ form.identity.dob.label }}
+            {{ form.identity.dob(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.dob.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>  
+
+          <div class="form-group col-md-4">
+            {{ form.identity.pan.label }}
+            {{ form.identity.pan(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.pan.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>
+
+          <div class="form-group col-md-4">
+            {{ form.identity.aadhaar.label }}
+            {{ form.identity.aadhaar(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.aadhaar.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>         
+        </div>
+
+        <hr class="my-4">
+
+        <div class="col align-items-center text-center">
+          <div class="col">
+            <small class="text-muted">By clicking change, the customer agrees to the changes</small> 
+          </div>
+          <div class="col">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+          </div>       
+        </div> 
+        
+      </form>
+        
+    {% elif category == 'address' %}
+
+      <div class="col text-center"> 
+        <p class="fs-4">Replace Customer Information in form with new values</p>
+      </div>
+
+      {% if result %}
+        <div class="row mb-4">
+          <div class="col-md-2">          
+            <p class="form-control bg-secondary text-white", id="floatingInput">ID: {{ result.id }}</p>       
+          </div>
+
+          <div class="col-md-5">    
+            <p class="form-control bg-secondary text-white", id="floatingInput">First name: {{ result.firstname }}</p>              
+          </div>
+
+          <div class="col-md-5">          
+            <p class="form-control bg-secondary text-white", id="floatingInput">Last name: {{ result.lastname }}</p>     
+          </div>        
+        </div>
+      {% endif %}
+
+      <form action="{{ url_for('customer.modify_customer_db', category=category, customer_id=customer_id) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            {{ form.address.house_type.label }}
+            {{ form.address.house_type(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.house_type.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-2">
+            {{ form.address.street_num.label }}
+            {{ form.address.street_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.street_num.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-7">
+            {{ form.address.street_name.label }}
+            {{ form.address.street_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.street_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>               
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            {{ form.address.house_num.label }}
+            {{ form.address.house_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.house_num.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div> 
+
+          <div class="col-md-5">
+            {{ form.address.locality.label }}
+            {{ form.address.locality(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.locality.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-4">
+            {{ form.address.locality_2.label }}
+            {{ form.address.locality_2(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.locality_2.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>               
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            {{ form.address.city.label }}
+            {{ form.address.city(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.city.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div> 
+
+          <div class="col-md-4">
+            {{ form.address.state.label }}
+            {{ form.address.state(class="form-control", id="floatingInput") }}                     
+          </div>    
+
+          <div class="col-md-4">
+            {{ form.address.pincode.label }}
+            {{ form.address.pincode(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.pincode.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>      
+        </div>
+
+        <hr class="my-4">
+
+        <div class="col align-items-center text-center">
+          <div class="col">
+            <small class="text-muted">By clicking change, the customer agrees to the changes</small> 
+          </div>
+          <div class="col">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+          </div>       
+        </div> 
+        
+      </form>
+
+    {% elif category == 'contact' %}
+
+      <div class="col text-center"> 
+        <p class="fs-4">Replace Customer Information in form with new values</p>
+      </div>
+
+      {% if result %}
+        <div class="row mb-4">
+          <div class="col-md-2">          
+            <p class="form-control bg-secondary text-white", id="floatingInput">ID: {{ result.id }}</p>       
+          </div>
+
+          <div class="col-md-5">    
+            <p class="form-control bg-secondary text-white", id="floatingInput">First name: {{ result.firstname }}</p>              
+          </div>
+
+          <div class="col-md-5">          
+            <p class="form-control bg-secondary text-white", id="floatingInput">Last name: {{ result.lastname }}</p>     
+          </div>        
+        </div>
+      {% endif %}
+
+      <form action="{{ url_for('customer.modify_customer_db', category=category, customer_id=customer_id) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+        <div class="row mb-4">
+          <div class="form-group col-md-3">
+            {{ form.phone_num.country_code.label }}
+            {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}                         
+          </div>   
+
+          <div class="col-md-3">
+            {{ form.phone_num.phone_num.label }}
+            {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.phone_num.phone_num.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>      
+
+          <div class="col-md-6">
+            {{ form.email.label }}
+            {{ form.email(class="form-control", id="floatingInput") }}          
+            {% for error in form.email.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+        </div>         
+
+        <hr class="my-4">
+
+        <div class="col align-items-center text-center">
+          <div class="col">
+            <small class="text-muted">By clicking change, the customer agrees to the changes</small> 
+          </div>
+          <div class="col">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+          </div>       
+        </div> 
+        
+      </form>
+
+    {% elif category == 'billing' %}
+    {% elif category == 'all' %}
+
+      <div class="col text-center"> 
+        <p class="fs-4">Replace Customer Information in form with new values</p>
+      </div>
+
+      <form action="{{ url_for('customer.modify_customer_db', category=category, customer_id=customer_id) }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+        <div class="row mb-4">
+          <div class="col-md-2">
+            <label>ID</label>
+            <p class="form-control bg-secondary text-white my-0", id="floatingInput">{{ result.id }}</p> 
+          </div>
+
+          <div class="col-md-4">
+            {{ form.first_name.label }}
+            {{ form.first_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.first_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-4">
+            {{ form.last_name.label }}
+            {{ form.last_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.last_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>
+
+          <div class="col-md-2">
+            {{ form.customer_type.label }}
+            {{ form.customer_type(class="form-control", id="floatingInput") }}                    
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row mb-4">
+          <div class="form-group col-md-4">
+            {{ form.identity.dob.label }}
+            {{ form.identity.dob(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.dob.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>  
+
+          <div class="form-group col-md-4">
+            {{ form.identity.pan.label }}
+            {{ form.identity.pan(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.pan.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>
+
+          <div class="form-group col-md-4">
+            {{ form.identity.aadhaar.label }}
+            {{ form.identity.aadhaar(class="form-control", id="floatingInput") }}          
+            {% for error in form.identity.aadhaar.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}
+          </div>         
+        </div>   
+
+        <!-- Row 3 -->
+        <div class="row mb-4">
+          <div class="form-group col-md-3">
+            {{ form.phone_num.country_code.label }}
+            {{ form.phone_num.country_code(class="form-control", id="floatingInput") }}                         
+          </div>   
+
+          <div class="col-md-3">
+            {{ form.phone_num.phone_num.label }}
+            {{ form.phone_num.phone_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.phone_num.phone_num.errors %}
+              <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}          
+          </div>      
+
+          <div class="col-md-6">
+            {{ form.email.label }}
+            {{ form.email(class="form-control", id="floatingInput") }}          
+            {% for error in form.email.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+        </div>         
+
+        <hr class="my-4">
+
+        <!-- Row 4 -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            {{ form.address.house_type.label }}
+            {{ form.address.house_type(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.house_type.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-2">
+            {{ form.address.street_num.label }}
+            {{ form.address.street_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.street_num.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-7">
+            {{ form.address.street_name.label }}
+            {{ form.address.street_name(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.street_name.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>               
+        </div>
+
+        <!-- Row 5 -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            {{ form.address.house_num.label }}
+            {{ form.address.house_num(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.house_num.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div> 
+
+          <div class="col-md-5">
+            {{ form.address.locality.label }}
+            {{ form.address.locality(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.locality.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>   
+
+          <div class="col-md-4">
+            {{ form.address.locality_2.label }}
+            {{ form.address.locality_2(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.locality_2.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>               
+        </div>
+
+        <!-- Row 6 -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            {{ form.address.city.label }}
+            {{ form.address.city(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.city.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div> 
+
+          <div class="col-md-4">
+            {{ form.address.state.label }}
+            {{ form.address.state(class="form-control", id="floatingInput") }}                     
+          </div>    
+
+          <div class="col-md-4">
+            {{ form.address.pincode.label }}
+            {{ form.address.pincode(class="form-control", id="floatingInput") }}          
+            {% for error in form.address.pincode.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}   
+          </div>      
+        </div>
+
+        <hr class="my-4">
+
+        <div class="col align-items-center text-center">
+          <div class="col">
+            <small class="text-muted">By clicking change, the customer agrees to the changes</small> 
+          </div>
+          <div class="col">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+          </div>       
+        </div> 
+      </form>
+
+    {% else %}
+      
+      <div class="col text-center"> 
+        <p class="fs-4">Enter customer ID and select type of information to modify</p>
+      </div>
+
+      <form action="{{ url_for('customer.modify') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2 pb-2">
+        {{ form.csrf_token() }}
+
+        <!-- Row 1 -->
+
+        <div class="form-group col">
+          {{ form.customer_id.label }}
+          {{ form.customer_id(class="form-control", id="floatingInput", placeholder="Customer ID") }}          
+            {% for error in form.customer_id.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+            {% endfor %}  
+        </div>   
+
+        <div class="row mb-4">
+          {% for subfield in form.modify_by %}
+          <div class="col my-2">
+            {{ subfield(id="floatingInput") }}
+            {{ subfield.label }}
+          </div>
+          {% endfor %}
+          {% for error in form.modify_by.errors %}
+            <small class="form-text text-muted">{{ error }}</small>    
+          {% endfor %}  
+        </div> 
+
+        <div class="row mb-4">
+          <div class="col align-items-center text-center">
+            <a href="{{ url_for('customer.search', category=category) }}" class="align-items-center btn btn-info">Search customer</a>
+          </div>
+          <div class="col">
+            {{ form.submit(class="col align-items-center btn btn-primary") }}
+          </div>              
+        </div>             
+      </form>  
+    {% endif %}
+               
+  </div>
+  {% endif %}
+
+  
+</div>
+{% endblock %}
+
+
+{% block script %}
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+{% endblock %}

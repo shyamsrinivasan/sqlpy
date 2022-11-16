@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+Success
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/cover.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block main %}
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center text-white bg-dark">
+  <main class="px-3">
+    <!-- <h1>About Demeter farms</h1> -->
+    {% if page == 'contact' %}
+      <p class="lead">Your message was sent successfully!</p>
+    {% elif page == 'signup' %}
+      <p class="lead">Your Sign-up was successful!</p>    
+    {% endif %}
+    <!-- <p class="lead">
+      <a href="{{ url_for('home.contact') }}" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Contact Us</a>
+    </p> -->
+  </main>
+</div>
+{% endblock %}
+
+{% block footer %}
+<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center text-white bg-dark">
+  <footer class="mt-auto text-white-50">
+  <p>Adopted by <a href="https://github.com/shyamsrinivasan" class="text-white">Shyam Srinivasan</a> using <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a></p>
+</footer>  
+</div>
+{% endblock %}
+
