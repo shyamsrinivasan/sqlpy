@@ -8,8 +8,10 @@ class Customer(db.Model):
     firstname = db.Column(db.String(20), nullable=False)
     lastname = db.Column(db.String(20), nullable=False)
     fullname = db.Column(db.String(40), index=True)
-    type = db.Column(db.Enum('personal', 'commercial', name='customer_type'), nullable=False)
-    date_added = db.Column(db.DateTime(timezone=True), nullable=False, server_default=db.func.now())
+    type = db.Column(db.Enum('personal', 'commercial', name='customer_type'),
+                     nullable=False, index=True)
+    date_added = db.Column(db.DateTime(timezone=True), nullable=False,
+                           server_default=db.func.now())
     date_updated = db.Column(db.DateTime(timezone=True), onupdate=db.func.now())
     added_user = db.Column(db.String(20))
     updated_user = db.Column(db.String(20))
