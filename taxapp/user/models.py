@@ -12,16 +12,18 @@ class User(UserMixin, db.Model):
     fullname = db.Column(db.String(40), nullable=False, index=True)
     email = db.Column(db.String(30))
     phone = db.Column(db.String(14))
-    username = db.Column(db.String(20), nullable=False, index=True)
+    username = db.Column(db.String(20), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(60))
     added_on = db.Column(db.DateTime(timezone=True), nullable=False,
                          server_default=db.func.now())
     added_by = db.Column(db.String(20))
+    last_update = db.Column(db.DateTime(timezone=True))
+    last_login = db.Column(db.DateTime(timezone=True))
 
     def __repr__(self):
-        return f"User(id={self.id!r}, firstname={self.firstname!r}," \
-               f"lastname={self.lastname!r}, email={self.email!r}, phone={self.phone!r}," \
-               f"username={self.username!r})"
+        return f"User(id={self.id!r}, name={self.fullname!r}, username={self.username!r}," \
+               f"email={self.email!r}, phone={self.phone!r}," \
+               f"last_login={self.last_login!r})"
 
     def set_password(self, password):
         """hash and set password field to hashed value"""
@@ -54,6 +56,15 @@ class User(UserMixin, db.Model):
     def set_added_user(self, username):
         """set added_user and updated_user"""
         self.added_by = username
+
+    def set_last_login(self):
+        """called everytime user obj is called during login"""
+        self.last_login = db.func.now()
+
+    def set_last_update(self):
+        """called everytime user table
+        fields(password/names/contact) are updated"""
+        self.last_update = db.func.now()
 
 
 @login_manager.user_loader
