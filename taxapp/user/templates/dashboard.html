@@ -156,39 +156,39 @@ User Dashboard
     <div class="row mt-2">
       <div class="col-sm-4">
         <div class="card">
-          <div class="card-header">
-            User Actions
-          </div>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item"><a href="{{ url_for('user.signup') }}" class="card-link">Add user</a></li>
-            <li class="list-group-item"><a href="{{ url_for('user.search') }}" class="card-link">Search user</a></li>
-            <li class="list-group-item"><a href="{{ url_for('user.remove') }}" class="card-link">Remove user</a></li>
-          </ul>                    
+          <div class="card-body">
+            <h5 class="card-title">User Actions</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item link-light rounded"><a href="{{ url_for('user.signup') }}" class="card-link">Add user</a></li>
+              <li class="list-group-item"><a href="{{ url_for('user.search') }}" class="card-link">Search user</a></li>
+              <li class="list-group-item"><a href="{{ url_for('user.remove') }}" class="card-link">Remove user</a></li>
+            </ul>   
+          </div>                          
         </div>
       </div>
       <div class="col-sm-4">
         <div class="card">
-          <div class="card-header">
-            Customer Actions
-          </div>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item"><a href="{{ url_for('customer.add') }}" class="card-link rounded">Add</a></li>
-            <li class="list-group-item"><a href="{{ url_for('customer.search') }}" class="card-link">Search</a></li>
-            <li class="list-group-item"><a href="{{ url_for('customer.remove') }}" class="card-link">Remove</a></li>
-            <li class="list-group-item"><a href="{{ url_for('customer.modify') }}" class="card-link">Modify</a></li>            
-          </ul>          
+          <div class="card-body">
+            <h5 class="card-title">Customer Actions</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><a href="{{ url_for('customer.add') }}" class="card-link rounded">Add</a></li>
+              <li class="list-group-item"><a href="{{ url_for('customer.search') }}" class="card-link">Search</a></li>
+              <li class="list-group-item"><a href="{{ url_for('customer.remove') }}" class="card-link">Remove</a></li>
+              <li class="list-group-item"><a href="{{ url_for('customer.modify') }}" class="card-link">Modify</a></li>            
+            </ul> 
+          </div>                   
         </div>
       </div>
       <div class="col-sm-4">
         <div class="card">
-          <div class="card-header">
-            Billing Actions
-          </div>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item"><a href="#" class="card-link rounded">New invoice</a></li>
-            <li class="list-group-item"><a href="#" class="card-link">Modify invoice</a></li>
-            <li class="list-group-item"><a href="#" class="card-link">Search invoice</a></li>              
-          </ul>          
+          <div class=card-body>
+            <h5 class="card-title">Billing Actions</h5>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><a href="#" class="card-link rounded">New invoice</a></li>
+              <li class="list-group-item"><a href="#" class="card-link">Modify invoice</a></li>
+              <li class="list-group-item"><a href="#" class="card-link">Search invoice</a></li>             
+            </ul> 
+          </div>                 
         </div>
       </div>       
     </div>
