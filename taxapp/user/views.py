@@ -70,6 +70,11 @@ def login_home():
                                                     password=password)
         if check_user:
             login_user(user=user_obj)
+
+            user_obj.set_last_login()
+            db.session.add(user_obj)
+            db.session.commit()
+
             next_page = request.form['next']
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('user.dashboard', username=username)
