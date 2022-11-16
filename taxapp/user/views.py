@@ -7,6 +7,7 @@ from ..customer.models import Customer
 from taxapp import db, flask_bcrypt
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
+import datetime as dt
 
 
 @user_bp.route('/signup', methods=['GET', 'POST'])
@@ -138,7 +139,9 @@ def dashboard(username):
         flash('No user with username {} exist'.format(username),
               category='error')
         return redirect(url_for('user.login_home'))
-    return render_template('/dashboard.html', user=user_obj)
+
+    login_days = (dt.datetime.now() - user_obj.last_login).days
+    return render_template('/dashboard.html', user=user_obj, login_days=login_days)
 
 
 @user_bp.route('/search', methods=['GET', 'POST'])
@@ -264,7 +267,7 @@ def change_password(username):
             if not _compare_password(current_user.username,
                                      new_password=request.form['password']):
                 user_obj.set_password(request.form['password'])
-                # new_user_obj.set_added_user(current_user.username)
+                user_obj.set_last_update()
 
                 # add user object to session and commit to db
                 db.session.add(user_obj)
