@@ -89,33 +89,22 @@ User Overview
 
   <!-- Main canvas -->
   <div class="col py-5 mx-1">
-  	<!-- row 1 -->
-  	<div class="row mb-2">
-  		<div class="col-sm-6">
-  			<div class="card bg-secondary text-white">
-	  			<div class="card-body">
-	  				<h5>Last login</h5> 
-	  				<p class="card-text">{{ result['last_login'] }}</p>
-	  			</div>  			
-	  		</div>
-  		</div>
-  		
-  		<div class="col-sm-6">
-  			<div class="card bg-secondary text-white">
-	  			<div class="card-body">
-	  				<h5>Last user added</h5> 
-	  				<p class="card-text">card text goes here</p>
-	  			</div>
-	  		</div>
-  		</div>  		
-  	</div>
+    
+    <!-- row 1 -->
+    <div class="col mb-2">
+      <div class="card text-center border-primary">
+        <div class="card-body">
+          <h5><i class="fa-solid fa-users-rectangle fa-fw"></i>&nbsp;&nbsp;Total Customers Served: {}</h5>      
+        </div>        
+      </div>
+    </div>
 
   	<!-- Row 2 -->
   	<div class="row mb-2">
   		<div class="col-sm-6">
   			<div class="card text-center border-primary">
 	  			<div class="card-body">
-	  				<h5><i class="fa-solid fa-user fa-fw"></i>&nbsp;Total Portal Users: {{ result['users'] }}</h5> 	  				
+	  				<h5><i class="fa-regular fa-file-excel fa-fw"></i>&nbsp;Total Returns Filed: {}</h5> 	  				
 	  			</div>  			
 	  		</div>
   		</div>
@@ -123,27 +112,13 @@ User Overview
   		<div class="col-sm-6">
   			<div class="card text-center border-primary">
 	  			<div class="card-body">
-	  				<h5><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Total Customers: {{ result['customers'] }}</h5>		
+	  				<h5><i class="fa-solid fa-coins fa-fw"></i>&nbsp;&nbsp;Total Income: {}</h5>		
 	  			</div>
 	  		</div>
   		</div>  		
-  	</div> 
+  	</div>    
 
     <!-- row 3 -->
-    <div class="card border-info mb-2">
-      <div class="card-header bg-info">
-        User portal actions available for {{ current_user.username }}
-      </div> 
-      
-      <div class="card-body">        
-        <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <a href="{{ url_for('user.signup') }}" class="btn btn-info"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add User</a>
-        <a href="{{ url_for('user.search') }}" class="btn btn-info"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search User</a> 
-        <a href="{{ url_for('user.remove') }}" class="btn btn-info"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove User</a>
-      </div>
-    </div>
-
-    <!-- row 4 -->
     <div class="card border-dark mb-2">
       <div class="card-header bg-dark text-white">
         Customer actions available for {{ current_user.username }}
@@ -157,7 +132,7 @@ User Overview
       </div>
     </div>
 
-    <!-- row 5 -->
+    <!-- row 4 -->
     <div class="card border-primary">
       <div class="card-header bg-primary text-white">
         Billing actions available for {{ current_user.username }}
@@ -165,9 +140,9 @@ User Overview
       
       <div class="card-body">        
         <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <a href="#" class="btn btn-primary">Generate invoice</a>
+        <a href="#" class="btn btn-primary"><i class="fa-solid fa-receipt fa-fw"></i>&nbsp;&nbsp;Generate invoice</a>
         <a href="#" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search invoice</a> 
-        <a href="#" class="btn btn-primary">Change invoice</a>
+        <a href="#" class="btn btn-primary"><i class="fa-solid fa-file-invoice fa-fw"></i>&nbsp;&nbsp;Change invoice</a>
       </div>
     </div>
 

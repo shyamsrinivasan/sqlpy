@@ -146,7 +146,7 @@ User Dashboard
           </div>          
         </div>
         
-        <a href="{{ url_for('user.user_overview') }}" class="btn btn-primary"><i class="fa-solid fa-user fa-fw"></i>&nbsp;Users</a>
+        <a href="{{ url_for('user.user_overview') }}" class="btn btn-primary"><i class="fa-solid fa-users-rectangle fa-fw"></i>&nbsp;&nbsp;Users</a>
         <a href="{{ url_for('customer.customer_overview') }}" class="btn btn-primary"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Customers</a> 
         <a href="{{ url_for('user.edit_profile', username=current_user.username) }}" class="btn btn-primary"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Edit Profile</a>
         <a href="{{ url_for('user.change_password', username=current_user.username) }}" class="btn btn-primary"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change Password</a> 
@@ -157,7 +157,7 @@ User Dashboard
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">User Actions</h5>
+            <h5 class="card-title"><i class="fa-solid fa-users-rectangle fa-fw"></i>&nbsp;&nbsp;User Actions</h5>
             <ul class="list-group list-group-flush">
               <li class="list-group-item link-light rounded"><a href="{{ url_for('user.signup') }}" class="card-link">Add user</a></li>
               <li class="list-group-item"><a href="{{ url_for('user.search') }}" class="card-link">Search user</a></li>
@@ -182,7 +182,7 @@ User Dashboard
       <div class="col-sm-4">
         <div class="card">
           <div class=card-body>
-            <h5 class="card-title">Billing Actions</h5>
+            <h5 class="card-title"><i class="fa-solid fa-square-poll-horizontal fa-fw"></i>&nbsp;&nbsp;Billing Actions</h5>
             <ul class="list-group list-group-flush">
               <li class="list-group-item"><a href="#" class="card-link rounded">New invoice</a></li>
               <li class="list-group-item"><a href="#" class="card-link">Modify invoice</a></li>

@@ -322,7 +322,11 @@ def user_overview():
     n_users = db.session.query(User).count()
     n_customers = db.session.query(Customer).count()
 
-    result = {'users': n_users, 'customers': n_customers}
+    user_obj = db.session.query(User).\
+        filter(User.username == current_user.username).first()
+
+    result = {'users': n_users, 'customers': n_customers,
+              'last_login': user_obj.last_login}
     return render_template('user_overview.html', result=result)
 
 
