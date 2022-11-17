@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, DateField, SelectField
-from wtforms import SubmitField, SelectMultipleField, FormField, RadioField
+from wtforms import SubmitField, FormField, RadioField
 from wtforms.validators import DataRequired, Email, Optional, Length
-from wtforms.validators import ValidationError
-from wtforms.widgets import html_params
+# from wtforms.validators import ValidationError
+# from wtforms.widgets import html_params
 
 
 class PhoneNumber(FlaskForm):
@@ -174,12 +174,3 @@ class ModifyAllCustomer(FlaskForm):
     address = FormField(Address)
 
     submit = SubmitField('Change Customer Information')
-
-
-
-
-
-
-
-
-
