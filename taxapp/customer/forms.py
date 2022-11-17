@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, Email, Optional, Length
 class PhoneNumber(FlaskForm):
     """phone number form for use in FormFields and FieldList"""
     country_code = SelectField('Country Code', [Optional()], choices=[('+91', 'India'),
-                                                              ('+1', 'USA')])
+                                                                      ('+1', 'USA')])
     phone_num = StringField('Phone Number', [Optional(), Length(min=10, max=10)])
 
 
