@@ -129,7 +129,26 @@ User Overview
   		</div>  		
   	</div> 
 
-    <!-- row 3 -->
+    <!-- Row 3 -->
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <div class="card text-center border-primary">
+          <div class="card-body">
+            <h5><i class="fa-regular fa-file-excel fa-fw"></i>&nbsp;Total Returns Filed: {}</h5>            
+          </div>        
+        </div>
+      </div>
+      
+      <div class="col-sm-6">
+        <div class="card text-center border-primary">
+          <div class="card-body">
+            <h5><i class="fa-solid fa-coins fa-fw"></i>&nbsp;&nbsp;Income Generated: {}</h5>    
+          </div>
+        </div>
+      </div>      
+    </div>
+
+    <!-- row 4 -->
     <div class="card border-info mb-2">
       <div class="card-header bg-info">
         User portal actions available for {{ current_user.username }}
@@ -143,7 +162,7 @@ User Overview
       </div>
     </div>
 
-    <!-- row 4 -->
+    <!-- row 5 -->
     <div class="card border-dark mb-2">
       <div class="card-header bg-dark text-white">
         Customer actions available for {{ current_user.username }}
@@ -157,7 +176,7 @@ User Overview
       </div>
     </div>
 
-    <!-- row 5 -->
+    <!-- row 6 -->
     <div class="card border-primary">
       <div class="card-header bg-primary text-white">
         Billing actions available for {{ current_user.username }}
@@ -165,9 +184,9 @@ User Overview
       
       <div class="card-body">        
         <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <a href="#" class="btn btn-primary">Generate invoice</a>
+        <a href="#" class="btn btn-primary"><i class="fa-solid fa-receipt fa-fw"></i>&nbsp;&nbsp;Generate invoice</a>
         <a href="#" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search invoice</a> 
-        <a href="#" class="btn btn-primary">Change invoice</a>
+        <a href="#" class="btn btn-primary"><i class="fa-solid fa-file-invoice fa-fw"></i>&nbsp;&nbsp;Change invoice</a>
       </div>
     </div>
 

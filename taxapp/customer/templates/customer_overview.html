@@ -119,21 +119,7 @@ User Overview
   	</div>    
 
     <!-- row 3 -->
-    <div class="card border-dark mb-2">
-      <div class="card-header bg-dark text-white">
-        Customer actions available for {{ current_user.username }}
-      </div> 
-      
-      <div class="card-body">        
-        <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-        <a href="{{ url_for('customer.add') }}" class="btn btn-dark"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add Customer</a>
-        <a href="{{ url_for('customer.search') }}" class="btn btn-dark"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search Customer</a> 
-        <a href="{{ url_for('customer.remove') }}" class="btn btn-dark"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove Customer</a>
-      </div>
-    </div>
-
-    <!-- row 4 -->
-    <div class="card border-primary">
+    <div class="card border-primary mb-2">
       <div class="card-header bg-primary text-white">
         Billing actions available for {{ current_user.username }}
       </div> 
@@ -145,6 +131,20 @@ User Overview
         <a href="#" class="btn btn-primary"><i class="fa-solid fa-file-invoice fa-fw"></i>&nbsp;&nbsp;Change invoice</a>
       </div>
     </div>
+
+    <!-- row 4 -->
+    <div class="card border-dark mb-2">
+      <div class="card-header bg-dark text-white">
+        Customer actions available for {{ current_user.username }}
+      </div> 
+      
+      <div class="card-body">        
+        <p class="card-text">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <a href="{{ url_for('customer.add') }}" class="btn btn-dark"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add Customer</a>
+        <a href="{{ url_for('customer.search') }}" class="btn btn-dark"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search Customer</a> 
+        <a href="{{ url_for('customer.remove') }}" class="btn btn-dark"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove Customer</a>
+      </div>
+    </div>    
 
   </div>
   {% endif %}
