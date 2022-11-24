@@ -1,57 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Multi Model Dynamic Form</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="flashes">
-    {% for message in get_flashed_messages() %}
-    <h3>{{ message }}</h3>
-    {% endfor %}
-</div>
+{% block title %}
+Multi Model Dynamic Form
+{% endblock %}
 
-<form method="POST">
-    {{ form.customer_name.label }}: {{ form.customer_name }}
+{% block styles %}
+<!-- Custom styles for this template-->
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/sidebars.css') }}" rel="stylesheet">
+{% endblock %}
 
-    <div data-toggle="fieldset" id="phone-fieldset">
-         {{ form.items.label }}  <button type="button" data-toggle="fieldset-add-row" data-target="#phone-fieldset">+</button>
-        <table>
-            <tr>
-                <th>Items</th>
-                <th>Cost</th>
-                <th></th>
-            </tr>
-            {% for phone in form.items %}
-                <tr data-toggle="fieldset-entry">
-                    <td>{{ phone.bill_item }}</td>
-                    <td>{{ phone.item_cost }}</td>
-                    <td><button type="button" data-toggle="fieldset-remove-row" id="phone-{{loop.index0}}-remove">-</button></td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-    {{ form.hidden_tag() }}
-    {{ form.submit }}
 
-<h5> <a href="{{ url_for('admin.index') }}">Home</a> </h5>
+{% block content %}
+<div class="row align-self-start gx-1 mx-1">
+  {% if current_user.is_anonymous %}
+  {% else %}
+  <div class="col-md-3 d-flex flex-column flex-shrink-0 bg-dark px-2 border"> 
+    <a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none btn">
+    <span class="bi me-2 fs-4"><i class="fa-solid fa-user fa-fw"></i>&nbsp;{{ current_user.username }}</span>
+    </a>
 
-<!-- just to display all potential errors -->
-{% if form.errors %}
-    <ul class="errors">
-        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-            {% for error in field_errors %}
-                <li>{{ form[field_name].label }}: {{ error }}</li>
-            {% endfor %}
-        {% endfor %}
+    <ul class="list-unstyled ps-0">
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+          User
+        </button>
+        <div class="collapse" id="home-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('user.user_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('user.signup') }}" class="link-light rounded"><i class="fa-solid fa-user-plus fa-fw"></i>&nbsp;&nbsp;Add user</a></li>
+            <li><a href="{{ url_for('user.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search user</a></li>
+            <li><a href="{{ url_for('user.remove') }}" class="link-light rounded"><i class="fa-solid fa-user-minus fa-fw"></i>&nbsp;&nbsp;Remove user</a></li>            
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+          Customer
+        </button>
+        <div class="collapse" id="dashboard-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="{{ url_for('customer.customer_overview') }}" class="link-light rounded"><i class="fa-solid fa-layer-group fa-fw"></i>&nbsp;&nbsp;Overview</a></li>
+            <li><a href="{{ url_for('customer.add') }}" class="link-light rounded"><i class="fa-solid fa-square-plus fa-fw"></i>&nbsp;&nbsp;Add</a></li>
+            <li><a href="{{ url_for('customer.search') }}" class="link-light rounded"><i class="fa-solid fa-magnifying-glass fa-fw"></i>&nbsp;&nbsp;Search</a></li>
+            <li><a href="{{ url_for('customer.remove') }}" class="link-light rounded"><i class="fa-solid fa-square-minus fa-fw"></i>&nbsp;&nbsp;Remove</a></li>
+            <li><a href="{{ url_for('customer.modify') }}" class="link-light rounded"><i class="fa-solid fa-scissors fa-fw"></i>&nbsp;&nbsp;Modify</a></li>
+            <li><a href="#" class="link-light rounded"><i class="fa-regular fa-address-card fa-fw"></i>&nbsp;&nbsp;Taxes</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+          Billing
+        </button>
+        <div class="collapse" id="orders-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li><a href="#" class="link-light rounded">Overview</a></li>
+            <li><a href="{{ url_for('bills.generate_invoice') }}" class="link-light rounded"><i class="fa-solid fa-receipt fa-fw"></i>&nbsp;&nbsp;New invoice</a></li>      
+          </ul>
+        </div>
+      </li>
+      <li class="border-top my-3"></li>
+      <li class="mb-1">
+        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+          Account
+        </button>
+        <div class="collapse" id="account-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small"> 
+            {% if current_user.is_anonymous %}           
+              <li><a href="{{ url_for('user.dashboard_no_login') }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+            {% else %}
+              <li><a href="{{ url_for('user.dashboard', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-chart-line fa-fw"></i>&nbsp;Dashboard</a></li>
+              <li><a href="{{ url_for('user.change_password', username=current_user.username) }}" class="nav-link text-white px-2"><i class="fa-solid fa-bars fa-fw"></i>&nbsp;Change password</a></li>     
+              <li><a href="{{ url_for('user.logout_home' )}}" class="link-light rounded"><i class="fa-solid fa-right-from-bracket fa-fw"></i>&nbsp;&nbsp;Sign out</a></li>
+            {% endif %}  
+          </ul>
+        </div>
+      </li>
     </ul>
-{% endif %}
 
-</form>
+    <!-- Sidebar Message -->    
+    <div class="text-center text-white">
+      <footer class="mt-auto text-white-50">
+        <span>Copyright &copy Demeter farms</span>      
+      </footer> 
+    </div> 
+  </div>
 
+  <!-- main content area -->
+  <div class="col-md-9 mt-1">
+    <form action="{{ url_for('bills.generate_invoice') }}" method="POST" novalidate class="g-3 rounded-3 bg-light px-2">
+        {{ form.csrf_token() }}
+
+        <!-- row 1 -->
+        <div class="row">
+            <div class="col-md-3">
+                {{ form.bill_number.label }}
+                {{ form.bill_number(class="form-control", id="floatingInput") }}        
+                {% for err in form.bill_number.errors %}
+                <small class="form-text text-muted">{{ err }}</small>{% endfor %} 
+            </div>
+            <div class="col">
+                {{ form.customer_name.label }}
+                {{ form.customer_name(class="form-control", id="floatingInput") }}
+                {% for err in form.customer_name.errors %}
+                <small class="form-text text-muted">{{ err }}</small>{% endfor %}   
+            </div> 
+            <div class="col-md-2">
+                {{ form.customer_id.label }}
+                {{ form.customer_id(class="form-control", id="floatingInput") }}
+                {% for err in form.customer_id.errors %}
+                <small class="form-text text-muted">{{ err }}</small>{% endfor %}
+            </div>    
+            <div class="col-md-3">
+                {{ form.pan.label }}                
+                {{ form.pan(class="form-control", id="floatingInput") }}
+                {% for err in form.pan.errors %}
+                <small class="form-text text-muted">{{ err }}</small>{% endfor %}
+            </div>            
+        </div>
+
+        <!-- row 2 -->        
+
+        <div data-toggle="fieldset" class="col mt-1" id="phone-fieldset">
+            <span>Add item<button type="button" class="btn btn-warning my-1" data-toggle="fieldset-add-row" data-target="#phone-fieldset">+</button></span>
+
+            {% for member in form.items %}
+            <div class="row align-items-center justify-content-center mb-2" data-toggle="fieldset-entry">  
+                <div class="col-md-6">
+                    {{ member.bill_item(class="form-control", palceholder="item description") }}
+                    {% for err in member.bill_item.errors %}
+                    <small class="form-text text-muted">{{ err }}</small>
+                    {% endfor %}
+                </div>
+                <div class="col-md-5">
+                    {{ member.item_cost(class="form-control", placeholder="0.00") }}     
+                    {% for err in member.item_cost.errors %}
+                    <small class="form-text text-muted">{{ err }}</small>
+                    {% endfor %}                              
+                </div>
+                <div class="col-md-1">
+                    <!-- remove row button -->
+                    <button class="btn btn-warning" type="button" data-toggle="fieldset-remove-row" id="item-{{loop.index0}}-remove">-</button>
+                </div>                              
+            </div>
+            {% endfor %}     
+            
+        </div>
+    
+        <div class="col align-items-center text-center mb-1">
+            {{ form.submit(class="w-50 align-items-center btn btn-primary") }}
+        </div>
+
+    <!-- just to display all potential errors -->
+    {% if form.errors %}
+        <ul class="errors">
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <li>{{ form[field_name].label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+        
+
+    </form>      
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+
+<!-- dynamic form js and jquery files-->
 <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.js') }}"></script>
-
-</body>
-</html>
+{% endblock %}

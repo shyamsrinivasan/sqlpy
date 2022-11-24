@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 from . import bills_bp
 from .forms import NewInvoice
 from .models import Bill, Items
@@ -13,15 +13,20 @@ def generate_invoice():
     bill = Bill()
 
     if bill is None or len(bill.items) == 0:
-        bill.items = [Items(bill_item="example")]
-        flash(message="empty bill provided", category='primary')
+        bill.items = [Items(bill_item="audit fee")]
+        # flash(message="empty bill provided", category='primary')
 
     form = NewInvoice(obj=bill)
 
     if form.validate_on_submit():
+        form_details = request.form
         form.populate_obj(bill)
-        db.session.commit()
+        # get customer id if not provided
+        # get pan if not provided
+        # db.session.add(bill)
+        # db.session.commit()
         flash(message="changes saved", category="success")
+        # redirect to review invoice details
         return redirect(url_for('customer.customer_overview'))
 
     return render_template('newbill_2.html', form=form)
