@@ -5,8 +5,8 @@ class Items(db.Model):
     __tablename__ = 'test_items'
 
     id = db.Column(db.Integer, primary_key=True)
-    bill_id = db.Column(db.String(11), db.ForeignKey('test_bills.bill_number',
-                                                     ondelete='CASCADE'))
+    bill_id = db.Column(db.Integer, db.ForeignKey('test_bills.id',
+                                                  ondelete='CASCADE'))
     bill_item = db.Column(db.String(40), nullable=False)
     item_cost = db.Column(db.Float)
 
